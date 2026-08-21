@@ -15,4 +15,4 @@ Esta rama (`doc`) no contiene código: solo explica para qué sirve cada rama de
 - Las tarjetas de la página `plataforma.html` deben apuntar al nombre y descripción reales de cada repositorio del laboratorio — si renombras o retiras un repo, actualiza también esta página.
 
 ### Licencia
-> **TO-DO**: este repositorio no tiene fichero `LICENSE` todavía, a diferencia del resto de repos del laboratorio (que usan BSD 3-Clause). Añadirlo si el contenido del sitio va a reutilizarse fuera de GitHub Pages.
+El código de este repositorio se publica bajo licencia BSD 3-Clause (ver `LICENSE` en `main`), igual que el resto de repos del laboratorio. Al contribuir, aceptas que tu aportación se publique bajo la misma licencia.
