@@ -1,5 +1,7 @@
 # Robotic-Park-Lab.github.io
 
+> 📖 Para entender las ramas de este repo y la guía de contribución, consulta la rama [`doc`](https://github.com/Robotic-Park-Lab/Robotic-Park-Lab.github.io/tree/doc).
+
 Web oficial de **Robotic Park Lab** (UNED), publicada con GitHub Pages en
 <https://robotic-park-lab.github.io/>.
 
