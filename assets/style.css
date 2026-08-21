@@ -1,0 +1,264 @@
+/* ============================================================
+   Robotic Park Lab — web del laboratorio
+   Hoja de estilos compartida por todas las páginas del sitio.
+   ============================================================ */
+
+:root {
+  --color-bg: #f6f8f7;
+  --color-surface: #ffffff;
+  --color-text: #17211c;
+  --color-text-muted: #4c5a52;
+  --color-border: #e0e6e2;
+
+  --color-primary: #145c43;      /* verde del logo del laboratorio */
+  --color-primary-dark: #0d3f2e;
+  --color-accent: #d9782e;       /* naranja del logo */
+  --color-accent-light: #fbeee1;
+
+  --color-link: var(--color-primary);
+  --color-link-hover: var(--color-primary-dark);
+
+  --shadow-soft: 0 1px 3px rgba(15, 30, 22, 0.08), 0 8px 24px rgba(15, 30, 22, 0.06);
+  --radius: 14px;
+  --max-width: 1040px;
+
+  --font-body: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-heading: "Georgia", "Times New Roman", serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0e1512;
+    --color-surface: #16201b;
+    --color-text: #e8ede9;
+    --color-text-muted: #a7b5ac;
+    --color-border: #263229;
+
+    --color-primary: #4fb98a;
+    --color-primary-dark: #7fd1a8;
+    --color-accent: #f0a35f;
+    --color-accent-light: #2a2118;
+
+    --color-link: var(--color-primary);
+    --color-link-hover: var(--color-primary-dark);
+
+    --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; display: block; }
+
+a { color: var(--color-link); text-decoration: none; }
+a:hover { color: var(--color-link-hover); text-decoration: underline; }
+
+h1, h2, h3 { font-family: var(--font-heading); line-height: 1.25; color: var(--color-text); }
+
+.container { max-width: var(--max-width); margin: 0 auto; padding: 0 1.5rem; }
+
+/* ---------- Cabecera / navegación ---------- */
+
+.site-header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.8rem;
+  padding-bottom: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.site-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--color-text);
+}
+.site-brand:hover { text-decoration: none; color: var(--color-primary); }
+.site-brand img { width: 32px; height: 32px; border-radius: 50%; }
+
+.site-nav { display: flex; gap: 1.4rem; flex-wrap: wrap; }
+
+.site-nav a {
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.3rem 0;
+  border-bottom: 2px solid transparent;
+}
+
+.site-nav a:hover, .site-nav a[aria-current="page"] {
+  color: var(--color-primary);
+  text-decoration: none;
+  border-bottom-color: var(--color-accent);
+}
+
+/* ---------- Secciones genéricas ---------- */
+
+main { padding: 3rem 0 4rem; }
+.section { margin-bottom: 3.5rem; }
+.section-title { font-size: 1.6rem; margin-bottom: 1.25rem; }
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin-bottom: 0.5rem;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  padding: 1.75rem;
+}
+.card + .card { margin-top: 1.25rem; }
+
+/* ---------- Hero ---------- */
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: 2.5rem;
+  align-items: center;
+  padding: 1.5rem 0 1rem;
+}
+
+.hero h1 { font-size: 2.3rem; margin: 0 0 0.5rem; }
+.hero .role { color: var(--color-text-muted); font-size: 1.05rem; margin: 0 0 1.25rem; }
+.hero .tagline { font-size: 1.05rem; max-width: 52ch; }
+.hero-logo { width: 100%; max-width: 260px; margin: 0 auto; }
+
+@media (max-width: 720px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-logo { max-width: 180px; }
+}
+
+/* ---------- Botones ---------- */
+
+.button-row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.55rem 1.1rem; border-radius: 999px;
+  font-weight: 600; font-size: 0.92rem; border: 1px solid var(--color-primary);
+}
+.btn:hover { text-decoration: none; }
+.btn-primary { background: var(--color-primary); color: #ffffff; }
+.btn-primary:hover { background: var(--color-primary-dark); color: #fff; }
+.btn-ghost { background: transparent; color: var(--color-primary); }
+.btn-ghost:hover { background: var(--color-accent-light); }
+
+/* ---------- Tags / enlaces ---------- */
+
+.tag-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.tag-list li {
+  background: var(--color-accent-light); color: var(--color-accent);
+  border-radius: 999px; padding: 0.4rem 0.9rem; font-size: 0.88rem; font-weight: 600;
+}
+
+.link-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+.link-list a { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; }
+
+/* ---------- Tarjetas en cuadrícula (líneas, plataforma, equipo…) ---------- */
+
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.item-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.item-card h3 { margin: 0; font-size: 1.1rem; }
+.item-card p { margin: 0; color: var(--color-text-muted); font-size: 0.95rem; }
+
+.status-badge {
+  display: inline-block; width: fit-content;
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase;
+  padding: 0.2rem 0.65rem; border-radius: 999px;
+  background: var(--color-accent-light); color: var(--color-accent);
+}
+.status-badge.muted { background: var(--color-border); color: var(--color-text-muted); }
+
+/* ---------- Miembros del equipo ---------- */
+
+.team-card { text-align: left; }
+.team-card .avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--color-accent-light); color: var(--color-accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-heading); font-weight: 700; font-size: 1.5rem;
+}
+.team-card .role { color: var(--color-accent); font-weight: 600; font-size: 0.88rem; }
+
+/* ---------- Pie de página ---------- */
+
+.site-footer {
+  border-top: 1px solid var(--color-border);
+  padding: 1.75rem 0;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+.site-footer .container { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+
+.breadcrumb { font-size: 0.88rem; color: var(--color-text-muted); margin-bottom: 1.5rem; }
+.breadcrumb a { color: var(--color-text-muted); }
+.breadcrumb a:hover { color: var(--color-primary); }
+
+.note {
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-accent-light);
+  padding: 0.9rem 1.1rem;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.92rem;
+  color: var(--color-text);
+}
+
+.toc { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1.25rem 0 2.5rem; }
+.toc a {
+  font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted);
+  background: var(--color-accent-light); padding: 0.35rem 0.85rem; border-radius: 999px;
+}
+.toc a:hover { color: var(--color-accent); text-decoration: none; }
+
+.pub-group { margin-top: 1.25rem; }
+.pub-group h3 { font-size: 1.05rem; margin-bottom: 0.5rem; }
+
+.entry { margin-bottom: 1.1rem; }
+.entry:last-child { margin-bottom: 0; }
+.entry-title { font-weight: 700; }
+.entry-meta { color: var(--color-text-muted); font-size: 0.92rem; }
