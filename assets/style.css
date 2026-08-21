@@ -262,3 +262,65 @@ main { padding: 3rem 0 4rem; }
 .entry:last-child { margin-bottom: 0; }
 .entry-title { font-weight: 700; }
 .entry-meta { color: var(--color-text-muted); font-size: 0.92rem; }
+
+/* ---------- Benchmarks (una sección completa por benchmark) ---------- */
+
+.benchmark {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  background: var(--color-surface);
+  padding: 1.75rem 1.75rem 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.benchmark h2 { margin-top: 0; }
+
+.benchmark-sub {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.6rem;
+  color: var(--color-primary);
+}
+.benchmark-sub:first-of-type { margin-top: 1.25rem; }
+
+.data-specs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.5rem 1.5rem;
+}
+.data-specs li {
+  font-size: 0.92rem;
+  padding-left: 1.1rem;
+  position: relative;
+}
+.data-specs li::before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: var(--color-accent);
+}
+.data-specs strong { color: var(--color-text); }
+
+.ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.92rem;
+}
+.ranking-table th, .ranking-table td {
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.ranking-table th {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.ranking-table td.rank-pos { font-weight: 700; color: var(--color-accent); }
+.ranking-table tr.rank-example td { color: var(--color-text-muted); font-style: italic; }

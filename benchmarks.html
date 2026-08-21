@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Benchmarks — Robotic Park Lab</title>
-<meta name="description" content="Benchmarks reproducibles de control de formaciones y robótica multi-agente publicados por Robotic Park Lab (UNED).">
+<meta name="description" content="Benchmarks reproducibles de control multi-agente publicados por Robotic Park Lab (UNED), con datasets descargables en ROS 2 y ranking de resultados.">
 <link rel="icon" href="assets/img/logo.png">
 <link rel="stylesheet" href="assets/style.css">
 </head>
@@ -31,39 +31,124 @@
       <p class="eyebrow">Reproducibilidad</p>
       <h1 class="section-title">Benchmarks</h1>
       <p>
-        Publicamos benchmarks abiertos y reproducibles para comparar objetivamente algoritmos de
-        control de formaciones y navegación multi-robot sobre Robotic Park, tanto en simulación
-        como con agentes reales.
+        Publicamos benchmarks abiertos para comparar objetivamente algoritmos de control y
+        navegación multi-robot sobre Robotic Park. Cada benchmark define un objetivo y un conjunto
+        de datos de referencia registrados en ROS 2 (<code>ros2 bag</code>) que puedes descargar
+        para desarrollar y evaluar tu propia solución.
+      </p>
+      <div class="card">
+        <p style="margin:0">
+          <strong>¿Cómo participar?</strong> Ejecuta tu método sobre el dataset del benchmark,
+          calcula la métrica indicada y envía tu resultado (método, métrica obtenida y, si es
+          posible, un enlace a tu código) a
+          <a href="mailto:lab.nanodrones@dia.uned.es">lab.nanodrones@dia.uned.es</a>
+          indicando el nombre del benchmark en el asunto. Lo añadiremos al ranking correspondiente.
+        </p>
+      </div>
+      <nav class="toc" aria-label="Benchmarks disponibles">
+        <a href="#formacion-multirobot">Control de formaciones multi-robot</a>
+        <a href="#navegacion-invernadero">Navegación jerárquica en invernadero</a>
+      </nav>
+    </section>
+
+    <section class="benchmark" id="formacion-multirobot">
+      <span class="status-badge">Activo</span>
+      <h2>Control de formaciones multi-robot</h2>
+
+      <p class="benchmark-sub">Descripción</p>
+      <p>
+        Compara controladores de formación (basados en distancia, consenso o restricciones de
+        superficie virtual) sobre una flota heterogénea de Robotic Park, bajo exactamente las
+        mismas condiciones iniciales, topología deseada y perturbaciones.
+      </p>
+
+      <p class="benchmark-sub">Objetivo</p>
+      <p>
+        Alcanzar y mantener la formación objetivo minimizando el error de formación en régimen
+        permanente y el tiempo de convergencia, ante un cambio de topología a mitad de la prueba.
+      </p>
+
+      <p class="benchmark-sub">Datos</p>
+      <ul class="data-specs">
+        <li><strong>Formato:</strong> rosbag2 (SQLite3 / MCAP)</li>
+        <li><strong>Agentes:</strong> 4 robots terrestres (Khepera IV / LIMO)</li>
+        <li><strong>Topics:</strong> <code>/robotN/pose</code> (Vicon), <code>/robotN/cmd_vel</code>, <code>/tf</code></li>
+        <li><strong>Frecuencia:</strong> 50 Hz (Vicon), 20 Hz (control)</li>
+        <li><strong>Duración por episodio:</strong> ~90 s</li>
+        <li><strong>Escenarios:</strong> formación en línea, en cuadrado y reconfiguración dinámica</li>
+      </ul>
+
+      <div class="button-row">
+        <a class="btn btn-primary" href="https://github.com/Robotic-Park-Lab/RoboticPark/tree/benchmark" target="_blank" rel="noopener">Descargar dataset</a>
+        <a class="btn btn-ghost" href="https://doi.org/10.1007/978-3-031-76312-0_10" target="_blank" rel="noopener">Metodología (Springer, 2025)</a>
+        <a class="btn btn-ghost" href="https://doi.org/10.17979/JA-CEA.2024.45.10749" target="_blank" rel="noopener">Artículo (JA 2024)</a>
+      </div>
+
+      <p class="benchmark-sub">Ranking</p>
+      <div style="overflow-x:auto">
+        <table class="ranking-table">
+          <thead>
+            <tr><th>#</th><th>Equipo / autor</th><th>Método</th><th>Error de formación (RMS)</th><th>Fecha</th></tr>
+          </thead>
+          <tbody>
+            <tr class="rank-example">
+              <td class="rank-pos">—</td>
+              <td>(ejemplo) Robotic Park Lab</td>
+              <td>Control basado en distancia + restricciones de superficie virtual</td>
+              <td>0.04 m</td>
+              <td>2025</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">
+        Fila de ejemplo — el ranking real se irá completando con los resultados que se reciban en
+        <a href="mailto:lab.nanodrones@dia.uned.es">lab.nanodrones@dia.uned.es</a>.
       </p>
     </section>
 
-    <section class="section">
-      <div class="grid-cards">
-        <div class="item-card">
-          <span class="status-badge">Rama <code>benchmark</code></span>
-          <h3>Robotic Park — benchmark de formaciones</h3>
-          <p>Escenarios y métricas para comparar controladores de formación (basados en distancia, consenso, restricciones de superficie virtual) bajo las mismas condiciones de partida.</p>
-          <a href="https://github.com/Robotic-Park-Lab/RoboticPark/tree/benchmark" target="_blank" rel="noopener">Repositorio →</a>
-        </div>
-        <div class="item-card">
-          <span class="status-badge muted">Metodología publicada</span>
-          <h3>A Benchmark on Formation Control of Multi-agent Robotic System</h3>
-          <p>Capítulo de libro (Advances in Industrial Control, Springer, 2025) que describe la metodología de benchmarking de formaciones usada en el laboratorio.</p>
-          <a href="https://doi.org/10.1007/978-3-031-76312-0_10" target="_blank" rel="noopener">doi →</a>
-        </div>
-        <div class="item-card">
-          <span class="status-badge muted">En revisión</span>
-          <h3>ROS2 Benchmarking Framework for Hierarchical Control in Greenhouses</h3>
-          <p>Framework de benchmarking en ROS 2 para estrategias de control jerárquico en robots móviles de invernadero mediterráneo.</p>
-          <a href="https://doi.org/10.48550/arXiv.2602.15162" target="_blank" rel="noopener">doi →</a>
-        </div>
+    <section class="benchmark" id="navegacion-invernadero">
+      <span class="status-badge muted">En preparación</span>
+      <h2>Navegación jerárquica en invernadero</h2>
+
+      <p class="benchmark-sub">Descripción</p>
+      <p>
+        Evalúa estrategias de control jerárquico para la navegación autónoma de un robot móvil de
+        transporte en un invernadero mediterráneo, con pasillos estrechos y condiciones de
+        iluminación variables.
+      </p>
+
+      <p class="benchmark-sub">Objetivo</p>
+      <p>
+        Completar una ruta de entrega punto a punto minimizando el tiempo total y el número de
+        intervenciones/recuperaciones, sin colisionar con la estructura del invernadero.
+      </p>
+
+      <p class="benchmark-sub">Datos</p>
+      <ul class="data-specs">
+        <li><strong>Formato:</strong> rosbag2 (MCAP)</li>
+        <li><strong>Agente:</strong> robot diferencial/Ackermann de transporte</li>
+        <li><strong>Topics:</strong> <code>/scan</code>, <code>/odom</code>, <code>/tf</code>, <code>/cmd_vel</code>, <code>/map</code></li>
+        <li><strong>Escenario:</strong> mapa de invernadero real y simulado (MVSim)</li>
+      </ul>
+
+      <div class="button-row">
+        <a class="btn btn-ghost" href="https://doi.org/10.48550/arXiv.2602.15162" target="_blank" rel="noopener">Artículo (en revisión)</a>
       </div>
+
+      <p class="benchmark-sub">Ranking</p>
       <p class="note">
-        Sección en construcción — a medida que se publiquen nuevos benchmarks (datasets,
-        escenarios, resultados comparativos) se irán añadiendo aquí como nuevas tarjetas
-        <code>.item-card</code>.
+        Benchmark en preparación — el dataset y el ranking se publicarán aquí en cuanto estén
+        listos.
       </p>
     </section>
+
+    <p class="note">
+      ¿Quieres proponer un nuevo benchmark del laboratorio? Escribe a
+      <a href="mailto:lab.nanodrones@dia.uned.es">lab.nanodrones@dia.uned.es</a>. Para añadirlo a
+      esta página, duplica un bloque <code>&lt;section class="benchmark"&gt;</code> completo
+      (Descripción / Objetivo / Datos / enlace de descarga / Ranking).
+    </p>
 
   </div>
 </main>
