@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Scalability in ROS 2">Escalabilidad en ROS 2</title>
+<meta name="description" content="Publicación interactiva: escalabilidad de sistemas ciberfísicos con robots reales y virtuales en ROS 2, Gazebo frente a Webots (Sensors 2023). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>.stage-md{height:430px}.clock{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.clock div{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:10px 12px}.clock b{display:block;font:600 1.4rem var(--font-mono)}.clock span{font-size:.75rem;color:var(--muted);font-weight:700;text-transform:uppercase}</style>
+</head>
+<body>
+<header class="ip-topbar"><div class="ip-wrap">
+  <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
+  <nav class="ip-topnav"><a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a><a href="#experimentos"><span lang="es">Experimentos</span><span lang="en">Experiments</span></a><a href="#resultados"><span lang="es">Resultados</span><span lang="en">Results</span></a><a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a></nav>
+</div><div class="ip-progress"></div></header>
+
+<section class="ip-hero"><div class="ip-wrap">
+  <div>
+    <p class="ip-kicker">Sensors 23(13), 6073 (2023) · <span lang="es">Publicación interactiva</span><span lang="en">Interactive publication</span></p>
+    <h1><span lang="es">¿Cuántos robots virtuales caben junto a los reales?</span><span lang="en">How many virtual robots fit alongside the real ones?</span></h1>
+    <p class="ip-authors"><strong>F. J. Mañas-Álvarez</strong>, M. Guinaldo, R. Dormido y S. Dormido-Canto · UNED</p>
+    <p class="ip-lead"><span lang="es">Para ensayar enjambres grandes basta con unos pocos robots reales y muchos virtuales que los imitan. Pero el simulador tiene que aguantar el ritmo del mundo real. Este trabajo lleva Gazebo y Webots, integrados en ROS 2, de 5 a 50 agentes en una formación semiesférica de 2 m y mide su factor de tiempo real, su CPU y el error de formación.</span><span lang="en">To test large swarms, a few real robots and many virtual robots imitating them are enough. But the simulator must keep up with the real world. This work takes Gazebo and Webots, integrated in ROS 2, from 5 to 50 agents in a 2 m hemispherical formation and measures their real-time factor, CPU and formation error.</span></p>
+    <div class="ip-btns"><a class="ip-btn" href="#experimentos"><span lang="es">Escalar el enjambre</span><span lang="en">Scale the swarm</span></a><a class="ip-btn ghost" href="https://doi.org/10.3390/s23136073" target="_blank" rel="noopener"><span lang="es">Leer el artículo (acceso abierto)</span><span lang="en">Read the paper (open access)</span></a></div>
+    <div class="ip-hero-stats"><div class="ip-hero-stat"><b>40</b><span lang="es">agentes con Webots (RTF 0,56)</span><span lang="en">agents with Webots (RTF 0.56)</span></div><div class="ip-hero-stat"><b>30</b><span lang="es">máximo con Gazebo (RTF 0,48)</span><span lang="en">maximum with Gazebo (RTF 0.48)</span></div><div class="ip-hero-stat"><b>×2</b><span lang="es">CPU de Gazebo frente a Webots</span><span lang="en">Gazebo CPU vs Webots</span></div></div>
+  </div>
+  <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+</div></section>
+
+<main>
+<section class="ip-section" id="mapa"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">1</span><span lang="es">Mapa conceptual</span><span lang="en">Concept map</span></p><h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2></div>
+  <div class="ip-cmap ip-reveal"><div id="cmap"></div><aside class="ip-card ip-cmap-panel" id="cmapPanel"></aside></div>
+</div></section>
+
+<section class="ip-section" id="experimentos"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">2</span><span lang="es">Experimentos A–F</span><span lang="en">Experiments A–F</span></p>
+    <h2><span lang="es">La formación, al ritmo que permite el simulador</span><span lang="en">The formation, at the pace the simulator allows</span></h2>
+    <p><span lang="es">Formación rígida sobre una semiesfera de \(R = 2\) m con control por eventos. Los agentes sólidos son robots reales (hasta 6 Crazyflie y 4 Khepera IV) y los translúcidos, virtuales. La animación avanza al <b>factor de tiempo real (RTF)</b> que midió el artículo: si RTF = 0,5, cada segundo real sólo simula medio segundo.</span><span lang="en">Rigid formation over a hemisphere of \(R = 2\) m with event-based control. Solid agents are real robots (up to 6 Crazyflies and 4 Khepera IV) and translucent ones are virtual. The animation advances at the <b>real-time factor (RTF)</b> measured in the paper: if RTF = 0.5, each real second only simulates half a second.</span></p>
+    <div class="ip-eq">$$u_i=-\mu\sum_{j\in\mathcal N_i}\big(\|p_i-p_j\|^2-d_{ij}^{*2}\big)(p_i-p_j)+\big(R^2-\|p_i\|^2\big)p_i,\qquad \mathrm{RTF}=\frac{t_{\mathrm{sim}}}{t_{\mathrm{real}}}$$</div></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-toolbar"><div id="simSeg"></div><button class="ip-btn accent small" id="run" type="button">▶ <span lang="es">Reiniciar</span><span lang="en">Restart</span></button></div><div class="ip-stage stage-md"><canvas id="cv"></canvas><span class="ip-stage-hint"><span lang="es">Sólidos: reales · translúcidos: virtuales</span><span lang="en">Solid: real · translucent: virtual</span></span></div></div>
+    <div class="ip-card"><div id="ctl"></div><div class="clock"><div><span lang="es">Tiempo real</span><span lang="en">Real time</span><b id="treal">0,0 s</b></div><div><span lang="es">Tiempo simulado</span><span lang="en">Simulated time</span><b id="tsim">0,0 s</b></div></div><div class="ip-readouts" id="ro" style="margin-top:12px"></div><div class="ip-note danger ip-small" id="warn" style="display:none"></div></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="resultados"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">3</span><span lang="es">Resultados del artículo</span><span lang="en">Paper results</span></p><h2><span lang="es">Gazebo frente a Webots</span><span lang="en">Gazebo vs Webots</span></h2></div>
+  <div class="ip-grid cols-2 ip-reveal">
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Factor de tiempo real</span><span lang="en">Real-time factor</span></div><div id="prtf"></div></div>
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Error de formación (IAE)</span><span lang="en">Formation error (IAE)</span></div><div id="piae"></div></div>
+  </div>
+  <div class="ip-card ip-reveal" style="margin-top:18px"><p class="ip-small"><span lang="es">Workstation con Intel Core i9-10885H, 64 GB de RAM y Ubuntu 22.04. La CPU global de Gazebo pasa del ~18,5 % (A) al 100 % (F) y la de Webots del ~14,2 % al ~84,8 %; los procesos de Gazebo (<code>gzserver</code> + <code>gzclient</code>) consumen más del doble que Webots en todos los casos. Con 40 agentes Gazebo falla al cargar los modelos y ningún simulador soporta 50. Por debajo de RTF ≈ 0,75 no tiene sentido mezclar robots reales: la batería del Crazyflie sólo dura 3–5 minutos.</span><span lang="en">Workstation with an Intel Core i9-10885H, 64 GB RAM and Ubuntu 22.04. Gazebo's overall CPU goes from ~18.5% (A) to 100% (F) and Webots' from ~14.2% to ~84.8%; Gazebo's processes (<code>gzserver</code> + <code>gzclient</code>) use more than twice Webots' CPU in every case. With 40 agents Gazebo fails to load the models and neither simulator handles 50. Below RTF ≈ 0.75 mixing in real robots makes no sense: the Crazyflie battery only lasts 3–5 minutes.</span></p></div>
+</div></section>
+
+<section class="ip-section" id="quiz"><div class="ip-wrap"><div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">4</span><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></p><h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2></div><div id="quizBox" class="ip-reveal"></div></div></section>
+
+<section class="ip-section" id="citar"><div class="ip-wrap"><div class="ip-grid cols-2 ip-reveal">
+  <div class="ip-card"><h3><span lang="es">Cómo citar</span><span lang="en">How to cite</span></h3><p>Mañas-Álvarez, F. J., Guinaldo, M., Dormido, R., &amp; Dormido-Canto, S. (2023). Scalability of cyber-physical systems with real and virtual robots in ROS 2. <em>Sensors</em>, 23(13), 6073. <a href="https://doi.org/10.3390/s23136073" target="_blank" rel="noopener">doi:10.3390/s23136073</a></p></div>
+  <div class="ip-code" id="bibtex">@article{ManasAlvarez2023Scalability,
+  title   = {Scalability of Cyber-Physical Systems with Real and Virtual Robots in ROS 2},
+  author  = {Ma{\~n}as-{\'A}lvarez, F. J. and Guinaldo, M. and Dormido, R.
+             and Dormido-Canto, S.},
+  journal = {Sensors},
+  volume  = {23}, number = {13}, pages = {6073},
+  year    = {2023},
+  doi     = {10.3390/s23136073}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+</div></div></section>
+</main>
+<footer class="ip-footer"><div class="ip-wrap"><span><span lang="es">Material docente interactivo · Proyecto de innovación docente</span><span lang="en">Interactive teaching material · Teaching innovation project</span> · <a href="../../index.html">Robotic Park Lab</a> — UNED</span><span lang="es">RTF, CPU e IAE: valores del artículo; la formación es una simulación didáctica.</span><span lang="en">RTF, CPU and IAE: paper values; the formation is a teaching simulation.</span></div></footer>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="../lib/multiagente.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

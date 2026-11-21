@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Crazyflie calibration">Calibración del Crazyflie</title>
+<meta name="description" content="Publicación interactiva: método indirecto para calibrar los sensores de un cuadricóptero, aplicado al Crazyflie 2.X (IEEE GlobConET 2022). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>.stage-md{height:340px}</style>
+</head>
+<body>
+<header class="ip-topbar"><div class="ip-wrap">
+  <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
+  <nav class="ip-topnav"><a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a><a href="#modelo"><span lang="es">Modelo</span><span lang="en">Model</span></a><a href="#estatica"><span lang="es">Calibración estática</span><span lang="en">Static calibration</span></a><a href="#indirecto"><span lang="es">Método indirecto</span><span lang="en">Indirect method</span></a><a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a></nav>
+</div><div class="ip-progress"></div></header>
+
+<section class="ip-hero"><div class="ip-wrap">
+  <div>
+    <p class="ip-kicker">IEEE GlobConET 2022 · <span lang="es">Publicación interactiva</span><span lang="en">Interactive publication</span></p>
+    <h1><span lang="es">Calibrar lo que no se puede medir</span><span lang="en">Calibrating what cannot be measured</span></h1>
+    <p class="ip-authors">R. Socas, R. Dormido, M. Guinaldo, <strong>F. J. Mañas-Álvarez</strong> y S. Dormido · UNED</p>
+    <p class="ip-lead"><span lang="es">La altitud y la actitud de un Crazyflie se calibran colocándolo en posiciones conocidas. Pero ¿cómo se calibra un giróscopo si no hay una referencia de velocidad angular? La idea: derivar la actitud ya calibrada y usarla como referencia para ajustar, por mínimos cuadrados, el polinomio de los giróscopos.</span><span lang="en">A Crazyflie's altitude and attitude are calibrated by placing it in known positions. But how do you calibrate a gyroscope without an angular-rate reference? The idea: differentiate the already calibrated attitude and use it as the reference to least-squares fit the gyroscopes' polynomial.</span></p>
+    <div class="ip-btns"><a class="ip-btn" href="#indirecto"><span lang="es">Probar el método</span><span lang="en">Try the method</span></a><a class="ip-btn ghost" href="https://doi.org/10.1109/GlobConET53749.2022.9872472" target="_blank" rel="noopener"><span lang="es">Leer el artículo</span><span lang="en">Read the paper</span></a></div>
+    <div class="ip-hero-stats"><div class="ip-hero-stat"><b>27 g</b><span lang="es">nano-cuadricóptero</span><span lang="en">nano quadrotor</span></div><div class="ip-hero-stat"><b>n = 4 · 6</b><span lang="es">grados de los polinomios</span><span lang="en">polynomial degrees</span></div><div class="ip-hero-stat"><b>10 s</b><span lang="es">de vuelo manual</span><span lang="en">of manual flight</span></div></div>
+  </div>
+  <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+</div></section>
+
+<main>
+<section class="ip-section" id="mapa"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">1</span><span lang="es">Mapa conceptual</span><span lang="en">Concept map</span></p><h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2></div>
+  <div class="ip-cmap ip-reveal"><div id="cmap"></div><aside class="ip-card ip-cmap-panel" id="cmapPanel"></aside></div>
+</div></section>
+
+<section class="ip-section" id="modelo"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">2</span><span lang="es">Modelo del Crazyflie 2.X</span><span lang="en">Crazyflie 2.X model</span></p>
+    <h2><span lang="es">De las velocidades de los motores a los momentos</span><span lang="en">From motor speeds to moments</span></h2>
+    <p><span lang="es">Cada hélice genera \(F_i = C_T\Omega_i^2\). Mueve las velocidades de los motores (rpm) y observa los momentos y las aceleraciones angulares con los parámetros de la Tabla I:</span><span lang="en">Each propeller generates \(F_i = C_T\Omega_i^2\). Move the motor speeds (rpm) and watch the moments and angular accelerations with the parameters of Table I:</span></p>
+    <div class="ip-eq">$$\begin{gathered}M_x=\frac{dC_T}{\sqrt2}\left(-\Omega_1^2-\Omega_2^2+\Omega_3^2+\Omega_4^2\right),\qquad M_y=\frac{dC_T}{\sqrt2}\left(-\Omega_1^2+\Omega_2^2+\Omega_3^2-\Omega_4^2\right)\\ M_z=C_D\left(-\Omega_1^2+\Omega_2^2-\Omega_3^2+\Omega_4^2\right),\qquad \dot p=\frac{M_x+qr(I_{yy}-I_{zz})}{I_{xx}}\end{gathered}$$</div></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-stage stage-md"><canvas id="cvm"></canvas><span class="ip-stage-hint"><span lang="es">Flechas: empuje de cada hélice · arrastra para girar</span><span lang="en">Arrows: thrust of each propeller · drag to rotate</span></span></div></div>
+    <div class="ip-card"><div id="ctlm"></div><div class="ip-btns"><button class="ip-btn ghost small" id="hover" type="button"><span lang="es">Vuelo estacionario</span><span lang="en">Hover</span></button></div><div class="ip-readouts" id="rom" style="margin-top:12px"></div></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="estatica"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">3</span><span lang="es">Calibración estática</span><span lang="en">Static calibration</span></p>
+    <h2><span lang="es">Mínimos cuadrados con un polinomio de grado n</span><span lang="en">Least squares with a degree-n polynomial</span></h2>
+    <p><span lang="es">El dron se coloca en posiciones y orientaciones conocidas \(X_r\) y se registra la lectura \(X_m\). Se busca el polinomio que minimiza el error cuadrático:</span><span lang="en">The drone is placed at known positions and orientations \(X_r\) and the reading \(X_m\) is logged. The polynomial that minimises the squared error is sought:</span></p>
+    <div class="ip-eq">$$X_c=P(X_m,\mathbf p,n)=\sum_{j=1}^{n+1}p_jX_m^{\,n+1-j},\qquad E(\mathbf p)=\tfrac12\sum_{k=1}^{N}\big(P(x_k,\mathbf p,n)-t_k\big)^2$$</div></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-toolbar"><div id="varSeg"></div><button class="ip-btn ghost small" id="resample" type="button"><span lang="es">Nuevas medidas</span><span lang="en">New readings</span></button></div><div id="pst"></div></div>
+    <div class="ip-card"><div id="ctls"></div><div class="ip-readouts" id="ros" style="margin-top:12px"></div><div class="ip-table-wrap" style="margin-top:12px"><table class="ip-table" id="tcoef"></table></div></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="indirecto"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">4</span><span lang="es">Método indirecto</span><span lang="en">Indirect method</span></p>
+    <h2><span lang="es">Derivar la actitud calibrada para calibrar el giróscopo</span><span lang="en">Differentiate the calibrated attitude to calibrate the gyroscope</span></h2>
+    <p><span lang="es">Durante un vuelo manual de 10 s se registran \(\phi_m\) y \(p_m\). Se calibra \(\phi_c = P_\phi(\phi_m)\), se estima \(p_r[k]\approx(\phi_c[k]-\phi_c[k-1])/T_s\) y se ajusta un polinomio \(p_c = P_p(p_m)\) que lleve las lecturas del giróscopo a esa estimación.</span><span lang="en">During a 10 s manual flight \(\phi_m\) and \(p_m\) are logged. \(\phi_c = P_\phi(\phi_m)\) is calibrated, \(p_r[k]\approx(\phi_c[k]-\phi_c[k-1])/T_s\) is estimated and a polynomial \(p_c = P_p(p_m)\) is fitted to map the gyroscope readings to that estimate.</span></p></div>
+  <div class="ip-card ip-reveal"><div class="ip-steps" id="steps"><div class="ip-step">1 · <span lang="es">Vuelo y registro</span><span lang="en">Flight and logging</span></div><div class="ip-step">2 · <span lang="es">Calibrar φ</span><span lang="en">Calibrate φ</span></div><div class="ip-step">3 · <span lang="es">Derivar φ_c</span><span lang="en">Differentiate φ_c</span></div><div class="ip-step">4 · <span lang="es">Ajustar P_p</span><span lang="en">Fit P_p</span></div></div></div>
+  <div class="ip-grid side ip-reveal" style="margin-top:18px">
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Velocidad angular de alabeo p (°/s)</span><span lang="en">Roll rate p (°/s)</span></div><div id="pp"></div><div class="ip-plot-title" style="margin-top:10px"><span lang="es">Ajuste p_m → p_r estimada</span><span lang="en">Fit p_m → estimated p_r</span></div><div id="pfit"></div></div>
+    <div class="ip-card"><div id="ctli"></div><div class="ip-readouts" id="roi" style="margin-top:12px"></div><p class="ip-small ip-muted" style="margin-top:10px"><span lang="es">Las lecturas se generan invirtiendo los polinomios de la Tabla II del artículo; los ángulos son pequeños, así que \(p\approx\dot\phi\).</span><span lang="en">Readings are generated by inverting the polynomials of the paper's Table II; angles are small, so \(p\approx\dot\phi\).</span></p></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="quiz"><div class="ip-wrap"><div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">5</span><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></p><h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2></div><div id="quizBox" class="ip-reveal"></div></div></section>
+
+<section class="ip-section" id="citar"><div class="ip-wrap"><div class="ip-grid cols-2 ip-reveal">
+  <div class="ip-card"><h3><span lang="es">Cómo citar</span><span lang="en">How to cite</span></h3><p>Socas, R., Dormido, R., Guinaldo, M., Mañas-Álvarez, F. J., &amp; Dormido, S. (2022). Indirect Method for Calibrating Quadrotor Sensors: A Case Study applied to the Crazyflie 2.X. In <em>2022 IEEE IAS Global Conference on Emerging Technologies (GlobConET)</em> (pp. 1–5). IEEE. <a href="https://doi.org/10.1109/GlobConET53749.2022.9872472" target="_blank" rel="noopener">doi:10.1109/GlobConET53749.2022.9872472</a></p></div>
+  <div class="ip-code" id="bibtex">@inproceedings{Socas2022Indirect,
+  title     = {Indirect Method for Calibrating Quadrotor Sensors:
+               A Case Study applied to the Crazyflie 2.X},
+  author    = {Socas, R. and Dormido, R. and Guinaldo, M.
+               and Ma{\~n}as-{\'A}lvarez, F. J. and Dormido, S.},
+  booktitle = {2022 IEEE IAS Global Conference on Emerging Technologies (GlobConET)},
+  pages     = {1--5},
+  year      = {2022},
+  doi       = {10.1109/GlobConET53749.2022.9872472}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+</div></div></section>
+</main>
+<footer class="ip-footer"><div class="ip-wrap"><span><span lang="es">Material docente interactivo · Proyecto de innovación docente</span><span lang="en">Interactive teaching material · Teaching innovation project</span> · <a href="../../index.html">Robotic Park Lab</a> — UNED</span><span lang="es">Datos sintéticos generados a partir de los coeficientes del artículo.</span><span lang="en">Synthetic data generated from the paper's coefficients.</span></div></footer>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

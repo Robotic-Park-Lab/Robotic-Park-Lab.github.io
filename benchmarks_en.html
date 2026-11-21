@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benchmarks — Robotic Park Lab</title>
+<meta name="description" content="Reproducible multi-agent control benchmarks published by Robotic Park Lab (UNED), with downloadable ROS 2 datasets and a results ranking.">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a class="site-brand" href="index_en.html"><img src="assets/img/logo.png" alt="Robotic Park Lab">Robotic Park Lab</a>
+    <div class="nav-wrap">
+      <nav class="site-nav">
+        <a href="index_en.html">Home</a>
+        <a href="investigacion_en.html">Research</a>
+        <a href="publicaciones_en.html">Publications</a>
+        <a href="plataforma_en.html">Platform</a>
+        <a href="equipo_en.html">Team</a>
+        <a href="benchmarks_en.html" aria-current="page">Benchmarks</a>
+        <a href="contacto_en.html">Contact</a>
+      </nav>
+      <div class="lang-switch">
+        <a href="benchmarks.html" hreflang="es">Español</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <section class="section">
+      <p class="eyebrow">Reproducibility</p>
+      <h1 class="section-title">Benchmarks</h1>
+      <p>
+        We publish open benchmarks to objectively compare multi-robot control and navigation
+        algorithms on Robotic Park. Each benchmark defines an objective and a reference dataset
+        recorded in ROS 2 (<code>ros2 bag</code>) that you can download to develop and evaluate
+        your own solution.
+      </p>
+      <div class="card">
+        <p style="margin:0">
+          <strong>How to take part?</strong> Run your method on the benchmark dataset, compute the
+          stated metric and send your result (method, metric obtained and, if possible, a link to
+          your code) to
+          <a href="mailto:lab.nanodrones@dia.uned.es">lab.nanodrones@dia.uned.es</a>
+          with the benchmark name in the subject. We will add it to the corresponding ranking.
+        </p>
+      </div>
+      <nav class="toc" aria-label="Available benchmarks">
+        <a href="#formacion-multirobot">Multi-robot formation control</a>
+        <a href="#navegacion-invernadero">Hierarchical navigation in a greenhouse</a>
+      </nav>
+    </section>
+
+    <section class="benchmark" id="formacion-multirobot">
+      <span class="status-badge">Active</span>
+      <h2>Multi-robot formation control</h2>
+
+      <p class="benchmark-sub">Description</p>
+      <p>
+        Compares formation controllers (distance-based, consensus or virtual surface constraints)
+        on a heterogeneous Robotic Park fleet, under exactly the same initial conditions, desired
+        topology and disturbances.
+      </p>
+
+      <p class="benchmark-sub">Objective</p>
+      <p>
+        Reach and hold the target formation while minimising the steady-state formation error and
+        the convergence time, with a topology change halfway through the test.
+      </p>
+
+      <p class="benchmark-sub">Data</p>
+      <ul class="data-specs">
+        <li><strong>Format:</strong> rosbag2 (SQLite3 / MCAP)</li>
+        <li><strong>Agents:</strong> 4 ground robots (Khepera IV / LIMO)</li>
+        <li><strong>Topics:</strong> <code>/robotN/pose</code> (Vicon), <code>/robotN/cmd_vel</code>, <code>/tf</code></li>
+        <li><strong>Rate:</strong> 50 Hz (Vicon), 20 Hz (control)</li>
+        <li><strong>Episode length:</strong> ~90 s</li>
+        <li><strong>Scenarios:</strong> line formation, square formation and dynamic reconfiguration</li>
+      </ul>
+
+      <div class="button-row">
+        <a class="btn btn-primary" href="https://github.com/Robotic-Park-Lab/RoboticPark/tree/benchmark" target="_blank" rel="noopener">Download dataset</a>
+        <a class="btn btn-ghost" href="interactivos/benchmark-formacion/?lang=en">Try it interactively</a>
+        <a class="btn btn-ghost" href="https://doi.org/10.1007/978-3-031-76312-0_10" target="_blank" rel="noopener">Methodology (Springer, 2025)</a>
+        <a class="btn btn-ghost" href="https://doi.org/10.17979/JA-CEA.2024.45.10749" target="_blank" rel="noopener">Paper (JA 2024)</a>
+      </div>
+
+      <p class="benchmark-sub">Ranking</p>
+      <div style="overflow-x:auto">
+        <table class="ranking-table">
+          <thead>
+            <tr><th>#</th><th>Team / author</th><th>Method</th><th>Formation error (RMS)</th><th>Date</th></tr>
+          </thead>
+          <tbody>
+            <tr class="rank-example">
+              <td class="rank-pos">—</td>
+              <td>(example) Robotic Park Lab</td>
+              <td>Distance-based control + virtual surface constraints</td>
+              <td>0.04 m</td>
+              <td>2025</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">
+        Example row — the real ranking will be filled in with the results received at
+        <a href="mailto:lab.nanodrones@dia.uned.es">lab.nanodrones@dia.uned.es</a>.
+      </p>
+    </section>
+
+    <section class="benchmark" id="navegacion-invernadero">
+      <span class="status-badge muted">In preparation</span>
+      <h2>Hierarchical navigation in a greenhouse</h2>
+
+      <p class="benchmark-sub">Description</p>
+      <p>
+        Evaluates hierarchical control strategies for the autonomous navigation of a transport
+        mobile robot in a Mediterranean greenhouse, with narrow aisles and changing lighting
+        conditions.
+      </p>
+
+      <p class="benchmark-sub">Objective</p>
+      <p>
+        Complete a point-to-point delivery route while minimising the total time and the number of
+        interventions/recoveries, without colliding with the greenhouse structure.
+      </p>
+
+      <p class="benchmark-sub">Data</p>
+      <ul class="data-specs">
+        <li><strong>Format:</strong> rosbag2 (MCAP)</li>
+        <li><strong>Agent:</strong> differential/Ackermann transport robot</li>
+        <li><strong>Topics:</strong> <code>/scan</code>, <code>/odom</code>, <code>/tf</code>, <code>/cmd_vel</code>, <code>/map</code></li>
+        <li><strong>Scenario:</strong> real and simulated (MVSim) greenhouse map</li>
+      </ul>
+
+      <div class="button-row">
+        <a class="btn btn-ghost" href="https://doi.org/10.48550/arXiv.2602.15162" target="_blank" rel="noopener">Paper (under review)</a>
+      </div>
+
+      <p class="benchmark-sub">Ranking</p>
+      <p class="note">
+        Benchmark in preparation — the dataset and ranking will be published here as soon as they
+        are ready.
+      </p>
+    </section>
+
+    <p class="note">
+      Would you like to propose a new lab benchmark? Write to
+      <a href="mailto:lab.nanodrones@dia.uned.es">lab.nanodrones@dia.uned.es</a>. To add it to
+      this page, duplicate a full <code>&lt;section class="benchmark"&gt;</code> block
+      (Description / Objective / Data / download link / Ranking).
+    </p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <span>© 2026 Robotic Park Lab — UNED</span>
+    <span><a href="contacto_en.html">lab.nanodrones@dia.uned.es</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

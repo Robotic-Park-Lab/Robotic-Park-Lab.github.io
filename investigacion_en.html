@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Research — Robotic Park Lab</title>
+<meta name="description" content="Research lines, BSc and MSc thesis proposals, and R&D and teaching innovation projects of Robotic Park Lab (UNED).">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a class="site-brand" href="index_en.html"><img src="assets/img/logo.png" alt="Robotic Park Lab">Robotic Park Lab</a>
+    <div class="nav-wrap">
+      <nav class="site-nav">
+        <a href="index_en.html">Home</a>
+        <a href="investigacion_en.html" aria-current="page">Research</a>
+        <a href="publicaciones_en.html">Publications</a>
+        <a href="plataforma_en.html">Platform</a>
+        <a href="equipo_en.html">Team</a>
+        <a href="benchmarks_en.html">Benchmarks</a>
+        <a href="contacto_en.html">Contact</a>
+      </nav>
+      <div class="lang-switch">
+        <a href="investigacion.html" hreflang="es">Español</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <section class="section">
+      <p class="eyebrow">Research</p>
+      <h1 class="section-title">Lines, proposals and projects</h1>
+      <p>
+        The lab's research focuses on the control and navigation of multi-agent robotic systems:
+        formations of drones and mobile robots, event-based control, cooperative cyber-physical systems
+        and mixed reality. Everything relies on <a href="plataforma_en.html">Robotic Park</a>, an
+        experimental platform integrated in ROS 2 with real and virtual aerial and ground robots.
+        This page gathers the research lines, the open BSc and MSc thesis proposals and the projects the
+        lab has taken part in. Publications are listed under <a href="publicaciones_en.html">Publications</a>.
+      </p>
+      <nav class="toc" aria-label="Sections of this page">
+        <a href="#lineas">Research lines</a>
+        <a href="#pfg-tfm">BSc and MSc thesis proposals</a>
+        <a href="#proyectos">Research projects</a>
+        <a href="#innovaciondocente">Teaching innovation</a>
+      </nav>
+    </section>
+
+    <section class="section" id="lineas">
+      <h2 class="section-title">Research lines</h2>
+      <div class="grid-cards">
+        <div class="item-card">
+          <h3>Multi-robot formation control</h3>
+          <p>Distance-based formations, virtual surface constraints, Lagrange multipliers and formation reconfiguration or <em>morphing</em> in multi-agent systems.</p>
+        </div>
+        <div class="item-card">
+          <h3>Event-based control</h3>
+          <p>Event-based sampling and communication strategies with adaptive thresholds, applied to formation control and aerial platforms (Crazyflie).</p>
+        </div>
+        <div class="item-card">
+          <h3>Cooperative cyber-physical systems</h3>
+          <p>Efficient design and distributed control of heterogeneous cyber-physical systems, with attention to communication and computation constraints.</p>
+        </div>
+        <div class="item-card">
+          <h3>Resilience and security</h3>
+          <p>Resilient and secure control architectures and algorithms against faults and attacks in cooperative cyber-physical systems.</p>
+        </div>
+        <div class="item-card">
+          <h3>Multi-agent mixed reality</h3>
+          <p>Real and virtual agents combined (digital twins in Gazebo and Webots) to scale swarm experiments beyond the available physical space.</p>
+        </div>
+        <div class="item-card">
+          <h3>Identification and hybrid control</h3>
+          <p>Relay identification, PID autotuning and new paradigms for hybrid identification and control in high-performance systems.</p>
+        </div>
+        <div class="item-card">
+          <h3>Aerial robotics</h3>
+          <p>Calibration, attitude and position control, gimbal tests and distributed formations with Crazyflie 2.X quadrotors.</p>
+        </div>
+        <div class="item-card">
+          <h3>Field robotics</h3>
+          <p>Autonomous navigation of mobile and collaborative robots for transport tasks in Mediterranean greenhouses.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="pfg-tfm">
+      <h2 class="section-title">BSc and MSc thesis proposals</h2>
+      <p>
+        Open topics for the Bachelor's Final Project (Degree in Information Technology Engineering, 18 ECTS) and
+        the Master's Final Project (Master in Computer Engineering, 12 ECTS). If you are interested in any of them,
+        write to the supervisors listed.
+      </p>
+
+      <div class="card proposal">
+        <h3>Cooperative navigation of multi-robot formations through <em>morphing</em> strategies</h3>
+        <div class="proposal-meta">Supervisors: Francisco José Mañas Álvarez (<a href="mailto:fjmanas@dia.uned.es">fjmanas@dia.uned.es</a>), Raquel Dormido Canto (<a href="mailto:raquel@dia.uned.es">raquel@dia.uned.es</a>) and María Guinaldo Losada (<a href="mailto:mguinaldo@dia.uned.es">mguinaldo@dia.uned.es</a>)</div>
+        <p>The work will consist of the study, development and implementation of <em>morphing</em> strategies for the cooperative navigation of multi-robot systems. The goal is to let a robot formation dynamically change its geometry to adapt to environmental constraints, such as obstacles, narrow corridors or mission changes, while keeping the group's cohesion and connectivity. Distributed control and coordination algorithms based on geometric representations of the formation will be developed, evaluated first in simulation (ROS 2/Gazebo) and, optionally, on real robotic platforms. The work covers concepts of cooperative control, multi-agent robotics and trajectory planning.</p>
+        <ul class="tag-list"><li>Distributed control</li><li>Multi-robot</li><li>ROS 2 / Gazebo</li></ul>
+        <ul class="proposal-refs">
+          <li>Liu, L., &amp; Shell, D. A. (2014). Multi-robot formation morphing through a graph matching problem. In <em>Distributed Autonomous Robotic Systems: The 11th International Symposium</em> (pp. 291–306). Springer.</li>
+          <li>Oh, K.-K., Park, M.-C., &amp; Ahn, H.-S. (2015). A survey of multi-agent formation control. <em>Automatica</em>, 53, 424–440.</li>
+        </ul>
+      </div>
+
+      <div class="card proposal">
+        <h3>Dynamic model identification and controller tuning for robots using Factor Graphs and GTSAM</h3>
+        <div class="proposal-meta">Supervisors: Francisco José Mañas Álvarez (<a href="mailto:fjmanas@dia.uned.es">fjmanas@dia.uned.es</a>), Raquel Dormido Canto (<a href="mailto:raquel@dia.uned.es">raquel@dia.uned.es</a>) and María Guinaldo Losada (<a href="mailto:mguinaldo@dia.uned.es">mguinaldo@dia.uned.es</a>)</div>
+        <p>The work will consist of researching and applying optimisation techniques based on Factor Graphs to identify dynamic models of aerial robots and automatically tune their controllers. The GTSAM library (Georgia Tech Smoothing and Mapping) will be used to formulate parameter estimation problems from experimental flight data. From the identified models, the design and tuning of attitude and position controllers will be studied, evaluating their performance in simulation and, optionally, on real aerial platforms. The work provides knowledge of probabilistic estimation, nonlinear optimisation, system identification and advanced control of unmanned aerial vehicles.</p>
+        <ul class="tag-list"><li>Identification</li><li>Optimisation</li><li>Aerial robotics</li></ul>
+        <ul class="proposal-refs">
+          <li>Dellaert, F., &amp; Kaess, M. (2017). Factor graphs for robot perception. <em>Foundations and Trends in Robotics</em>, 6(1–2), 1–139.</li>
+          <li>Kaess, M., Johannsson, H., Roberts, R., Ila, V., Leonard, J. J., &amp; Dellaert, F. (2012). iSAM2: Incremental smoothing and mapping using the Bayes tree. <em>The International Journal of Robotics Research</em>, 31(2), 216–235.</li>
+        </ul>
+      </div>
+
+      <div class="card proposal">
+        <h3>Robot prototyping for hybrid multi-agent systems</h3>
+        <div class="proposal-meta">Supervisors: Francisco José Mañas Álvarez (<a href="mailto:fjmanas@dia.uned.es">fjmanas@dia.uned.es</a>), Raquel Dormido Canto (<a href="mailto:raquel@dia.uned.es">raquel@dia.uned.es</a>) and María Guinaldo Losada (<a href="mailto:mguinaldo@dia.uned.es">mguinaldo@dia.uned.es</a>)</div>
+        <p>Dynamic robot simulation is essential to set up many robotics applications and helps decide whether a robotic system suits an environment and its characteristics. The work will consist of the complete modelling and development of a robot in ROS 2 with an open-source simulator, building an interface that lets the same code run on the simulated and the real robot. The robot will include its standard sensors and the devices needed to integrate it with other positioning systems. An interface that can be integrated into the Robotic Park experimental platform will be developed, aimed at hybrid multi-agent systems.</p>
+        <ul class="tag-list"><li>Digital twin</li><li>ROS 2</li><li>Robotic Park</li></ul>
+        <ul class="proposal-refs">
+          <li>Mañas-Álvarez, F. J., Guinaldo, M., Dormido, R., &amp; Dormido, S. (2023). Robotic Park: Multi-Agent Platform for Teaching Control and Robotics. <em>IEEE Access</em>, 11, 34899–34911.</li>
+        </ul>
+      </div>
+
+      <div class="card proposal">
+        <h3>Development of the digital shadow of a mobile robot with ROS 2</h3>
+        <div class="proposal-meta">Supervisors: Francisco José Mañas Álvarez (<a href="mailto:fjmanas@dia.uned.es">fjmanas@dia.uned.es</a>), Raquel Dormido Canto (<a href="mailto:raquel@dia.uned.es">raquel@dia.uned.es</a>) and María Guinaldo Losada (<a href="mailto:mguinaldo@dia.uned.es">mguinaldo@dia.uned.es</a>)</div>
+        <p>A digital shadow is a virtual replica of a physical system that can be used to simulate, analyse and optimise its performance in real time in different scenarios, and is characterised by one-way, real-time communication from the real robot. This project proposes to design the digital shadow of a mobile robot in different scenarios using ROS 2: create the virtual model of the robot, integrate its sensors and actuators with the virtual model and simulate typical scenarios for this kind of robot, such as model training, fault detection, dynamic controller tuning or autonomous navigation.</p>
+        <ul class="tag-list"><li>Digital shadow</li><li>Mobile robotics</li><li>ROS 2</li></ul>
+        <ul class="proposal-refs">
+          <li>Mañas-Álvarez, F. J., Guinaldo, M., Dormido, R., &amp; Dormido, S. (2023). Robotic Park: Multi-Agent Platform for Teaching Control and Robotics. <em>IEEE Access</em>, 11, 34899–34911.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" id="proyectos">
+      <h2 class="section-title">Research projects</h2>
+      <div class="card">
+        <div class="entry">
+          <div class="entry-title"><a href="https://blogs.uned.es/go-hybrid/" target="_blank" rel="noopener">GO-HYBRID — New paradigms for hybrid identification and control in high-performance systems</a></div>
+          <div class="entry-meta">Spanish Ministry of Science and Innovation — 01/09/2025–31/08/2028 · Ongoing</div>
+          <p class="entry-code">PID2024-156427OB-I00</p>
+          <p>PI: María Guinaldo Losada; PI2: José Sánchez Moreno.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="entry">
+          <div class="entry-title"><a href="https://blogs.uned.es/collectively/" target="_blank" rel="noopener">Collectively — Control of Cooperative Multi-Agent Cyber-Physical Systems: theoretical and practical aspects</a></div>
+          <div class="entry-meta">Spanish Ministry of Science and Innovation — 01/09/2023–31/08/2027 · Ongoing</div>
+          <p class="entry-code">PID2022-139187OB-I00</p>
+          <p>PI: Raquel Dormido Canto.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="entry">
+          <div class="entry-title"><a href="https://blogs.uned.es/recovery/" target="_blank" rel="noopener">RECOVERY — REsilient and secure COntrol of cooperatiVE cybeR-phYsical systems</a></div>
+          <div class="entry-meta">Spanish Ministry of Science and Innovation — 01/01/2022–31/12/2025 · Completed</div>
+          <p class="entry-code">PID2020-112658RB-I00</p>
+          <p>PI: María Guinaldo Losada. Developed on the Robotic Park experimental platform.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="entry">
+          <div class="entry-title"><a href="http://portal.uned.es/portal/page?_pageid=93,63115277&amp;_dad=portal&amp;_schema=PORTAL&amp;idContenido=3" target="_blank" rel="noopener">ECoDiC — Efficient Design and Distributed Control of Cyber-Physical Systems</a></div>
+          <div class="entry-meta">Spanish Ministry of Science and Innovation — 01/01/2019–31/12/2021 · Completed</div>
+          <p class="entry-code">RTI2018-094665-B-I00</p>
+          <p>PI: Raquel Dormido Canto.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="innovaciondocente">
+      <h2 class="section-title">Teaching innovation</h2>
+      <p>
+        Robotic Park is also used as a teaching tool. One outcome of these projects are the
+        <a href="publicaciones_en.html">interactive publications</a>: pages that explain each paper with concept
+        maps, simulators and self-assessment. For example,
+        <a href="interactivos/relay-autotuning/?lang=en">relay autotuning of a quadrotor on a gimbal</a>.
+      </p>
+      <div class="card">
+        <div class="entry">
+          <div class="entry-title">Development of teaching methodologies using configurable and customisable experimentation platforms to improve the teaching-learning process</div>
+          <div class="entry-meta">Universidad Nacional de Educación a Distancia — 2024/2025 · Completed</div>
+          <p>PI: Ernesto Aranda Escolástico.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="entry">
+          <div class="entry-title">Experimentation-based teaching methodologies and assessment methods to foster interest and motivation</div>
+          <div class="entry-meta">Universidad Nacional de Educación a Distancia — 2023/2024 · Completed</div>
+          <p>PI: David Moreno Salinas.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <span>© 2026 Robotic Park Lab — UNED</span>
+    <span><a href="contacto_en.html">lab.nanodrones@dia.uned.es</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

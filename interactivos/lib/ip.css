@@ -106,6 +106,16 @@
   color-scheme: dark;
 }
 
+/* ---------- Idioma: se muestra sólo el texto del idioma activo ---------- */
+:root:not([data-lang="en"]) [lang="en"]:not(html) { display: none !important; }
+:root[data-lang="en"] [lang="es"]:not(html) { display: none !important; }
+.ip-lang {
+  flex: none; margin-left: 10px; font-size: 0.82rem; font-weight: 700; text-decoration: none;
+  color: var(--primary); border: 1px solid var(--primary); border-radius: 999px; padding: 5px 12px; white-space: nowrap;
+}
+.ip-lang:hover { background: var(--primary-soft); color: var(--primary); }
+@media (max-width: 860px) { .ip-lang { margin-left: auto; } }
+
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 72px; }
 body {
@@ -413,3 +423,6 @@ code, .mono { font-family: var(--font-mono); font-size: 0.9em; }
 .ip-stage canvas:active { cursor: grabbing; }
 .ip-stage .ip-stage-hint { position: absolute; left: 12px; bottom: 10px; font-size: 0.74rem; color: var(--muted); pointer-events: none; }
 .ip-stage .ip-stage-badge { position: absolute; right: 12px; top: 10px; }
+/* envolturas de idioma que contienen el número de sección */
+.ip-eyebrow > span[lang] { display: inline-flex; align-items: center; gap: inherit; }
+:root[data-lang="en"] .ip-eyebrow > span[lang="es"], :root:not([data-lang="en"]) .ip-eyebrow > span[lang="en"] { display: none; }

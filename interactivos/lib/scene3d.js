@@ -71,6 +71,14 @@
       this.point(p, { r: s.dot ?? 3, color: c });
       return this;
     }
+    /** Robot terrestre: disco en el plano horizontal con indicador de rumbo. */
+    rover(p, heading = 0, s = {}) {
+      const k = s.size || 0.1, c = s.color || '--s2', ring = [];
+      for (let i = 0; i < 16; i++) { const a = i / 16 * 2 * Math.PI; ring.push([p[0] + k * Math.cos(a), p[1] + k * Math.sin(a), p[2] + 0.005]); }
+      this.poly(ring, { fill: c, alpha: s.virtual ? 0.15 : 0.45, stroke: c, width: s.virtual ? 1 : 1.6 });
+      this.line([p[0], p[1], p[2] + 0.01], [p[0] + k * Math.cos(heading), p[1] + k * Math.sin(heading), p[2] + 0.01], { color: c, width: 2.2 });
+      return this;
+    }
     _setup() {
       const cv = this.cv, W = cv.clientWidth, H = cv.clientHeight;
       if (!W || !H) return null;

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Sampling frequency">Frecuencia de muestreo</title>
+<meta name="description" content="Publicación interactiva: análisis de la frecuencia de muestreo y del muestreo por eventos en la formación de 5 Crazyflie (Jornadas de Automática 2023). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>.stage-md{height:400px}.bars svg{width:100%;height:auto}.bars text{font:500 11px var(--font);fill:var(--muted)}</style>
+</head>
+<body>
+<header class="ip-topbar"><div class="ip-wrap">
+  <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
+  <nav class="ip-topnav"><a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a><a href="#formacion"><span lang="es">Formación</span><span lang="en">Formation</span></a><a href="#simulador"><span lang="es">Simulador</span><span lang="en">Simulator</span></a><a href="#resultados"><span lang="es">Resultados</span><span lang="en">Results</span></a><a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a></nav>
+</div><div class="ip-progress"></div></header>
+
+<section class="ip-hero"><div class="ip-wrap">
+  <div>
+    <p class="ip-kicker">XLIV Jornadas de Automática (2023) · <span lang="es">Publicación interactiva</span><span lang="en">Interactive publication</span></p>
+    <h1><span lang="es">¿Cada cuánto deben hablar los drones de un enjambre?</span><span lang="en">How often should the drones in a swarm talk?</span></h1>
+    <p class="ip-authors"><strong>F. J. Mañas-Álvarez</strong>, M. Guinaldo, R. Dormido y S. Dormido · UNED</p>
+    <p class="ip-lead"><span lang="es">Cinco Crazyflie forman una semiesfera midiendo sólo distancias a sus vecinos. Si se comunican demasiado, saturan el canal y la batería; si lo hacen poco, la formación se degrada. El trabajo encuentra la frecuencia mínima (10 Hz) y la mejora con muestreo por eventos.</span><span lang="en">Five Crazyflies form a hemisphere by measuring only distances to their neighbours. Talking too much saturates the channel and the battery; talking too little degrades the formation. The work finds the minimum frequency (10 Hz) and improves on it with event-based sampling.</span></p>
+    <div class="ip-btns"><a class="ip-btn" href="#simulador"><span lang="es">Probar el simulador</span><span lang="en">Try the simulator</span></a><a class="ip-btn ghost" href="https://doi.org/10.17979/spudc.9788497498609.329" target="_blank" rel="noopener"><span lang="es">Leer el artículo</span><span lang="en">Read the paper</span></a></div>
+    <div class="ip-hero-stats"><div class="ip-hero-stat"><b>10 Hz</b><span lang="es">frecuencia mínima periódica</span><span lang="en">minimum periodic frequency</span></div><div class="ip-hero-stat"><b>2 cm</b><span lang="es">umbral de eventos óptimo</span><span lang="en">optimal event threshold</span></div><div class="ip-hero-stat"><b><span lang="es">−46,7 %</span><span lang="en">−46.7%</span></b><span lang="es">mensajes, mismo desempeño</span><span lang="en">messages, same performance</span></div></div>
+  </div>
+  <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+</div></section>
+
+<main>
+<section class="ip-section" id="mapa"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">1</span><span lang="es">Mapa conceptual</span><span lang="en">Concept map</span></p><h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2></div>
+  <div class="ip-cmap ip-reveal"><div id="cmap"></div><aside class="ip-card ip-cmap-panel" id="cmapPanel"></aside></div>
+</div></section>
+
+<section class="ip-section" id="formacion"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">2</span><span lang="es">La formación</span><span lang="en">The formation</span></p>
+    <h2><span lang="es">Una semiesfera definida por distancias</span><span lang="en">A hemisphere defined by distances</span></h2>
+    <p><span lang="es">Cinco drones (CF01–CF05) y un nodo virtual fijo en el origen. Cada enlace del grafo fija una distancia: 0,70 m entre drones vecinos, 1,00 m de CF02–CF05 al origen y 1,37 m de CF01 al origen. Cada dron aplica una ley distribuida que sólo usa las posiciones de sus vecinos:</span><span lang="en">Five drones (CF01–CF05) and a fixed virtual node at the origin. Each graph edge sets a distance: 0.70 m between neighbouring drones, 1.00 m from CF02–CF05 to the origin and 1.37 m from CF01 to the origin. Each drone applies a distributed law using only its neighbours' positions:</span></p>
+    <div class="ip-eq">$$u_i = -\mu\sum_{j\in\mathcal N_i}\big(\|p_i-p_j\|^2-d_{ij}^{*2}\big)(p_i-p_j)$$</div>
+    <p class="ip-small ip-muted"><span lang="es">Esas distancias son coherentes con un anillo de 4 drones de radio 0,495 m a 0,87 m de altura y CF01 en el eje a 1,37 m: compruébalo en la vista 3D.</span><span lang="en">Those distances are consistent with a ring of 4 drones of radius 0.495 m at 0.87 m height and CF01 on the axis at 1.37 m: check it in the 3D view.</span></p></div>
+</div></section>
+
+<section class="ip-section" id="simulador"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">3</span><span lang="es">Simulador</span><span lang="en">Simulator</span></p>
+    <h2><span lang="es">Periódico frente a <i>send-on-delta</i></span><span lang="en">Periodic vs <i>send-on-delta</i></span></h2>
+    <p><span lang="es">Con muestreo periódico cada dron publica su posición a la frecuencia elegida. Con eventos, sólo cuando se ha movido más de δ desde el último envío (comprobado a 50 Hz):</span><span lang="en">With periodic sampling each drone publishes its position at the chosen rate. With events, only when it has moved more than δ since the last message (checked at 50 Hz):</span></p>
+    <div class="ip-eq">$$t_{k+1}=\inf\{t>t_k:\;\|x(t_k)-x(t)\|>\delta\}$$</div></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-toolbar"><button class="ip-btn accent" id="run" type="button">▶ <span lang="es">Despegar y formar</span><span lang="en">Take off and form</span></button><span class="ip-pill muted" id="tt"></span></div><div class="ip-stage stage-md"><canvas id="cv"></canvas><span class="ip-stage-hint"><span lang="es">Enlaces naranjas: error &gt; 10 % · gris discontinuo: enlaces al origen</span><span lang="en">Orange edges: error &gt; 10% · grey dashed: edges to the origin</span></span></div></div>
+    <div class="ip-card"><div id="ctl"></div><div class="ip-readouts" id="ro" style="margin-top:14px"></div></div>
+  </div>
+  <div class="ip-grid cols-2 ip-reveal" style="margin-top:18px">
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Error total de formación Σ|d_ij − d*_ij| (m)</span><span lang="en">Total formation error Σ|d_ij − d*_ij| (m)</span></div><div id="pe"></div></div>
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Mensajes publicados (acumulados)</span><span lang="en">Messages published (cumulative)</span></div><div id="pm"></div></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="resultados"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">4</span><span lang="es">Resultados del artículo (Tabla 1)</span><span lang="en">Paper results (Table 1)</span></p>
+    <h2><span lang="es">Con 5 drones reales en Robotic Park</span><span lang="en">With 5 real drones in Robotic Park</span></h2>
+    <p><span lang="es">IEA (integral del error absoluto) de cada caso: por debajo de 5 Hz o por encima de 4 cm el desempeño se degrada. Pulsa «Comparar con mi simulación» para ejecutar los 13 casos.</span><span lang="en">IAE (integral of absolute error) for each case: below 5 Hz or above 4 cm performance degrades. Click «Compare with my simulation» to run all 13 cases.</span></p></div>
+  <div class="ip-card ip-reveal"><div class="ip-toolbar"><button class="ip-btn small" id="sweep" type="button"><span lang="es">Comparar con mi simulación</span><span lang="en">Compare with my simulation</span></button></div><div class="bars" id="bars"></div></div>
+</div></section>
+
+<section class="ip-section" id="quiz"><div class="ip-wrap"><div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">5</span><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></p><h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2></div><div id="quizBox" class="ip-reveal"></div></div></section>
+
+<section class="ip-section" id="citar"><div class="ip-wrap"><div class="ip-grid cols-2 ip-reveal">
+  <div class="ip-card"><h3><span lang="es">Cómo citar</span><span lang="en">How to cite</span></h3><p>Mañas-Álvarez, F. J., Guinaldo, M., Dormido, R., &amp; Dormido, S. (2023). Análisis de la frecuencia de muestreo en sistemas multi-robot. In <em>XLIV Jornadas de Automática</em>, Zaragoza (pp. 329–334). <a href="https://doi.org/10.17979/spudc.9788497498609.329" target="_blank" rel="noopener">doi:10.17979/spudc.9788497498609.329</a></p><p class="ip-small ip-muted"><span lang="es">Versión ampliada con robots terrestres y tres arquitecturas:</span><span lang="en">Extended version with ground robots and three architectures:</span> <a href="../muestreo-comunicacion/">RIAI 2024</a>.</p></div>
+  <div class="ip-code" id="bibtex">@inproceedings{ManasAlvarez2023Frecuencia,
+  title     = {An{\'a}lisis de la frecuencia de muestreo en sistemas multi-robot},
+  author    = {Ma{\~n}as-{\'A}lvarez, F. J. and Guinaldo, M. and Dormido, R. and Dormido, S.},
+  booktitle = {XLIV Jornadas de Autom{\'a}tica},
+  pages     = {329--334},
+  year      = {2023},
+  doi       = {10.17979/spudc.9788497498609.329}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+</div></div></section>
+</main>
+<footer class="ip-footer"><div class="ip-wrap"><span><span lang="es">Material docente interactivo · Proyecto de innovación docente</span><span lang="en">Interactive teaching material · Teaching innovation project</span> · <a href="../../index.html">Robotic Park Lab</a> — UNED</span><span lang="es">Simulación didáctica; la Tabla 1 recoge los resultados experimentales.</span><span lang="en">Teaching simulation; Table 1 lists the experimental results.</span></div></footer>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="../lib/multiagente.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

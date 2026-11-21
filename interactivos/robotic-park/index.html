@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Robotic Park platform">Plataforma Robotic Park</title>
+<meta name="description" content="Publicación interactiva: Robotic Park, plataforma multi-agente física, virtual e híbrida para enseñar control y robótica (IEEE Access 2023). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>
+  .stage-md{height:420px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+  .rcard{border:1px solid var(--border);border-radius:14px;padding:14px;background:var(--surface);cursor:pointer;transition:border-color .15s,transform .15s}
+  .rcard:hover{border-color:var(--primary);transform:translateY(-2px)}
+  .rcard.on{border-color:var(--primary);background:var(--primary-soft)}
+  .rcard h4{margin:0 0 4px;font-family:var(--font);font-size:1rem}
+  .rcard p{margin:0;font-size:.82rem;color:var(--muted)}
+  .layers{display:grid;gap:10px}
+  .layer{display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:center;border:1px solid var(--border);border-radius:12px;padding:12px;background:var(--surface-2)}
+  .layer b{font-family:var(--font-mono);color:var(--primary)}
+  @media(max-width:600px){.layer{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="ip-topbar"><div class="ip-wrap">
+  <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
+  <nav class="ip-topnav"><a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a><a href="#plataforma"><span lang="es">Plataforma</span><span lang="en">Platform</span></a><a href="#capas"><span lang="es">Control</span><span lang="en">Control</span></a><a href="#experiencia"><span lang="es">Experiencia</span><span lang="en">Experiment</span></a><a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a></nav>
+</div><div class="ip-progress"></div></header>
+
+<section class="ip-hero"><div class="ip-wrap">
+  <div>
+    <p class="ip-kicker">IEEE Access 11 (2023) 34899–34911 · <span lang="es">Publicación interactiva</span><span lang="en">Interactive publication</span></p>
+    <h1><span lang="es">Robotic Park: un parque para enseñar control multi-robot</span><span lang="en">Robotic Park: a park to teach multi-robot control</span></h1>
+    <p class="ip-authors"><strong>F. J. Mañas-Álvarez</strong>, M. Guinaldo, R. Dormido y S. Dormido · UNED</p>
+    <p class="ip-lead"><span lang="es">Drones y robots terrestres de cuatro tipos, tres sistemas de posicionamiento, gemelos digitales en Gazebo y Webots y una única red ROS 2. Las experiencias pueden ser físicas, virtuales o híbridas (realidad mixta), con control centralizado, distribuido o mixto.</span><span lang="en">Four kinds of drones and ground robots, three positioning systems, digital twins in Gazebo and Webots and a single ROS 2 network. Experiments can be physical, virtual or hybrid (mixed reality), with centralised, distributed or mixed control.</span></p>
+    <div class="ip-btns"><a class="ip-btn" href="#experiencia"><span lang="es">Ver la experiencia</span><span lang="en">See the experiment</span></a><a class="ip-btn ghost" href="https://doi.org/10.1109/ACCESS.2023.3264508" target="_blank" rel="noopener"><span lang="es">Leer el artículo (acceso abierto)</span><span lang="en">Read the paper (open access)</span></a></div>
+    <div class="ip-hero-stats"><div class="ip-hero-stat"><b>−89 %</b><span lang="es">tráfico con eventos de 1 cm</span><span lang="en">traffic with 1 cm events</span></div><div class="ip-hero-stat"><b><span lang="es">5,07 Hz</span><span lang="en">5.07 Hz</span></b><span lang="es">frecuencia media frente a 50 Hz</span><span lang="en">mean rate vs 50 Hz</span></div><div class="ip-hero-stat"><b>3</b><span lang="es">modos: físico, virtual e híbrido</span><span lang="en">modes: physical, virtual and hybrid</span></div></div>
+  </div>
+  <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+</div></section>
+
+<main>
+<section class="ip-section" id="mapa"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">1</span><span lang="es">Mapa conceptual</span><span lang="en">Concept map</span></p><h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2></div>
+  <div class="ip-cmap ip-reveal"><div id="cmap"></div><aside class="ip-card ip-cmap-panel" id="cmapPanel"></aside></div>
+</div></section>
+
+<section class="ip-section" id="plataforma"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">2</span><span lang="es">La plataforma</span><span lang="en">The platform</span></p><h2><span lang="es">Robots, posicionamiento y simuladores</span><span lang="en">Robots, positioning and simulators</span></h2><p><span lang="es">Pulsa cada tarjeta para ver sus características.</span><span lang="en">Click each card to see its features.</span></p></div>
+  <div class="ip-grid side ip-reveal">
+    <div><h3><span lang="es">Robots</span><span lang="en">Robots</span></h3><div class="cards" id="robots"></div><h3 style="margin-top:18px"><span lang="es">Posicionamiento y simulación</span><span lang="en">Positioning and simulation</span></h3><div class="cards" id="pos"></div></div>
+    <div class="ip-card" id="detail" aria-live="polite"></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="capas"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">3</span><span lang="es">Control jerárquico</span><span lang="en">Hierarchical control</span></p><h2><span lang="es">Tres capas, tres ritmos</span><span lang="en">Three layers, three rates</span></h2>
+    <p><span lang="es">La entrada de cada robot suma un término de formación por distancias y otro de seguimiento de la referencia de la capa superior:</span><span lang="en">Each robot's input adds a distance-based formation term and a tracking term for the upper-layer reference:</span></p>
+    <div class="ip-eq">$$u_i=\underbrace{\tfrac12\sum_{j\in\mathcal N_i}\mu_{ij}\big(d_{ij}^2-\|p_i-p_j\|^2\big)(p_i-p_j)}_{u_i^s}\;\underbrace{-\tfrac12k_i\|p_i-q_i\|^2(p_i-q_i)}_{u_i^t}$$</div></div>
+  <div class="layers ip-reveal">
+    <div class="layer"><b>&lt; 10 Hz</b><div><strong><span lang="es">Planificación</span><span lang="en">Path planning</span></strong> — <span lang="es">trayectorias de la formación (por ejemplo, desplazar al líder) y evitación de obstáculos con campos potenciales repulsivos.</span><span lang="en">formation trajectories (e.g. moving the leader) and obstacle avoidance with repulsive potential fields.</span></div></div>
+    <div class="layer"><b>10–100 Hz</b><div><strong><span lang="es">Coordinación</span><span lang="en">Coordination</span></strong> — <span lang="es">formación por distancias, centralizada o distribuida en ROS 2, con muestreo periódico o por eventos.</span><span lang="en">distance-based formation, centralised or distributed in ROS 2, with periodic or event-based sampling.</span></div></div>
+    <div class="layer"><b>100–500 Hz</b><div><strong><span lang="es">Control individual</span><span lang="en">Individual control</span></strong> — <span lang="es">posición (100 Hz) y actitud (500 Hz) en los cuadricópteros; velocidad de ruedas en los robots diferenciales, con la restricción no holónoma \(\dot x\sin\phi-\dot y\cos\phi=0\).</span><span lang="en">position (100 Hz) and attitude (500 Hz) on quadrotors; wheel speed on differential robots, with the non-holonomic constraint \(\dot x\sin\phi-\dot y\cos\phi=0\).</span></div></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="experiencia"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">4</span><span lang="es">Experiencia de realidad mixta</span><span lang="en">Mixed-reality experiment</span></p>
+    <h2><span lang="es">7 agentes: 4 reales y 3 virtuales</span><span lang="en">7 agents: 4 real and 3 virtual</span></h2>
+    <p><span lang="es">Un Turtlebot3 real (líder, TB01), tres Crazyflie reales a ~0,8 m y tres Khepera IV virtuales. Primero adquieren la formación; después el líder avanza 0,75 m en x y el resto lo sigue. Con eventos de 1 cm cada agente sólo publica cuando se ha movido.</span><span lang="en">A real Turtlebot3 (leader, TB01), three real Crazyflies at ~0.8 m and three virtual Khepera IV. They first acquire the formation; then the leader moves 0.75 m along x and the rest follow. With 1 cm events each agent only publishes when it has moved.</span></p>
+    <p class="ip-small ip-muted"><span lang="es">Formación de ejemplo con el mismo grafo de 12 enlaces del artículo.</span><span lang="en">Example formation with the paper's same 12-edge graph.</span></p></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-toolbar"><div id="modeSeg"></div><button class="ip-btn accent small" id="run" type="button">▶ <span lang="es">Reiniciar</span><span lang="en">Restart</span></button><span class="ip-pill muted" id="tt"></span></div><div class="ip-stage stage-md"><canvas id="cv"></canvas><span class="ip-stage-hint"><span lang="es">Verde: TB01 (líder) · naranja: Khepera virtuales · azul: Crazyflie</span><span lang="en">Green: TB01 (leader) · orange: virtual Kheperas · blue: Crazyflies</span></span></div></div>
+    <div class="ip-card"><div class="ip-readouts" id="ro"></div><div class="ip-note ip-small" style="margin-top:12px"><span lang="es"><b>Artículo:</b> de 50 Hz a una media de 5,07 Hz con eventos de 1 cm (−89 %): 1,57 Hz en los robots terrestres (−96 %) y 8,58 Hz en los drones (−81 %). El error global (IAE, ITAE, RMSE) mejora ~5 % porque se filtra el rizado inferior a 1 cm.</span><span lang="en"><b>Paper:</b> from 50 Hz to a mean of 5.07 Hz with 1 cm events (−89%): 1.57 Hz on ground robots (−96%) and 8.58 Hz on drones (−81%). The global error (IAE, ITAE, RMSE) improves ~5% because ripple below 1 cm is filtered out.</span></div></div>
+  </div>
+  <div class="ip-card ip-reveal" style="margin-top:18px"><div class="ip-plot-title"><span lang="es">Error por agente (m) · hitos: formación adquirida y avance del líder</span><span lang="en">Error per agent (m) · milestones: formation acquired and leader moves</span></div><div id="pe"></div></div>
+</div></section>
+
+<section class="ip-section" id="quiz"><div class="ip-wrap"><div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">5</span><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></p><h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2></div><div id="quizBox" class="ip-reveal"></div></div></section>
+
+<section class="ip-section" id="citar"><div class="ip-wrap"><div class="ip-grid cols-2 ip-reveal">
+  <div class="ip-card"><h3><span lang="es">Cómo citar</span><span lang="en">How to cite</span></h3><p>Mañas-Álvarez, F. J., Guinaldo, M., Dormido, R., &amp; Dormido, S. (2023). Robotic Park: Multi-agent platform for teaching control and robotics. <em>IEEE Access</em>, 11, 34899–34911. <a href="https://doi.org/10.1109/ACCESS.2023.3264508" target="_blank" rel="noopener">doi:10.1109/ACCESS.2023.3264508</a></p><div class="ip-btns"><a class="ip-btn ghost small" href="../../plataforma.html" data-href-en="../../plataforma_en.html"><span lang="es">La plataforma hoy</span><span lang="en">The platform today</span></a></div></div>
+  <div class="ip-code" id="bibtex">@article{ManasAlvarez2023RoboticPark,
+  title   = {Robotic Park. Multi-Agent Platform for Teaching Control and Robotics},
+  author  = {Ma{\~n}as-{\'A}lvarez, F. J. and Guinaldo, M. and Dormido, R. and Dormido, S.},
+  journal = {IEEE Access},
+  volume  = {11}, pages = {34899--34911},
+  year    = {2023},
+  doi     = {10.1109/ACCESS.2023.3264508}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+</div></div></section>
+</main>
+<footer class="ip-footer"><div class="ip-wrap"><span><span lang="es">Material docente interactivo · Proyecto de innovación docente</span><span lang="en">Interactive teaching material · Teaching innovation project</span> · <a href="../../index.html">Robotic Park Lab</a> — UNED</span><span lang="es">Simulación didáctica de la experiencia del artículo.</span><span lang="en">Teaching simulation of the paper's experiment.</span></div></footer>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="../lib/multiagente.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

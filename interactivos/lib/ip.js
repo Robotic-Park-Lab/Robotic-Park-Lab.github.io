@@ -27,6 +27,22 @@
   IP.version = '1.0.0';
   /** Errores de JavaScript capturados (útil para depurar páginas nuevas: IP.errors en la consola). */
   IP.errors = [];
+
+  /* ---------------- idioma (es / en) ----------------
+     Orden: ?lang=en|es en la URL -> preferencia guardada -> español.
+     En el HTML, los textos bilingües van en parejas
+       <span lang="es">...</span><span lang="en">...</span>
+     y ip.css oculta el idioma inactivo. En JS: IP.t('texto', 'text'). */
+  IP.lang = (function () {
+    let l = null;
+    try { l = new URLSearchParams(global.location.search).get('lang'); } catch (e) { }
+    if (l !== 'en' && l !== 'es') { try { l = global.localStorage.getItem('ip-lang'); } catch (e) { } }
+    return l === 'en' ? 'en' : 'es';
+  })();
+  document.documentElement.setAttribute('data-lang', IP.lang);
+  document.documentElement.lang = IP.lang;
+  IP.t = (es, en) => (IP.lang === 'en' && en !== undefined ? en : es);
+  IP.locale = IP.lang === 'en' ? 'en-GB' : 'es-ES';
   global.addEventListener('error', (e) => IP.errors.push(`${e.message} @ ${(e.filename || '').split('/').pop()}:${e.lineno}`));
 
   /* ---------------- utilidades ---------------- */
@@ -43,9 +59,9 @@
     const a = Math.abs(v);
     if (a !== 0 && (a >= 1e6 || a < Math.pow(10, -d))) {
       const [m, e] = v.toExponential(Math.max(1, d)).split('e');
-      return m.replace('.', ',') + '·10' + IP.sup(parseInt(e, 10));
+      return (IP.lang === 'en' ? m : m.replace('.', ',')) + '·10' + IP.sup(parseInt(e, 10));
     }
-    return v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
+    return v.toLocaleString(IP.locale, { minimumFractionDigits: d, maximumFractionDigits: d });
   };
   IP.sup = (n) => String(n).split('').map(ch => ({ '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' }[ch] || ch)).join('');
   IP.el = function (tag, attrs = {}, html) {
@@ -169,7 +185,7 @@
   }
   function tickFmt(v, step) {
     const d = step >= 1 ? 0 : Math.min(4, Math.ceil(-Math.log10(step)));
-    return v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
+    return v.toLocaleString(IP.locale, { minimumFractionDigits: d, maximumFractionDigits: d });
   }
 
   /**
@@ -470,7 +486,7 @@
         g.addEventListener('mouseleave', () => hot(active));
         gN.append(g);
       });
-      container.append(svg, IP.el('div', { class: 'ip-cmap-hint' }, 'Pulsa un concepto'));
+      container.append(svg, IP.el('div', { class: 'ip-cmap-hint' }, IP.t('Pulsa un concepto', 'Click a concept')));
       if (active) select(active, false);
     }
     function border(p, tx, ty) {
@@ -496,15 +512,15 @@
       hot(id);
       const n = byId[id];
       if (panel && n) {
-        const kinds = { problem: ['Problema', 'danger'], method: ['Método', ''], theory: ['Teoría', 'muted'], result: ['Resultado', 'accent'] };
+        const kinds = { problem: [IP.t('Problema', 'Problem'), 'danger'], method: [IP.t('Método', 'Method'), ''], theory: [IP.t('Teoría', 'Theory'), 'muted'], result: [IP.t('Resultado', 'Result'), 'accent'] };
         const k = kinds[n.kind || 'method'];
         const ins = map.edges.filter(e => e.to === id).map(e => byId[e.from]);
         const outs = map.edges.filter(e => e.from === id).map(e => byId[e.to]);
         const link = (m) => `<a href="#" data-goto="${m.id}">${m.label.replace(/\n/g, ' ')}</a>`;
         panel.innerHTML = `<span class="ip-pill ${k[1]}">${k[0]}</span><h3>${n.label.replace(/\n/g, ' ')}</h3>${n.text || ''}` +
-          (ins.length ? `<p class="ip-small ip-muted"><b>Viene de:</b> ${ins.map(link).join(' · ')}</p>` : '') +
-          (outs.length ? `<p class="ip-small ip-muted"><b>Conduce a:</b> ${outs.map(link).join(' · ')}</p>` : '') +
-          (n.href ? `<a class="ip-btn small" href="${n.href}">Ir a la sección →</a>` : '');
+          (ins.length ? `<p class="ip-small ip-muted"><b>${IP.t('Viene de', 'Comes from')}:</b> ${ins.map(link).join(' · ')}</p>` : '') +
+          (outs.length ? `<p class="ip-small ip-muted"><b>${IP.t('Conduce a', 'Leads to')}:</b> ${outs.map(link).join(' · ')}</p>` : '') +
+          (n.href ? `<a class="ip-btn small" href="${n.href}">${IP.t('Ir a la sección →', 'Go to section →')}</a>` : '');
         IP.$$('[data-goto]', panel).forEach(a => a.addEventListener('click', (ev) => { ev.preventDefault(); select(a.dataset.goto, true); }));
         if (global.renderMathInElement) IP.math(panel);
       }
@@ -522,8 +538,8 @@
   IP.quiz = function (container, questions) {
     container.classList.add('ip-quiz');
     let score = 0, done = 0;
-    const head = IP.el('div', { class: 'ip-score' }, `<span>Aciertos: <b class="ip-sc">0</b> / ${questions.length}</span><div class="ip-score-bar"><i></i></div>`);
-    const reset = IP.el('button', { class: 'ip-btn small ghost', type: 'button' }, 'Reiniciar');
+    const head = IP.el('div', { class: 'ip-score' }, `<span>${IP.t('Aciertos', 'Score')}: <b class="ip-sc">0</b> / ${questions.length}</span><div class="ip-score-bar"><i></i></div>`);
+    const reset = IP.el('button', { class: 'ip-btn small ghost', type: 'button' }, IP.t('Reiniciar', 'Reset'));
     head.append(reset);
     container.append(head);
     const cards = questions.map((q, qi) => {
@@ -688,6 +704,23 @@
    *  · fórmulas KaTeX (si la librería está cargada)
    */
   IP.page = function () {
+    // --- idioma: título, enlaces específicos y botón ES/EN en la barra superior
+    const ttl = IP.$('title');
+    if (ttl && IP.lang === 'en' && ttl.dataset.en) document.title = ttl.dataset.en;
+    if (IP.lang === 'en') IP.$$('option[data-en]').forEach(o => { o.textContent = o.dataset.en; });
+    IP.$$('[data-href-en]').forEach(a => { if (IP.lang === 'en') a.setAttribute('href', a.dataset.hrefEn); });
+    IP.$$('[data-copy]').forEach(b => (b.textContent = IP.t('Copiar', 'Copy')));
+    const bar = IP.$('.ip-topbar .ip-wrap');
+    if (bar && !IP.$('.ip-lang', bar)) {
+      const other = IP.lang === 'en' ? 'es' : 'en';
+      const btn = IP.el('a', { class: 'ip-lang', href: '?lang=' + other, hreflang: other, title: other === 'en' ? 'English version' : 'Versión en español' }, other === 'en' ? 'English' : 'Español');
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        try { global.localStorage.setItem('ip-lang', other); } catch (er) { }
+        const u = new URL(global.location.href); u.searchParams.set('lang', other); global.location.href = u.toString();
+      });
+      bar.append(btn);
+    }
     const prog = IP.$('.ip-progress');
     const links = IP.$$('.ip-topnav a[href^="#"]');
     const secs = links.map(a => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
@@ -707,10 +740,10 @@
 
     IP.$$('[data-copy]').forEach(b => b.addEventListener('click', async () => {
       const src = IP.$(b.dataset.copy); if (!src) return;
-      const txt = src.innerText.replace(/\s*Copiar\s*$/, '');
-      try { await navigator.clipboard.writeText(txt); b.textContent = '¡Copiado!'; }
-      catch (e) { b.textContent = 'Selecciona y copia'; }
-      setTimeout(() => (b.textContent = 'Copiar'), 1600);
+      const txt = src.innerText.replace(/\s*(Copiar|Copy)\s*$/, '');
+      try { await navigator.clipboard.writeText(txt); b.textContent = IP.t('¡Copiado!', 'Copied!'); }
+      catch (e) { b.textContent = IP.t('Selecciona y copia', 'Select and copy'); }
+      setTimeout(() => (b.textContent = IP.t('Copiar', 'Copy')), 1600);
     }));
 
     if (global.renderMathInElement) IP.math();

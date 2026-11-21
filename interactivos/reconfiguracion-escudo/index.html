@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Shield reconfiguration">Reconfiguración del escudo</title>
+<meta name="description" content="Publicación interactiva: reconfiguración distribuida de formaciones por distancias con restricciones de superficie virtual tras la pérdida de agentes (ECC 2024). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>.stage-lg{height:480px}@media(max-width:600px){.stage-lg{height:360px}}</style>
+</head>
+<body>
+<header class="ip-topbar"><div class="ip-wrap">
+  <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
+  <nav class="ip-topnav"><a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a><a href="#algoritmo"><span lang="es">Algoritmo</span><span lang="en">Algorithm</span></a><a href="#simulador"><span lang="es">Simulador</span><span lang="en">Simulator</span></a><a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a></nav>
+</div><div class="ip-progress"></div></header>
+
+<section class="ip-hero"><div class="ip-wrap">
+  <div>
+    <p class="ip-kicker">2024 European Control Conference (ECC) · <span lang="es">Publicación interactiva</span><span lang="en">Interactive publication</span></p>
+    <h1><span lang="es">Cerrar el agujero cuando cae un dron</span><span lang="en">Closing the hole when a drone falls</span></h1>
+    <p class="ip-authors"><strong>M. Guinaldo</strong>, J. Sánchez-Moreno, S. Zaragoza y F. J. Mañas-Álvarez · UNED y CUD</p>
+    <p class="ip-lead"><span lang="es">Un escudo de drones sobre una superficie virtual pierde a algunos de sus miembros. Sin un coordinador central, los vecinos deben reconectarse, recuperar una triangulación de Delaunay y acordar nuevas distancias para repartirse de nuevo de forma uniforme. Este trabajo lo resuelve con reconexión local, volteo de aristas y un consenso de distancias por eventos.</span><span lang="en">A drone shield over a virtual surface loses some of its members. Without a central coordinator, the neighbours must reconnect, recover a Delaunay triangulation and agree on new distances to spread uniformly again. This work solves it with local reconnection, edge flipping and an event-based distance consensus.</span></p>
+    <div class="ip-btns"><a class="ip-btn" href="#simulador"><span lang="es">Derribar drones</span><span lang="en">Knock out drones</span></a><a class="ip-btn ghost" href="https://doi.org/10.23919/ECC64448.2024.10591270" target="_blank" rel="noopener"><span lang="es">Leer el artículo</span><span lang="en">Read the paper</span></a></div>
+    <div class="ip-hero-stats"><div class="ip-hero-stat"><b>2 <span lang="es">etapas</span><span lang="en">stages</span></b><span lang="es">topología y distancias</span><span lang="en">topology and distances</span></div><div class="ip-hero-stat"><b>δ = 5 %</b><span lang="es">umbral de eventos</span><span lang="en">event threshold</span></div><div class="ip-hero-stat"><b><span lang="es">5,43</span><span lang="en">5.43</span></b><span lang="es">distancia media final (5,49 nominal)</span><span lang="en">final mean distance (5.49 nominal)</span></div></div>
+  </div>
+  <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+</div></section>
+
+<main>
+<section class="ip-section" id="mapa"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">1</span><span lang="es">Mapa conceptual</span><span lang="en">Concept map</span></p><h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2><p><span lang="es">Continúa el <a href="../escudo-multi-uav/">escudo multi-UAV (RAS 2024)</a>.</span><span lang="en">Continues the <a href="../escudo-multi-uav/">multi-UAV shield (RAS 2024)</a>.</span></p></div>
+  <div class="ip-cmap ip-reveal"><div id="cmap"></div><aside class="ip-card ip-cmap-panel" id="cmapPanel"></aside></div>
+</div></section>
+
+<section class="ip-section" id="algoritmo"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">2</span><span lang="es">Algoritmo distribuido</span><span lang="en">Distributed algorithm</span></p>
+    <h2><span lang="es">Dos etapas</span><span lang="en">Two stages</span></h2></div>
+  <div class="ip-grid cols-2 ip-reveal">
+    <div class="ip-card"><span class="ip-pill"><span lang="es">Etapa 1</span><span lang="en">Stage 1</span></span><h3 style="margin-top:8px"><span lang="es">Restaurar la topología</span><span lang="en">Restore the topology</span></h3><p class="ip-small"><span lang="es">Los vecinos del agente perdido forman un polígono alrededor del hueco: se conectan entre sí y, mientras el test local del determinante \(|M_{ABCD}|\) detecte un triángulo no Delaunay, se voltea la arista compartida (<i>Lawson flip</i>).</span><span lang="en">The lost agent's neighbours form a polygon around the hole: they connect to each other and, while the local determinant test \(|M_{ABCD}|\) detects a non-Delaunay triangle, the shared edge is flipped (<i>Lawson flip</i>).</span></p></div>
+    <div class="ip-card"><span class="ip-pill accent"><span lang="es">Etapa 2</span><span lang="en">Stage 2</span></span><h3 style="margin-top:8px"><span lang="es">Acordar nuevas distancias</span><span lang="en">Agree on new distances</span></h3><p class="ip-small"><span lang="es">Las distancias objetivo de los nodos móviles se promedian con sus vecinos (pesos de Metropolis); los nodos ancla del borde \(z=0\) no se mueven. Cada arista sólo actualiza cuando su error es pequeño:</span><span lang="en">The mobile nodes' target distances are averaged with their neighbours (Metropolis weights); anchor nodes on the \(z=0\) border do not move. Each edge only updates when its error is small:</span></p>
+      <div class="ip-eq">$$\mu_{ij}^2(l+1)=\mu_{ij}^2(l)+\theta_{i\to j}(l)+\theta_{j\to i}(l),\qquad |d_{ij}^2-\mu_{ij}^2(l)|\le\delta\,\mu_{ij}^2(l)$$</div></div>
+  </div>
+  <div class="ip-card ip-reveal" style="margin-top:18px"><div class="ip-eq">$$u_i=-\kappa_1\sum_{j\in\mathcal N_i}\big(d_{ij}^2-\mu_{ij}^2(l)\big)(p_i-p_j)-\kappa_2 f_{\mathcal S}(p_i)\frac{\partial f_{\mathcal S}(p_i)}{\partial p_i}$$</div></div>
+</div></section>
+
+<section class="ip-section" id="simulador"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">3</span><span lang="es">Simulador</span><span lang="en">Simulator</span></p>
+    <h2><span lang="es">Pulsa un dron para derribarlo</span><span lang="en">Click a drone to knock it out</span></h2>
+    <p><span lang="es">Elige un ejemplo del artículo o derriba los drones que quieras (los del anillo inferior son anclas y no se pueden derribar). Después lanza la reconfiguración.</span><span lang="en">Pick one of the paper's examples or knock out any drones you like (bottom-ring anchors cannot be removed). Then start the reconfiguration.</span></p></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-toolbar"><button class="ip-btn accent" id="go" type="button">▶ <span lang="es">Reconfigurar</span><span lang="en">Reconfigure</span></button><button class="ip-btn ghost small" id="reset" type="button"><span lang="es">Restablecer</span><span lang="en">Reset</span></button><span class="ip-pill muted" id="stage"></span></div>
+      <div class="ip-steps" id="steps"><div class="ip-step"><span lang="es">Formación nominal</span><span lang="en">Nominal formation</span></div><div class="ip-step"><span lang="es">Pérdida de agentes</span><span lang="en">Agents lost</span></div><div class="ip-step"><span lang="es">Topología restaurada</span><span lang="en">Topology restored</span></div><div class="ip-step"><span lang="es">Consenso de distancias</span><span lang="en">Distance consensus</span></div></div>
+      <div class="ip-stage stage-lg"><canvas id="cv"></canvas><span class="ip-stage-hint"><span lang="es">Naranja: enlaces nuevos · gris: anclas · rojo: perdidos</span><span lang="en">Orange: new links · grey: anchors · red: lost</span></span></div></div>
+    <div class="ip-card"><div id="ctl"></div><div class="ip-readouts" id="ro" style="margin-top:14px"></div><div class="ip-plot-title" style="margin-top:14px"><span lang="es">Histograma de distancias objetivo</span><span lang="en">Target distance histogram</span></div><div id="hist"></div></div>
+  </div>
+  <div class="ip-card ip-reveal" style="margin-top:18px"><div class="ip-plot-title"><span lang="es">Distancias de las aristas móviles d_ij(t)</span><span lang="en">Mobile edge distances d_ij(t)</span></div><div id="pd"></div>
+    <p class="ip-small ip-muted"><span lang="es"><b>Artículo:</b> en el ejemplo 2 (semielipsoide 10 × 8 × 7, 25 agentes, se pierden los agentes 15, 20 y 22) la distancia media tras la reconfiguración es 5,43, frente a 5,49 si se diseñara desde cero, con \(f_{\mathcal S}(p_i)\le 0{,}025\) para todos los móviles y una distribución de distancias casi gaussiana.</span><span lang="en"><b>Paper:</b> in example 2 (10 × 8 × 7 semi-ellipsoid, 25 agents, agents 15, 20 and 22 lost) the mean distance after reconfiguration is 5.43, vs 5.49 if designed from scratch, with \(f_{\mathcal S}(p_i)\le 0.025\) for all mobile agents and an almost Gaussian distance distribution.</span></p></div>
+</div></section>
+
+<section class="ip-section" id="quiz"><div class="ip-wrap"><div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">4</span><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></p><h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2></div><div id="quizBox" class="ip-reveal"></div></div></section>
+
+<section class="ip-section" id="citar"><div class="ip-wrap"><div class="ip-grid cols-2 ip-reveal">
+  <div class="ip-card"><h3><span lang="es">Cómo citar</span><span lang="en">How to cite</span></h3><p>Guinaldo, M., Sánchez-Moreno, J., Zaragoza, S., &amp; Mañas-Álvarez, F. J. (2024). Distributed reconfiguration of distance-based formations with virtual surface constraints. In <em>2024 European Control Conference (ECC)</em> (pp. 442–447). IEEE. <a href="https://doi.org/10.23919/ECC64448.2024.10591270" target="_blank" rel="noopener">doi:10.23919/ECC64448.2024.10591270</a></p></div>
+  <div class="ip-code" id="bibtex">@inproceedings{Guinaldo2024Reconfiguration,
+  title     = {Distributed reconfiguration of distance-based formations
+               with virtual surface constraints},
+  author    = {Guinaldo, M. and S{\'a}nchez-Moreno, J. and Zaragoza, S.
+               and Ma{\~n}as-{\'A}lvarez, F. J.},
+  booktitle = {2024 European Control Conference (ECC)},
+  pages     = {442--447},
+  year      = {2024},
+  doi       = {10.23919/ECC64448.2024.10591270}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+</div></div></section>
+</main>
+<footer class="ip-footer"><div class="ip-wrap"><span><span lang="es">Material docente interactivo · Proyecto de innovación docente</span><span lang="en">Interactive teaching material · Teaching innovation project</span> · <a href="../../index.html">Robotic Park Lab</a> — UNED</span><span lang="es">Simulación didáctica con los algoritmos del artículo.</span><span lang="en">Teaching simulation with the paper's algorithms.</span></div></footer>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="../lib/formacion.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Sampling and communication">Muestreo y comunicación</title>
+<meta name="description" content="Publicación interactiva: impacto del muestreo y la comunicación en el control de formaciones de sistemas multi-robot heterogéneos (RIAI 2024). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>.stage-md{height:400px}.archs svg{width:100%;height:auto}.archs text{font:600 12px var(--font);fill:var(--text)}.archs .m{fill:var(--muted);font-weight:500;font-size:11px}</style>
+</head>
+<body>
+<header class="ip-topbar"><div class="ip-wrap">
+  <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
+  <nav class="ip-topnav"><a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a><a href="#arquitecturas"><span lang="es">Arquitecturas</span><span lang="en">Architectures</span></a><a href="#simulador"><span lang="es">Simulador</span><span lang="en">Simulator</span></a><a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a></nav>
+</div><div class="ip-progress"></div></header>
+
+<section class="ip-hero"><div class="ip-wrap">
+  <div>
+    <p class="ip-kicker">Revista Iberoamericana de Automática e Informática Industrial 21(2) · <span lang="es">Publicación interactiva</span><span lang="en">Interactive publication</span></p>
+    <h1><span lang="es">Muestreo y comunicación en enjambres heterogéneos</span><span lang="en">Sampling and communication in heterogeneous swarms</span></h1>
+    <p class="ip-authors"><strong>F. J. Mañas-Álvarez</strong>, M. Guinaldo, R. Dormido y S. Dormido · UNED</p>
+    <p class="ip-lead"><span lang="es">Cinco Crazyflie y cuatro Khepera IV construyen juntos una formación 3D. ¿Dónde debe ejecutarse el controlador (en un PC central, en nodos ROS 2 por robot o a bordo) y cada cuánto deben comunicarse? Con muestreo por eventos de 2 cm se ahorra entre un 80 % y un 89 % de los mensajes.</span><span lang="en">Five Crazyflies and four Khepera IV build a 3D formation together. Where should the controller run (a central PC, per-robot ROS 2 nodes or on board) and how often should they talk? Event-based sampling with 2 cm saves 80% to 89% of the messages.</span></p>
+    <div class="ip-btns"><a class="ip-btn" href="#simulador"><span lang="es">Probar el simulador</span><span lang="en">Try the simulator</span></a><a class="ip-btn ghost" href="https://doi.org/10.4995/riai.2023.20155" target="_blank" rel="noopener"><span lang="es">Leer el artículo (acceso abierto)</span><span lang="en">Read the paper (open access)</span></a></div>
+    <div class="ip-hero-stats"><div class="ip-hero-stat"><b>−89 %</b><span lang="es">mensajes · centralizado</span><span lang="en">messages · centralised</span></div><div class="ip-hero-stat"><b>−80 %</b><span lang="es">mensajes · distribuido ROS 2</span><span lang="en">messages · distributed ROS 2</span></div><div class="ip-hero-stat"><b>−82 %</b><span lang="es">mensajes · a bordo</span><span lang="en">messages · on board</span></div></div>
+  </div>
+  <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+</div></section>
+
+<main>
+<section class="ip-section" id="mapa"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">1</span><span lang="es">Mapa conceptual</span><span lang="en">Concept map</span></p><h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2></div>
+  <div class="ip-cmap ip-reveal"><div id="cmap"></div><aside class="ip-card ip-cmap-panel" id="cmapPanel"></aside></div>
+</div></section>
+
+<section class="ip-section" id="arquitecturas"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">2</span><span lang="es">Tres arquitecturas</span><span lang="en">Three architectures</span></p>
+    <h2><span lang="es">¿Dónde se ejecuta la coordinación?</span><span lang="en">Where does coordination run?</span></h2>
+    <p><span lang="es">El número de mensajes por periodo depende de la arquitectura: en la centralizada cada robot envía su posición al nodo central y recibe su consigna (\(n = 2N\)); en las distribuidas cada robot publica su posición a sus vecinos y recibe la de éstos (\(n = N(1+|\mathcal N_i|)\)).</span><span lang="en">Messages per period depend on the architecture: in the centralised one each robot sends its position to the central node and receives its setpoint (\(n = 2N\)); in the distributed ones each robot publishes its position to its neighbours and receives theirs (\(n = N(1+|\mathcal N_i|)\)).</span></p></div>
+  <div class="ip-card ip-reveal"><div class="ip-toolbar"><div id="archSeg"></div></div><div class="archs" id="archSvg"></div><p class="ip-small" id="archTxt"></p></div>
+</div></section>
+
+<section class="ip-section" id="simulador"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">3</span><span lang="es">Simulador</span><span lang="en">Simulator</span></p>
+    <h2><span lang="es">Formación heterogénea aire–tierra</span><span lang="en">Heterogeneous air–ground formation</span></h2>
+    <p><span lang="es">Los Khepera (discos naranjas) se mueven en el suelo y los Crazyflie (azules) en 3D; los enlaces aire–tierra miden 0,9468 m, los de un mismo tipo 0,7071 m. Elige arquitectura y muestreo.</span><span lang="en">The Kheperas (orange discs) move on the ground and the Crazyflies (blue) in 3D; air–ground edges are 0.9468 m, same-type edges 0.7071 m. Choose an architecture and a sampling scheme.</span></p></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-toolbar"><button class="ip-btn accent" id="run" type="button">▶ <span lang="es">Nueva experiencia</span><span lang="en">New run</span></button><span class="ip-pill muted" id="tt"></span></div><div class="ip-stage stage-md"><canvas id="cv"></canvas></div></div>
+    <div class="ip-card"><div id="ctl"></div><div class="ip-readouts" id="ro" style="margin-top:14px"></div></div>
+  </div>
+  <div class="ip-grid cols-2 ip-reveal" style="margin-top:18px">
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Error de formación por tipo de robot (m)</span><span lang="en">Formation error per robot type (m)</span></div><div id="pe"></div></div>
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Mensajes en la red (acumulados)</span><span lang="en">Network messages (cumulative)</span></div><div id="pm"></div></div>
+  </div>
+  <div class="ip-note ip-reveal"><p><span lang="es"><b>En el artículo</b> (11 casos × 7 repeticiones con robots reales): 10 Hz es la frecuencia periódica mínima operativa; por debajo de 5 Hz o por encima de 4 cm el tiempo de establecimiento, el IEA y el IEAT se degradan. La carga de CPU con eventos equivale a la de 5 Hz. El Crazyflie rinde mejor con el controlador a bordo y el Khepera IV en ROS 2, por el sobrecoste del protocolo cliente-servidor en su procesador.</span><span lang="en"><b>In the paper</b> (11 cases × 7 repetitions with real robots): 10 Hz is the minimum operational periodic rate; below 5 Hz or above 4 cm settling time, IAE and ITAE degrade. CPU load with events equals that of 5 Hz. The Crazyflie performs best with the controller on board and the Khepera IV in ROS 2, due to the client–server overhead on its processor.</span></p></div>
+</div></section>
+
+<section class="ip-section" id="quiz"><div class="ip-wrap"><div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">4</span><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></p><h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2></div><div id="quizBox" class="ip-reveal"></div></div></section>
+
+<section class="ip-section" id="citar"><div class="ip-wrap"><div class="ip-grid cols-2 ip-reveal">
+  <div class="ip-card"><h3><span lang="es">Cómo citar</span><span lang="en">How to cite</span></h3><p>Mañas-Álvarez, F. J., Guinaldo, M., Dormido, R., &amp; Dormido, S. (2024). Muestreo y comunicación: impacto en el control de formaciones en sistemas multi-robot heterogéneos. <em>Revista Iberoamericana de Automática e Informática Industrial</em>, 21(2), 125–136. <a href="https://doi.org/10.4995/riai.2023.20155" target="_blank" rel="noopener">doi:10.4995/riai.2023.20155</a></p><p class="ip-small ip-muted"><span lang="es">Trabajo previo, sólo con drones:</span><span lang="en">Previous work, drones only:</span> <a href="../frecuencia-muestreo/">JA 2023</a>.</p></div>
+  <div class="ip-code" id="bibtex">@article{ManasAlvarez2024Muestreo,
+  title   = {Muestreo y comunicaci{\'o}n: impacto en el control de formaciones
+             en sistemas multi-robot heterog{\'e}neos},
+  author  = {Ma{\~n}as-{\'A}lvarez, F. J. and Guinaldo, M. and Dormido, R. and Dormido, S.},
+  journal = {Revista Iberoamericana de Autom{\'a}tica e Inform{\'a}tica Industrial},
+  volume  = {21}, number = {2}, pages = {125--136},
+  year    = {2024},
+  doi     = {10.4995/riai.2023.20155}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+</div></div></section>
+</main>
+<footer class="ip-footer"><div class="ip-wrap"><span><span lang="es">Material docente interactivo · Proyecto de innovación docente</span><span lang="en">Interactive teaching material · Teaching innovation project</span> · <a href="../../index.html">Robotic Park Lab</a> — UNED</span><span lang="es">Simulación didáctica de la experiencia del artículo.</span><span lang="en">Teaching simulation of the paper's experiment.</span></div></footer>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="../lib/multiagente.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

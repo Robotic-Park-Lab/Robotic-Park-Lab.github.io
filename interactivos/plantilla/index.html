@@ -17,9 +17,10 @@
      ============================================================ -->
 
 <!-- EDITA AQUÍ: título corto (2-4 palabras) y descripción -->
-<title>Título corto</title>
+<title data-en="Interactive template">Título corto</title>
 <meta name="description" content="Publicación interactiva: resumen en una frase del artículo. Robotic Park Lab, UNED.">
 
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
 <link rel="icon" href="../../assets/img/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,13 +38,13 @@
 <!-- ============ Barra superior: un enlace por sección ============ -->
 <header class="ip-topbar">
   <div class="ip-wrap">
-    <a class="ip-brand" href="../../publicaciones.html"><img src="../../assets/img/logo.png" alt=""><span>← Publicaciones</span></a>
+    <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
     <nav class="ip-topnav" aria-label="Secciones">
-      <a href="#mapa">Mapa</a>
-      <a href="#teoria">Teoría</a>
-      <a href="#simulador">Simulador</a>
-      <a href="#quiz">Autoevaluación</a>
-      <a href="#citar">Citar</a>
+      <a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a>
+      <a href="#teoria"><span lang="es">Teoría</span><span lang="en">Theory</span></a>
+      <a href="#simulador"><span lang="es">Simulador</span><span lang="en">Simulator</span></a>
+      <a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a>
+      <a href="#citar"><span lang="es">Citar</span><span lang="en">Cite</span></a>
     </nav>
   </div>
   <div class="ip-progress"></div>
@@ -54,19 +55,19 @@
   <div class="ip-wrap">
     <div>
       <!-- EDITA AQUÍ: revista, título, autores, entradilla y DOI -->
-      <p class="ip-kicker">Revista · Año · Publicación interactiva</p>
-      <h1>Título del artículo en español</h1>
-      <p class="ip-authors"><strong>Autor/a 1</strong>, Autor/a 2 y Autor/a 3 · Dpto. de Informática y Automática, UNED</p>
-      <p class="ip-lead">Dos o tres frases que expliquen qué problema resuelve el trabajo y qué podrá experimentar el lector en esta página.</p>
+      <p class="ip-kicker"><span lang="es">Revista · Año · Publicación interactiva</span><span lang="en">Journal · Year · Interactive publication</span></p>
+      <h1><span lang="es">Título del artículo en español</span><span lang="en">Paper title in English</span></h1>
+      <p class="ip-authors"><span lang="es"><strong>Autor/a 1</strong>, Autor/a 2 y Autor/a 3 · Dpto. de Informática y Automática, UNED</span><span lang="en"><strong>Author 1</strong>, Author 2 and Author 3 · Dept. of Computer Science and Automatic Control, UNED</span></p>
+      <p class="ip-lead"><span lang="es">Dos o tres frases que expliquen qué problema resuelve el trabajo y qué podrá experimentar el lector en esta página.</span><span lang="en">Two or three sentences explaining what problem the work solves and what the reader will be able to try on this page.</span></p>
       <div class="ip-btns">
-        <a class="ip-btn" href="#simulador">Probar el simulador</a>
-        <a class="ip-btn ghost" href="https://doi.org/10.xxxx/xxxxx" target="_blank" rel="noopener">Leer el artículo</a>
+        <a class="ip-btn" href="#simulador"><span lang="es">Probar el simulador</span><span lang="en">Try the simulator</span></a>
+        <a class="ip-btn ghost" href="https://doi.org/10.xxxx/xxxxx" target="_blank" rel="noopener"><span lang="es">Leer el artículo</span><span lang="en">Read the paper</span></a>
       </div>
       <!-- Tres cifras destacadas del artículo -->
       <div class="ip-hero-stats">
-        <div class="ip-hero-stat"><b>−30 %</b><span>resultado destacado 1</span></div>
-        <div class="ip-hero-stat"><b>×2</b><span>resultado destacado 2</span></div>
-        <div class="ip-hero-stat"><b>95 %</b><span>resultado destacado 3</span></div>
+        <div class="ip-hero-stat"><b>−30 %</b><span><span lang="es">resultado destacado 1</span><span lang="en">highlighted result 1</span></span></div>
+        <div class="ip-hero-stat"><b>×2</b><span><span lang="es">resultado destacado 2</span><span lang="en">highlighted result 2</span></span></div>
+        <div class="ip-hero-stat"><b>95 %</b><span><span lang="es">resultado destacado 3</span><span lang="en">highlighted result 3</span></span></div>
       </div>
     </div>
     <!-- Visual de portada: un canvas animado desde app.js (o cambia por <img>) -->
@@ -80,9 +81,9 @@
 <section class="ip-section" id="mapa">
   <div class="ip-wrap">
     <div class="ip-section-head ip-reveal">
-      <p class="ip-eyebrow"><span class="ip-num">1</span>Mapa conceptual</p>
-      <h2>El artículo de un vistazo</h2>
-      <p>Pulsa cada concepto para ver su explicación. Los nodos y las flechas se definen en <code>app.js</code>.</p>
+      <p class="ip-eyebrow"><span lang="es"><span class="ip-num">1</span>Mapa conceptual</span><span lang="en"><span class="ip-num">1</span>Concept map</span></p>
+      <h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2>
+      <p><span lang="es">Pulsa cada concepto para ver su explicación. Los nodos y las flechas se definen en <code>app.js</code>.</span><span lang="en">Click each concept to see its explanation. Nodes and arrows are defined in <code>app.js</code>.</span></p>
     </div>
     <div class="ip-cmap ip-reveal">
       <div id="cmap"></div>
@@ -95,18 +96,18 @@
 <section class="ip-section" id="teoria">
   <div class="ip-wrap">
     <div class="ip-section-head ip-reveal">
-      <p class="ip-eyebrow"><span class="ip-num">2</span>Fundamentos</p>
-      <h2>La idea en dos ecuaciones</h2>
-      <p>Texto introductorio. Las fórmulas se escriben en LaTeX dentro de <code>$$ … $$</code>.</p>
+      <p class="ip-eyebrow"><span lang="es"><span class="ip-num">2</span>Fundamentos</span><span lang="en"><span class="ip-num">2</span>Fundamentals</span></p>
+      <h2><span lang="es">La idea en dos ecuaciones</span><span lang="en">The idea in two equations</span></h2>
+      <p><span lang="es">Texto introductorio. Las fórmulas se escriben en LaTeX dentro de <code>$$ … $$</code>.</span><span lang="en">Introductory text. Formulas are written in LaTeX inside <code>$$ … $$</code>.</span></p>
     </div>
     <div class="ip-grid cols-2 ip-reveal">
       <div class="ip-card">
-        <h3>Modelo del proceso</h3>
+        <h3><span lang="es">Modelo del proceso</span><span lang="en">Process model</span></h3>
         <div class="ip-eq">$$G(s)=\frac{K}{Ts+1}\,e^{-Ls}$$</div>
-        <p class="ip-small">Primer orden con retardo: ganancia \(K\), constante de tiempo \(T\) y retardo \(L\).</p>
+        <p class="ip-small"><span lang="es">Primer orden con retardo: ganancia \(K\), constante de tiempo \(T\) y retardo \(L\).</span><span lang="en">First order plus delay: gain \(K\), time constant \(T\) and delay \(L\).</span></p>
       </div>
       <div class="ip-card">
-        <h3>Controlador</h3>
+        <h3><span lang="es">Controlador</span><span lang="en">Controller</span></h3>
         <div class="ip-eq">$$u(t)=K_p\,e(t)+K_i\int_0^t e(\tau)\,d\tau$$</div>
         <div class="ip-note info ip-small">Las notas resaltan ideas clave. Variantes: <code>ip-note</code>, <code>ip-note info</code>, <code>ip-note ok</code> y <code>ip-note danger</code>.</div>
       </div>
@@ -118,9 +119,9 @@
 <section class="ip-section" id="simulador">
   <div class="ip-wrap">
     <div class="ip-section-head ip-reveal">
-      <p class="ip-eyebrow"><span class="ip-num">3</span>Simulador</p>
-      <h2>Mueve los parámetros y observa la respuesta</h2>
-      <p>Ejemplo completo: controles → simulación → gráfica → lecturas numéricas.</p>
+      <p class="ip-eyebrow"><span lang="es"><span class="ip-num">3</span>Simulador</span><span lang="en"><span class="ip-num">3</span>Simulator</span></p>
+      <h2><span lang="es">Mueve los parámetros y observa la respuesta</span><span lang="en">Move the parameters and watch the response</span></h2>
+      <p><span lang="es">Ejemplo completo: controles → simulación → gráfica → lecturas numéricas.</span><span lang="en">Complete example: controls → simulation → plot → numerical readouts.</span></p>
     </div>
     <div class="ip-grid side-left ip-reveal">
       <div class="ip-card">
@@ -128,7 +129,7 @@
         <div id="simControls"></div>
       </div>
       <div class="ip-card">
-        <div class="ip-plot-title"><span>Respuesta a un escalón unitario</span><span class="ip-pill" id="simBadge"></span></div>
+        <div class="ip-plot-title"><span><span lang="es">Respuesta a un escalón unitario</span><span lang="en">Unit step response</span></span><span class="ip-pill" id="simBadge"></span></div>
         <div id="simPlot"></div>
         <div class="ip-readouts" id="simReadouts" style="margin-top:14px"></div>
       </div>
@@ -140,8 +141,8 @@
 <section class="ip-section" id="quiz">
   <div class="ip-wrap">
     <div class="ip-section-head ip-reveal">
-      <p class="ip-eyebrow"><span class="ip-num">4</span>Autoevaluación</p>
-      <h2>¿Lo has entendido?</h2>
+      <p class="ip-eyebrow"><span lang="es"><span class="ip-num">4</span>Autoevaluación</span><span lang="en"><span class="ip-num">4</span>Quiz</span></p>
+      <h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2>
     </div>
     <div id="quizBox" class="ip-reveal"></div>
   </div>
@@ -151,16 +152,16 @@
 <section class="ip-section" id="citar">
   <div class="ip-wrap">
     <div class="ip-section-head ip-reveal">
-      <p class="ip-eyebrow"><span class="ip-num">5</span>Cómo citar</p>
-      <h2>Referencia</h2>
+      <p class="ip-eyebrow"><span lang="es"><span class="ip-num">5</span>Cómo citar</span><span lang="en"><span class="ip-num">5</span>How to cite</span></p>
+      <h2><span lang="es">Referencia</span><span lang="en">Reference</span></h2>
     </div>
     <div class="ip-grid cols-2 ip-reveal">
       <div class="ip-card">
         <!-- EDITA AQUÍ: referencia en formato APA -->
         <p>Apellido, N., Apellido, N. (Año). Título del artículo. <em>Revista</em>, vol, páginas. <a href="https://doi.org/10.xxxx/xxxxx" target="_blank" rel="noopener">doi:10.xxxx/xxxxx</a></p>
         <div class="ip-btns">
-          <a class="ip-btn" href="https://doi.org/10.xxxx/xxxxx" target="_blank" rel="noopener">Artículo</a>
-          <a class="ip-btn ghost" href="../../publicaciones.html">Más publicaciones</a>
+          <a class="ip-btn" href="https://doi.org/10.xxxx/xxxxx" target="_blank" rel="noopener"><span lang="es">Artículo</span><span lang="en">Paper</span></a>
+          <a class="ip-btn ghost" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><span lang="es">Más publicaciones</span><span lang="en">More publications</span></a>
         </div>
       </div>
       <!-- EDITA AQUÍ: BibTeX (el botón «Copiar» funciona solo) -->
@@ -170,7 +171,7 @@
   journal = {Revista},
   year    = {2026},
   doi     = {10.xxxx/xxxxx}
-}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex"><span lang="es">Copiar</span><span lang="en">Copy</span></button></div>
     </div>
   </div>
 </section>
@@ -179,8 +180,8 @@
 
 <footer class="ip-footer">
   <div class="ip-wrap">
-    <span>Material docente interactivo · Proyecto de innovación docente · <a href="../../index.html">Robotic Park Lab</a> — UNED</span>
-    <span>Simulación didáctica; consulta el artículo para los resultados experimentales.</span>
+    <span><span lang="es">Material docente interactivo · Proyecto de innovación docente · <a href="../../index.html" data-href-en="../../index_en.html">Robotic Park Lab</a> — UNED</span><span lang="en">Interactive teaching material · Teaching innovation project · <a href="../../index.html" data-href-en="../../index_en.html">Robotic Park Lab</a> — UNED</span></span>
+    <span><span lang="es">Simulación didáctica; consulta el artículo para los resultados experimentales.</span><span lang="en">Teaching simulation; see the paper for the experimental results.</span></span>
   </div>
 </footer>
 

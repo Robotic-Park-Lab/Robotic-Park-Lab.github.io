@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="MVSim simulator">Simulador MVSim</title>
+<meta name="description" content="Publicación interactiva: MultiVehicle Simulator (MVSim), simulador dinámico ligero para robótica móvil y sistemas multi-agente, con modelo de fricción rueda-suelo (SoftwareX 2023). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>
+  .stage-md{height:420px}
+  .wbars{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;font-size:.82rem;margin-top:12px}
+  .wbar{height:12px;background:var(--surface-2);border-radius:6px;position:relative;overflow:hidden}
+  .wbar i{position:absolute;top:0;bottom:0;left:50%;background:var(--s1);transition:width .08s,left .08s}
+  .wbar i.sat{background:var(--danger)}
+  .wbar::after{content:'';position:absolute;left:50%;top:0;bottom:0;border-left:1px solid var(--border)}
+  .mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+  .mods .ip-card h4{margin:0 0 6px;font-family:var(--font-mono);color:var(--primary);font-size:.95rem}
+  .mods .ip-card p{margin:0;font-size:.86rem}
+</style>
+</head>
+<body>
+<header class="ip-topbar"><div class="ip-wrap">
+  <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
+  <nav class="ip-topnav"><a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a><a href="#friccion"><span lang="es">Fricción</span><span lang="en">Friction</span></a><a href="#arquitectura"><span lang="es">Arquitectura</span><span lang="en">Architecture</span></a><a href="#escala"><span lang="es">Escalabilidad</span><span lang="en">Scalability</span></a><a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a></nav>
+</div><div class="ip-progress"></div></header>
+
+<section class="ip-hero"><div class="ip-wrap">
+  <div>
+    <p class="ip-kicker">SoftwareX 23 (2023) 101443 · <span lang="es">Publicación interactiva</span><span lang="en">Interactive publication</span></p>
+    <h1><span lang="es">Muchos robots, poca CPU: así simula MVSim</span><span lang="en">Many robots, little CPU: how MVSim simulates</span></h1>
+    <p class="ip-authors">J. L. Blanco-Claraco, B. Tymchenko, <strong>F. J. Mañas-Álvarez</strong>, F. Cañadas-Aránega, Á. López-Gázquez y J. C. Moreno · UAL, Deci AI y UNED</p>
+    <p class="ip-lead"><span lang="es">MVSim combina un motor físico 2D (Box2D) con un modelo de fricción rueda-suelo propio y sensores acelerados por GPU. El resultado: simulaciones realistas de flotas de vehículos terrestres, con ROS 1, ROS 2 o Python, que consumen mucha menos CPU que los simuladores 3D generalistas.</span><span lang="en">MVSim combines a 2D physics engine (Box2D) with its own wheel–ground friction model and GPU-accelerated sensors. The result: realistic simulations of fleets of ground vehicles, with ROS 1, ROS 2 or Python, using far less CPU than general-purpose 3D simulators.</span></p>
+    <div class="ip-btns"><a class="ip-btn" href="#friccion"><span lang="es">Hacer derrapar un robot</span><span lang="en">Make a robot skid</span></a><a class="ip-btn ghost" href="https://doi.org/10.1016/j.softx.2023.101443" target="_blank" rel="noopener"><span lang="es">Artículo (acceso abierto)</span><span lang="en">Paper (open access)</span></a><a class="ip-btn ghost" href="https://github.com/MRPT/mvsim" target="_blank" rel="noopener">GitHub</a></div>
+    <div class="ip-hero-stats"><div class="ip-hero-stat"><b>BSD-3</b><span lang="es">código abierto</span><span lang="en">open source</span></div><div class="ip-hero-stat"><b>Box2D + MRPT</b><span lang="es">física 2D, render 3D</span><span lang="en">2D physics, 3D render</span></div><div class="ip-hero-stat"><b>ROS 1 · ROS 2 · Python</b><span lang="es">interfaces</span><span lang="en">interfaces</span></div></div>
+  </div>
+  <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+</div></section>
+
+<main>
+<section class="ip-section" id="mapa"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">1</span><span lang="es">Mapa conceptual</span><span lang="en">Concept map</span></p><h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2></div>
+  <div class="ip-cmap ip-reveal"><div id="cmap"></div><aside class="ip-card ip-cmap-panel" id="cmapPanel"></aside></div>
+</div></section>
+
+<section class="ip-section" id="friccion"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">2</span><span lang="es">Modelo de fricción rueda-suelo</span><span lang="en">Wheel–ground friction model</span></p>
+    <h2><span lang="es">Rodar, derrapar o patinar</span><span lang="en">Rolling, skidding or spinning</span></h2>
+    <p><span lang="es">En cada paso, cada rueda calcula la fuerza lateral que anularía su deslizamiento y la longitudinal que la haría rodar sin deslizar. Si alguna supera el límite de fricción seca, se satura y la rueda desliza:</span><span lang="en">At each step, each wheel computes the lateral force that would cancel its sliding and the longitudinal force that would make it roll without slipping. If either exceeds the dry-friction limit, it saturates and the wheel slips:</span></p>
+    <div class="ip-eq">$$F_{max}=\mu W,\qquad F_y=-\frac{v_y\,W}{dt\,g}\in[-F_{max},F_{max}],\qquad \tau_m-\dot\omega I_y+RF_R-RF_x=0,\quad \dot\omega^\star=\frac{v_x/R-\omega}{dt}$$</div></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-toolbar"><div id="manSeg"></div><button class="ip-btn accent small" id="run" type="button">▶ <span lang="es">Repetir</span><span lang="en">Replay</span></button></div><div class="ip-stage stage-md"><canvas id="cv"></canvas><span class="ip-stage-hint"><span lang="es">Rastro rojo: alguna rueda satura · gris: modelo cinemático ideal</span><span lang="en">Red trail: a wheel saturates · grey: ideal kinematic model</span></span></div></div>
+    <div class="ip-card"><div id="ctl"></div>
+      <div class="wbars" id="wb"></div>
+      <div class="ip-readouts" id="ro" style="margin-top:12px"></div></div>
+  </div>
+  <div class="ip-card ip-reveal" style="margin-top:18px"><div class="ip-plot-title"><span lang="es">Rueda izquierda: velocidad de giro R·ω frente a velocidad de avance v_x (m/s)</span><span lang="en">Left wheel: spin speed R·ω vs forward speed v_x (m/s)</span></div><div id="pw"></div></div>
+</div></section>
+
+<section class="ip-section" id="arquitectura"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">3</span><span lang="es">Arquitectura</span><span lang="en">Architecture</span></p><h2><span lang="es">Tres módulos y muchos clientes</span><span lang="en">Three modules and many clients</span></h2></div>
+  <div class="mods ip-reveal">
+    <div class="ip-card"><h4>mvsim-simulator</h4><p><span lang="es">Carga mundos XML, integra la física (Box2D + fricción propia), renderiza con MRPT y simula cámaras, RGBD y LiDAR 2D/3D por GPU.</span><span lang="en">Loads XML worlds, integrates physics (Box2D + own friction), renders with MRPT and simulates cameras, RGBD and 2D/3D LiDAR on the GPU.</span></p></div>
+    <div class="ip-card"><h4>mvsim-comms</h4><p><span lang="es">Comunicación cliente-servidor y publicación/suscripción con ZeroMQ entre procesos.</span><span lang="en">Client–server and publish/subscribe communication between processes with ZeroMQ.</span></p></div>
+    <div class="ip-card"><h4>mvsim-msgs</h4><p><span lang="es">Mensajes Google Protobuf para C++ y Python.</span><span lang="en">Google Protobuf messages for C++ and Python.</span></p></div>
+    <div class="ip-card"><h4>ROS 1 · ROS 2 · mvsim-cli</h4><p><span lang="es">Nodos para ROS (en ROS 2, un <code>rclcpp::Node</code>), interfaz de línea de órdenes y scripts de Python para enjambres.</span><span lang="en">Nodes for ROS (in ROS 2, an <code>rclcpp::Node</code>), command-line interface and Python scripts for swarms.</span></p></div>
+  </div>
+  <div class="ip-card ip-reveal" style="margin-top:18px"><div class="ip-table-wrap"><table class="ip-table">
+    <thead><tr><th style="text-align:left"></th><th>MVSim</th><th>Gazebo</th><th>Webots</th></tr></thead>
+    <tbody>
+      <tr><td style="text-align:left"><span lang="es">Primera versión</span><span lang="en">First release</span></td><td>2014</td><td>2011</td><td>1996</td></tr>
+      <tr><td style="text-align:left"><span lang="es">Motor físico</span><span lang="en">Physics engine</span></td><td>Box2D + <span lang="es">propio</span><span lang="en">custom</span></td><td>DART</td><td>ODE</td></tr>
+      <tr><td style="text-align:left"><span lang="es">Render</span><span lang="en">Rendering</span></td><td>MRPT</td><td>OGRE</td><td><span lang="es">Propio</span><span lang="en">Custom</span></td></tr>
+      <tr><td style="text-align:left"><span lang="es">Licencia</span><span lang="en">License</span></td><td>BSD-3</td><td>Apache-2.0</td><td>Apache-2.0</td></tr>
+      <tr><td style="text-align:left"><span lang="es">Vehículos aéreos</span><span lang="en">Aerial vehicles</span></td><td><span lang="es">Aún no</span><span lang="en">Not yet</span></td><td>✓</td><td>✓</td></tr>
+    </tbody></table></div><p class="ip-small ip-muted"><span lang="es">Tabla 1 del artículo (resumida).</span><span lang="en">Table 1 of the paper (abridged).</span></p></div>
+</div></section>
+
+<section class="ip-section" id="escala"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">4</span><span lang="es">Escalabilidad</span><span lang="en">Scalability</span></p>
+    <h2><span lang="es">¿Cuánto cuesta cada robot más?</span><span lang="en">How much does each extra robot cost?</span></h2>
+    <p><span lang="es">En el artículo (Fig. 6), el uso de CPU de MVSim, con y sin interfaz gráfica, crece mucho menos con el número de robots diferenciales con LiDAR que el de Gazebo y Webots. Aquí puedes medir, en tu navegador, el coste por paso del mismo modelo de fricción de la sección 2 al añadir robots.</span><span lang="en">In the paper (Fig. 6), MVSim's CPU usage, with and without GUI, grows much less with the number of differential robots with LiDAR than Gazebo's and Webots'. Here you can measure, in your browser, the per-step cost of the same friction model from section 2 as robots are added.</span></p></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-stage stage-md"><canvas id="cvs"></canvas></div></div>
+    <div class="ip-card"><div id="ctls"></div><div class="ip-readouts" id="ros" style="margin-top:12px"></div><div class="ip-plot-title" style="margin-top:12px"><span lang="es">Tiempo por paso de física (μs) frente a N</span><span lang="en">Time per physics step (μs) vs N</span></div><div id="pscale"></div><p class="ip-small ip-muted"><span lang="es">Medida de este navegador con el modelo simplificado de esta página, no de MVSim.</span><span lang="en">Measured in this browser with this page's simplified model, not MVSim.</span></p></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="quiz"><div class="ip-wrap"><div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">5</span><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></p><h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2></div><div id="quizBox" class="ip-reveal"></div></div></section>
+
+<section class="ip-section" id="citar"><div class="ip-wrap"><div class="ip-grid cols-2 ip-reveal">
+  <div class="ip-card"><h3><span lang="es">Cómo citar</span><span lang="en">How to cite</span></h3><p>Blanco-Claraco, J. L., Tymchenko, B., Mañas-Álvarez, F. J., Cañadas-Aránega, F., López-Gázquez, Á., &amp; Moreno, J. C. (2023). MultiVehicle Simulator (MVSim): Lightweight dynamics simulator for multiagents and mobile robotics research. <em>SoftwareX</em>, 23, 101443. <a href="https://doi.org/10.1016/j.softx.2023.101443" target="_blank" rel="noopener">doi:10.1016/j.softx.2023.101443</a></p></div>
+  <div class="ip-code" id="bibtex">@article{BlancoClaraco2023MVSim,
+  title   = {MultiVehicle Simulator (MVSim): Lightweight dynamics simulator
+             for multiagents and mobile robotics research},
+  author  = {Blanco-Claraco, J. L. and Tymchenko, B. and
+             Ma{\~n}as-{\'A}lvarez, F. J. and Ca{\~n}adas-Ar{\'a}nega, F. and
+             L{\'o}pez-G{\'a}zquez, {\'A}. and Moreno, J. C.},
+  journal = {SoftwareX},
+  volume  = {23}, pages = {101443},
+  year    = {2023},
+  doi     = {10.1016/j.softx.2023.101443}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+</div></div></section>
+</main>
+<footer class="ip-footer"><div class="ip-wrap"><span><span lang="es">Material docente interactivo · Proyecto de innovación docente</span><span lang="en">Interactive teaching material · Teaching innovation project</span> · <a href="../../index.html">Robotic Park Lab</a> — UNED</span><span lang="es">Simulación didáctica con el modelo de fricción del artículo.</span><span lang="en">Teaching simulation with the paper's friction model.</span></div></footer>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

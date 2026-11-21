@@ -448,6 +448,7 @@
         if (this.dtc > 0) { if (this.t >= this.tc - 1e-9) { this.compute(); this.tc += this.dtc; } }
         else this.compute();
         for (let i = 0; i < this.N; i++) {
+          if (this.fixed && this.fixed.has(i)) continue;      // nodos ancla (no se mueven)
           let vel = this.u[i];
           if (this.tau > 0) { this.v[i] = add(this.v[i], mul(sub(this.u[i], this.v[i]), this.dt / this.tau)); vel = this.v[i]; }
           this.p[i] = add(this.p[i], mul(vel, this.dt));

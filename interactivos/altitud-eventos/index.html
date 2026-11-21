@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Event-based altitude control">Altitud por eventos</title>
+<meta name="description" content="Publicación interactiva: control basado en eventos con umbral relativo para la altitud del Crazyflie 2.1 (Jornadas de Automática 2021). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+</head>
+<body>
+<header class="ip-topbar">
+  <div class="ip-wrap">
+    <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
+    <nav class="ip-topnav">
+      <a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a>
+      <a href="#umbral"><span lang="es">Umbral</span><span lang="en">Threshold</span></a>
+      <a href="#simulador"><span lang="es">Simulador</span><span lang="en">Simulator</span></a>
+      <a href="#resultados"><span lang="es">Resultados</span><span lang="en">Results</span></a>
+      <a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a>
+    </nav>
+  </div>
+  <div class="ip-progress"></div>
+</header>
+
+<section class="ip-hero">
+  <div class="ip-wrap">
+    <div>
+      <p class="ip-kicker">XLII Jornadas de Automática (2021) · <span lang="es">Publicación interactiva</span><span lang="en">Interactive publication</span></p>
+      <h1><span lang="es">Controlar la altitud sólo cuando hace falta</span><span lang="en">Control altitude only when needed</span></h1>
+      <p class="ip-authors"><strong>F. J. Mañas-Álvarez</strong>, M. Guinaldo, R. Dormido, R. Socas y S. Dormido · UNED</p>
+      <p class="ip-lead"><span lang="es">Un nano-dron vive de su batería. Recalcular el control 100 veces por segundo gasta energía y comunicaciones, y el ruido de los sensores dispara eventos inútiles. Este trabajo propone un umbral de disparo <b>relativo y adaptativo al ruido</b> para el PID de altitud del Crazyflie 2.1: un 93 % menos de actualizaciones con el mismo error.</span><span lang="en">A nano-drone lives on its battery. Recomputing the controller 100 times per second wastes energy and communication, and sensor noise triggers useless events. This work proposes a <b>relative, noise-adaptive</b> triggering threshold for the Crazyflie 2.1 altitude PID: 93% fewer updates with the same error.</span></p>
+      <div class="ip-btns"><a class="ip-btn" href="#simulador"><span lang="es">Probar el simulador</span><span lang="en">Try the simulator</span></a><a class="ip-btn ghost" href="https://doi.org/10.17979/spudc.9788497498043.341" target="_blank" rel="noopener"><span lang="es">Leer el artículo</span><span lang="en">Read the paper</span></a></div>
+      <div class="ip-hero-stats">
+        <div class="ip-hero-stat"><b><span lang="es">−93 %</span><span lang="en">−93%</span></b><span lang="es">actualizaciones del control</span><span lang="en">control updates</span></div>
+        <div class="ip-hero-stat"><b><span lang="es">−3,3 %</span><span lang="en">−3.3%</span></b><span lang="es">IAE frente al periódico</span><span lang="en">IAE vs periodic</span></div>
+        <div class="ip-hero-stat"><b><span lang="es">1,25 s</span><span lang="en">1.25 s</span></b><span lang="es">máximo sin recalcular</span><span lang="en">longest gap without updates</span></div>
+      </div>
+    </div>
+    <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+  </div>
+</section>
+
+<main>
+<section class="ip-section" id="mapa">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">1</span><span lang="es">Mapa conceptual</span><span lang="en">Concept map</span></p><h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2></div>
+    <div class="ip-cmap ip-reveal"><div id="cmap"></div><aside class="ip-card ip-cmap-panel" id="cmapPanel"></aside></div>
+  </div>
+</section>
+
+<section class="ip-section" id="umbral">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">2</span><span lang="es">Tres formas de muestrear</span><span lang="en">Three ways to sample</span></p>
+      <h2><span lang="es">¿Cuándo se recalcula el PID?</span><span lang="en">When is the PID recomputed?</span></h2>
+      <p><span lang="es">El PID de altitud se compara en tres casos. Con eventos, el controlador sólo se ejecuta cuando la altitud medida se aleja lo suficiente del último valor usado, y entre eventos se mantiene la última acción:</span><span lang="en">The altitude PID is compared in three cases. With events, the controller only runs when the measured altitude moves far enough from the last value used; between events the last action is held:</span></p>
+      <div class="ip-eq">$$t_{k+1}=\inf\{t>t_k:\;|p(t_k)-p(t)| > c_0 + a\,|p(t)-p_{ref}| + c_n(t)\}$$</div>
+    </div>
+    <div class="ip-grid cols-3 ip-reveal">
+      <div class="ip-card"><span class="ip-pill muted"><span lang="es">Caso 1</span><span lang="en">Case 1</span></span><h3 style="margin-top:8px"><span lang="es">Periódico</span><span lang="en">Periodic</span></h3><p class="ip-small"><span lang="es">PID discreto cada T = 10 ms (100 Hz): 3000 ejecuciones en 30 s.</span><span lang="en">Discrete PID every T = 10 ms (100 Hz): 3000 executions in 30 s.</span></p></div>
+      <div class="ip-card"><span class="ip-pill accent"><span lang="es">Caso 2</span><span lang="en">Case 2</span></span><h3 style="margin-top:8px"><span lang="es">Umbral fijo</span><span lang="en">Fixed threshold</span></h3><p class="ip-small"><span lang="es"><i>Send-on-delta</i> con \(c_0 = 1\) cm. El ruido del sensor lo dispara una y otra vez cerca de la referencia.</span><span lang="en"><i>Send-on-delta</i> with \(c_0 = 1\) cm. Sensor noise keeps triggering it near the reference.</span></p></div>
+      <div class="ip-card"><span class="ip-pill"><span lang="es">Caso 3</span><span lang="en">Case 3</span></span><h3 style="margin-top:8px"><span lang="es">Umbral relativo</span><span lang="en">Relative threshold</span></h3><p class="ip-small"><span lang="es">\(c_0 = 1\) cm, \(a = 0{,}015\) y \(c_n(t)\): máxima desviación de la señal en una ventana de \(l = 20\) muestras, para ignorar el ruido.</span><span lang="en">\(c_0 = 1\) cm, \(a = 0.015\) and \(c_n(t)\): maximum deviation of the signal over a window of \(l = 20\) samples, to ignore noise.</span></p></div>
+    </div>
+    <div class="ip-card ip-reveal" style="margin-top:18px">
+      <h3><span lang="es">PID discreto con filtro derivativo (periodo variable \(T_k\))</span><span lang="en">Discrete PID with derivative filter (variable period \(T_k\))</span></h3>
+      <div class="ip-eq">$$u_k=K_pe_k+I_k+D_k,\quad I_k=I_{k-1}+K_iT_ke_{k-1},\quad D_k=\frac{K_d}{K_d+N_dT_kK_p}D_{k-1}+\frac{K_dN_d}{K_d/K_p+N_dT_k}(e_k-e_{k-1})$$</div>
+      <p class="ip-small"><span lang="es">Ganancias del artículo: \(K_p = 15000\), \(K_i = 3500\), \(K_d = 9000\) bits/m y \(N_d = 20\); salida PWM de 16 bits sumada al empuje de equilibrio.</span><span lang="en">Gains from the paper: \(K_p = 15000\), \(K_i = 3500\), \(K_d = 9000\) bits/m and \(N_d = 20\); 16-bit PWM output added to the hover thrust.</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="ip-section" id="simulador">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">3</span><span lang="es">Simulador</span><span lang="en">Simulator</span></p>
+      <h2><span lang="es">30 s de vuelo con los tres esquemas</span><span lang="en">30 s of flight with the three schemes</span></h2>
+      <p><span lang="es">Despegue a 1 m y dos descensos del 20 %, con ruido blanco en la medida de altitud. Cambia los parámetros del umbral y observa cuántas veces se ejecuta el PID.</span><span lang="en">Take-off to 1 m and two 20% drops, with white noise on the altitude measurement. Change the threshold parameters and see how often the PID runs.</span></p>
+    </div>
+    <div class="ip-grid side-left ip-reveal">
+      <div class="ip-card"><div id="ctl"></div><div class="ip-readouts" id="ro" style="margin-top:14px"></div></div>
+      <div class="ip-card">
+        <div class="ip-plot-title"><span lang="es">Altitud z (m)</span><span lang="en">Altitude z (m)</span></div><div id="pz"></div>
+        <div class="ip-plot-title" style="margin-top:10px"><span lang="es">Zoom: |p(t_k) − p(t)| frente al umbral (caso seleccionado)</span><span lang="en">Zoom: |p(t_k) − p(t)| vs threshold (selected case)</span></div><div id="pth"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ip-section" id="resultados">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">4</span><span lang="es">Resultados del artículo (Tabla 4)</span><span lang="en">Paper results (Table 4)</span></p><h2><span lang="es">Menos eventos, mismo error</span><span lang="en">Fewer events, same error</span></h2></div>
+    <div class="ip-card ip-reveal"><div class="ip-table-wrap"><table class="ip-table">
+      <thead><tr><th></th><th><span lang="es">Muestras</span><span lang="en">Samples</span></th><th>IAE</th><th>ITAE</th><th><span lang="es">Consumo (W)</span><span lang="en">Power (W)</span></th><th><span lang="es">Máx. entre acciones</span><span lang="en">Max. gap</span></th></tr></thead>
+      <tbody>
+        <tr><td><span lang="es">Caso 1 · periódico</span><span lang="en">Case 1 · periodic</span></td><td class="num">3000</td><td class="num">2,2568</td><td class="num">12,485</td><td class="num">13,909</td><td class="num">0,01 s</td></tr>
+        <tr><td><span lang="es">Caso 2 · umbral fijo</span><span lang="en">Case 2 · fixed threshold</span></td><td class="num">1027 (−65,8 %)</td><td class="num">2,6417</td><td class="num">21,224</td><td class="num">13,931</td><td class="num">0,337 s</td></tr>
+        <tr class="best"><td><span lang="es">Caso 3 · umbral relativo</span><span lang="en">Case 3 · relative threshold</span></td><td class="num">207 (−93 %)</td><td class="num">2,1825</td><td class="num">14,989</td><td class="num">13,897</td><td class="num">1,25 s</td></tr>
+      </tbody></table></div>
+      <p class="ip-small ip-muted" style="margin-top:10px"><span lang="es">El umbral relativo mejora el IAE un 3,29 % frente al periódico y un 17,38 % frente al umbral fijo, y el ITAE un 29,37 % frente al umbral fijo. El consumo estimado sólo considera los rotores. Simulación en Simulink del modelo Newton-Euler del Crazyflie (27 g).</span><span lang="en">The relative threshold improves IAE by 3.29% vs periodic and 17.38% vs fixed threshold, and ITAE by 29.37% vs fixed threshold. Estimated power only accounts for the rotors. Simulink simulation of the Crazyflie Newton-Euler model (27 g).</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="ip-section" id="quiz"><div class="ip-wrap"><div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">5</span><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></p><h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2></div><div id="quizBox" class="ip-reveal"></div></div></section>
+
+<section class="ip-section" id="citar"><div class="ip-wrap"><div class="ip-grid cols-2 ip-reveal">
+  <div class="ip-card"><h3><span lang="es">Cómo citar</span><span lang="en">How to cite</span></h3><p>Mañas-Álvarez, F. J., Guinaldo, M., Dormido, R., Socas, R., &amp; Dormido, S. (2021). Control basado en eventos mediante umbral relativo aplicado al control de altitud de cuadricópteros Crazyflie 2.1. In <em>XLII Jornadas de Automática</em> (pp. 341–348). Universidade da Coruña. <a href="https://doi.org/10.17979/spudc.9788497498043.341" target="_blank" rel="noopener">doi:10.17979/spudc.9788497498043.341</a></p></div>
+  <div class="ip-code" id="bibtex">@inproceedings{ManasAlvarez2021Altitud,
+  title     = {Control basado en eventos mediante umbral relativo aplicado
+               al control de altitud de cuadric{\'o}pteros Crazyflie 2.1},
+  author    = {Ma{\~n}as-{\'A}lvarez, F. J. and Guinaldo, M. and Dormido, R.
+               and Socas, R. and Dormido, S.},
+  booktitle = {XLII Jornadas de Autom{\'a}tica},
+  pages     = {341--348},
+  year      = {2021},
+  doi       = {10.17979/spudc.9788497498043.341}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+</div></div></section>
+</main>
+
+<footer class="ip-footer"><div class="ip-wrap"><span><span lang="es">Material docente interactivo · Proyecto de innovación docente</span><span lang="en">Interactive teaching material · Teaching innovation project</span> · <a href="../../index.html">Robotic Park Lab</a> — UNED</span><span lang="es">Simulación didáctica; la Tabla 4 recoge los resultados del artículo.</span><span lang="en">Teaching simulation; Table 4 lists the paper's results.</span></div></footer>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="../lib/altitud.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

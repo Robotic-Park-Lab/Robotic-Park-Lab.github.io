@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Twins in the loop">Gemelos en el bucle</title>
+<meta name="description" content="Publicación interactiva: formación por consenso en enjambres robóticos heterogéneos con gemelos digitales en el bucle (ROBOT 2022). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>.stage-md{height:420px}.mr svg{width:100%;height:auto}.mr text{font:600 12.5px var(--font);fill:var(--text)}.mr .s{font:500 11px var(--font);fill:var(--muted)}</style>
+</head>
+<body>
+<header class="ip-topbar"><div class="ip-wrap">
+  <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
+  <nav class="ip-topnav"><a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a><a href="#realidad-mixta"><span lang="es">Realidad mixta</span><span lang="en">Mixed reality</span></a><a href="#simulador"><span lang="es">Consenso</span><span lang="en">Consensus</span></a><a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a></nav>
+</div><div class="ip-progress"></div></header>
+
+<section class="ip-hero"><div class="ip-wrap">
+  <div>
+    <p class="ip-kicker">ROBOT 2022 · Fifth Iberian Robotics Conference · <span lang="es">Publicación interactiva</span><span lang="en">Interactive publication</span></p>
+    <h1><span lang="es">Drones reales y robots virtuales en la misma formación</span><span lang="en">Real drones and virtual robots in the same formation</span></h1>
+    <p class="ip-authors"><strong>F. J. Mañas-Álvarez</strong>, M. Guinaldo, R. Dormido, R. Socas y S. Dormido · UNED</p>
+    <p class="ip-lead"><span lang="es">Probar algoritmos de enjambre exige muchos robots y mucho espacio. Con <i>twins-in-the-loop</i>, tres Crazyflie reales vuelan en Robotic Park mientras tres Khepera IV existen sólo en Gazebo, y todos se coordinan como si fueran reales mediante un control de formación por consenso.</span><span lang="en">Testing swarm algorithms takes many robots and a lot of space. With <i>twins-in-the-loop</i>, three real Crazyflies fly in Robotic Park while three Khepera IV exist only in Gazebo, and they all coordinate as if they were real through consensus-based formation control.</span></p>
+    <div class="ip-btns"><a class="ip-btn" href="#simulador"><span lang="es">Probar el consenso</span><span lang="en">Try the consensus</span></a><a class="ip-btn ghost" href="https://doi.org/10.1007/978-3-031-21065-5_36" target="_blank" rel="noopener"><span lang="es">Leer el artículo</span><span lang="en">Read the paper</span></a></div>
+    <div class="ip-hero-stats"><div class="ip-hero-stat"><b>3 + 3</b><span lang="es">reales + virtuales</span><span lang="en">real + virtual</span></div><div class="ip-hero-stat"><b>ROS 2</b><span lang="es">transparencia total</span><span lang="en">full transparency</span></div><div class="ip-hero-stat"><b><span lang="es">−40,9 %</span><span lang="en">−40.9%</span></b><span lang="es">MSE con PI (T_i = 3 s)</span><span lang="en">MSE with PI (T_i = 3 s)</span></div></div>
+  </div>
+  <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+</div></section>
+
+<main>
+<section class="ip-section" id="mapa"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">1</span><span lang="es">Mapa conceptual</span><span lang="en">Concept map</span></p><h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2></div>
+  <div class="ip-cmap ip-reveal"><div id="cmap"></div><aside class="ip-card ip-cmap-panel" id="cmapPanel"></aside></div>
+</div></section>
+
+<section class="ip-section" id="realidad-mixta"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">2</span><span lang="es">Realidad mixta</span><span lang="en">Mixed reality</span></p>
+    <h2><span lang="es">El truco: que los gemelos parezcan reales</span><span lang="en">The trick: make the twins look real</span></h2>
+    <p><span lang="es">Los Crazyflie se localizan con 6 cámaras Vicon a 100 Hz. Los Khepera de Gazebo publican su odometría absoluta, y un nodo traductor la convierte al mismo mensaje <code>Pose</code> que produce Vicon. Así, para el controlador de formación no existe diferencia entre un robot real y uno virtual.</span><span lang="en">The Crazyflies are tracked by 6 Vicon cameras at 100 Hz. The Gazebo Kheperas publish their absolute odometry, and a translator node turns it into the same <code>Pose</code> message Vicon produces. For the formation controller there is no difference between a real and a virtual robot.</span></p></div>
+  <div class="ip-card ip-reveal mr" id="mr"></div>
+</div></section>
+
+<section class="ip-section" id="simulador"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">3</span><span lang="es">Control por consenso</span><span lang="en">Consensus control</span></p>
+    <h2><span lang="es">Cada agente persigue el promedio de lo que le piden sus vecinos</span><span lang="en">Each agent chases the average of what its neighbours ask for</span></h2>
+    <p><span lang="es">Cada agente \(i\) calcula su posición objetivo a partir de las posiciones relativas deseadas \(X^*_{i\to j}\) con sus vecinos, con un término proporcional y, opcionalmente, uno integral de tiempo \(T_i\):</span><span lang="en">Each agent \(i\) computes its target position from the desired relative positions \(X^*_{i\to j}\) with its neighbours, with a proportional term and, optionally, an integral term of time \(T_i\):</span></p>
+    <div class="ip-eq">$$X_i^t(k)=X_i(k)+\frac{1}{N_i}\sum_{j\in\mathcal N_i}\varepsilon_{ij}(k)+\frac{1}{N_iT_i}\sum_{l=1}^{k-1}\sum_{j\in\mathcal N_i}\varepsilon_{ij}(l),\qquad \varepsilon_{ij}=X^*_{i\to j}-(X_j-X_i)$$</div>
+    <p class="ip-small ip-muted"><span lang="es">Formación de ejemplo con el mismo grafo de 7 enlaces del artículo (KH1–KH2, KH2–KH3, KH1–CF1, KH2–CF2, CF1–CF2, CF1–CF3, CF2–CF3). Los Khepera no pueden volar: su componente z no cuenta.</span><span lang="en">Example formation with the paper's same 7-edge graph (KH1–KH2, KH2–KH3, KH1–CF1, KH2–CF2, CF1–CF2, CF1–CF3, CF2–CF3). The Kheperas cannot fly: their z component does not count.</span></p></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-toolbar"><button class="ip-btn accent" id="run" type="button">▶ <span lang="es">Nueva experiencia</span><span lang="en">New run</span></button><span class="ip-pill muted" id="tt"></span></div><div class="ip-stage stage-md"><canvas id="cv"></canvas><span class="ip-stage-hint"><span lang="es">Discos translúcidos: Khepera virtuales (Gazebo) · drones: Crazyflie reales</span><span lang="en">Translucent discs: virtual Kheperas (Gazebo) · drones: real Crazyflies</span></span></div></div>
+    <div class="ip-card"><div id="ctl"></div><div class="ip-readouts" id="ro" style="margin-top:14px;grid-template-columns:1fr"></div></div>
+  </div>
+  <div class="ip-grid cols-2 ip-reveal" style="margin-top:18px">
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Error de posición relativa por eje (m)</span><span lang="en">Relative position error per axis (m)</span></div><div id="pe"></div></div>
+    <div class="ip-card"><h3><span lang="es">Resultados del artículo (Tabla 2)</span><span lang="en">Paper results (Table 2)</span></h3>
+      <div class="ip-table-wrap"><table class="ip-table"><thead><tr><th></th><th>IAE</th><th>ITAE</th><th>MSE</th></tr></thead><tbody>
+        <tr><td><span lang="es">Caso 1 · P</span><span lang="en">Case 1 · P</span></td><td class="num">42,515</td><td class="num">176,76</td><td class="num">2,3826</td></tr>
+        <tr><td><span lang="es">Caso 2 · PI, T_i = 2 s</span><span lang="en">Case 2 · PI, T_i = 2 s</span></td><td class="num">55,565</td><td class="num">296,72</td><td class="num">2,1758</td></tr>
+        <tr class="best"><td><span lang="es">Caso 3 · PI, T_i = 3 s</span><span lang="en">Case 3 · PI, T_i = 3 s</span></td><td class="num">47,261</td><td class="num">316,25</td><td class="num">1,4085</td></tr>
+      </tbody></table></div>
+      <p class="ip-small ip-muted" style="margin-top:8px"><span lang="es">El P tiene el menor IAE e ITAE (responde antes), pero el PI con T_i = 3 s logra el menor MSE (−40,9 %) y una sobreoscilación ~30 % menor en X e Y. El eje Z es el más lento al acoplar drones con robots que sólo se mueven en el plano.</span><span lang="en">P has the lowest IAE and ITAE (it reacts sooner), but PI with T_i = 3 s achieves the lowest MSE (−40.9%) and ~30% less overshoot in X and Y. The Z axis is the slowest when coupling drones with robots that only move in the plane.</span></p></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="quiz"><div class="ip-wrap"><div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">4</span><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></p><h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2></div><div id="quizBox" class="ip-reveal"></div></div></section>
+
+<section class="ip-section" id="citar"><div class="ip-wrap"><div class="ip-grid cols-2 ip-reveal">
+  <div class="ip-card"><h3><span lang="es">Cómo citar</span><span lang="en">How to cite</span></h3><p>Mañas-Álvarez, F. J., Guinaldo, M., Dormido, R., Socas, R., &amp; Dormido, S. (2022). Formation by consensus in heterogeneous robotic swarms with twins-in-the-loop. In <em>Iberian Robotics Conference</em> (pp. 435–447). Springer. <a href="https://doi.org/10.1007/978-3-031-21065-5_36" target="_blank" rel="noopener">doi:10.1007/978-3-031-21065-5_36</a></p></div>
+  <div class="ip-code" id="bibtex">@inproceedings{ManasAlvarez2022Twins,
+  title     = {Formation by consensus in heterogeneous robotic swarms
+               with twins-in-the-loop},
+  author    = {Ma{\~n}as-{\'A}lvarez, F. J. and Guinaldo, M. and Dormido, R.
+               and Socas, R. and Dormido, S.},
+  booktitle = {ROBOT2022: Fifth Iberian Robotics Conference},
+  pages     = {435--447},
+  publisher = {Springer},
+  year      = {2022},
+  doi       = {10.1007/978-3-031-21065-5_36}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+</div></div></section>
+</main>
+<footer class="ip-footer"><div class="ip-wrap"><span><span lang="es">Material docente interactivo · Proyecto de innovación docente</span><span lang="en">Interactive teaching material · Teaching innovation project</span> · <a href="../../index.html">Robotic Park Lab</a> — UNED</span><span lang="es">Simulación didáctica; la Tabla 2 recoge los resultados experimentales.</span><span lang="en">Teaching simulation; Table 2 lists the experimental results.</span></div></footer>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="../lib/multiagente.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

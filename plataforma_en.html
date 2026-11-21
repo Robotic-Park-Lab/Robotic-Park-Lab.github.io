@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Platform — Robotic Park Lab</title>
+<meta name="description" content="Robotic Park: the multi-agent experimental platform of Robotic Park Lab (UNED) — hardware, software and repositories.">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a class="site-brand" href="index_en.html"><img src="assets/img/logo.png" alt="Robotic Park Lab">Robotic Park Lab</a>
+    <div class="nav-wrap">
+      <nav class="site-nav">
+        <a href="index_en.html">Home</a>
+        <a href="investigacion_en.html">Research</a>
+        <a href="publicaciones_en.html">Publications</a>
+        <a href="plataforma_en.html" aria-current="page">Platform</a>
+        <a href="equipo_en.html">Team</a>
+        <a href="benchmarks_en.html">Benchmarks</a>
+        <a href="contacto_en.html">Contact</a>
+      </nav>
+      <div class="lang-switch">
+        <a href="plataforma.html" hreflang="es">Español</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <section class="section">
+      <p class="eyebrow">Infrastructure</p>
+      <h1 class="section-title">Robotic Park</h1>
+      <p>
+        Robotic Park is the lab's multi-agent experimental platform: a heterogeneous fleet of
+        real robots synchronised with their simulated counterparts (hardware-in-the-loop),
+        designed both for research in distributed control and for hands-on robotics teaching
+        with ROS 2.
+      </p>
+    </section>
+
+    <section class="section">
+      <p class="eyebrow">Hardware</p>
+      <h2 class="section-title">Agents and sensing</h2>
+      <div class="grid-cards">
+        <div class="item-card">
+          <h3>Crazyflie 2.X</h3>
+          <p>Open-source quadrotors for aerial formation and event-based control experiments.</p>
+        </div>
+        <div class="item-card">
+          <h3>Khepera IV</h3>
+          <p>Differential ground robots, with a hardware-in-the-loop simulator in ROS/Gazebo/Matlab.</p>
+        </div>
+        <div class="item-card">
+          <h3>LIMO</h3>
+          <p>Multi-sensor ground robotic platform (Ackermann/differential) integrated in ROS 2.</p>
+        </div>
+        <div class="item-card">
+          <h3>DJI Tello</h3>
+          <p>Micro drones for rapid prototyping, with the lab's own ROS 2 driver.</p>
+        </div>
+        <div class="item-card">
+          <h3>Vicon motion capture system</h3>
+          <p>High-accuracy localisation for all the lab's real agents, integrated in ROS 2.</p>
+        </div>
+        <div class="item-card">
+          <h3>Vision (Orbbec)</h3>
+          <p>Orbbec depth cameras for perception and obstacle detection, with the lab's own ROS 2 wrapper.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <p class="eyebrow">Software</p>
+      <h2 class="section-title">Repositories</h2>
+      <p>All the lab's software is open and published at <a href="https://github.com/Robotic-Park-Lab" target="_blank" rel="noopener">github.com/Robotic-Park-Lab</a>.</p>
+      <div class="grid-cards">
+        <div class="item-card">
+          <h3><a href="https://github.com/Robotic-Park-Lab/RoboticPark" target="_blank" rel="noopener">RoboticPark</a></h3>
+          <p>Main repository of the experimental platform and its benchmarks.</p>
+        </div>
+        <div class="item-card">
+          <h3><a href="https://github.com/Robotic-Park-Lab/uned_crazyflie_ros_pkg" target="_blank" rel="noopener">uned_crazyflie_ros_pkg</a></h3>
+          <p>Hardware-in-the-loop simulator of the Crazyflie 2.1 drone in ROS, Gazebo and Matlab.</p>
+        </div>
+        <div class="item-card">
+          <h3><a href="https://github.com/Robotic-Park-Lab/uned_kheperaIV_ros_pkg" target="_blank" rel="noopener">uned_kheperaIV_ros_pkg</a></h3>
+          <p>Hardware-in-the-loop simulator of the Khepera IV differential robot in ROS, Gazebo and Matlab.</p>
+        </div>
+        <div class="item-card">
+          <h3><a href="https://github.com/Robotic-Park-Lab/uned_limo_ros_pkg" target="_blank" rel="noopener">uned_limo_ros_pkg</a></h3>
+          <p>ROS integration of the LIMO platform.</p>
+        </div>
+        <div class="item-card">
+          <h3><a href="https://github.com/Robotic-Park-Lab/uned_multi_agent_ros_pkg" target="_blank" rel="noopener">uned_multi_agent_ros_pkg</a></h3>
+          <p>Multi-agent coordination for heterogeneous combinations of the lab's platforms.</p>
+        </div>
+        <div class="item-card">
+          <h3><a href="https://github.com/Robotic-Park-Lab/uned_vision_ros_pkg" target="_blank" rel="noopener">uned_vision_ros_pkg</a></h3>
+          <p>Perception and computer vision for the platform's agents.</p>
+        </div>
+        <div class="item-card">
+          <h3><a href="https://github.com/Robotic-Park-Lab/ros2-vicon-receiver" target="_blank" rel="noopener">ros2-vicon-receiver</a></h3>
+          <p>ROS 2 receiver for the Vicon motion capture system.</p>
+        </div>
+        <div class="item-card">
+          <h3><a href="https://github.com/Robotic-Park-Lab/uned_tello_ros_pkg" target="_blank" rel="noopener">uned_tello_ros_pkg</a></h3>
+          <p>ROS 2 packages for DJI Tello drones, with the original driver as a submodule.</p>
+        </div>
+        <div class="item-card">
+          <h3><a href="https://github.com/Robotic-Park-Lab/OrbbecSDK_ROS2" target="_blank" rel="noopener">OrbbecSDK_ROS2</a></h3>
+          <p>ROS 2 wrapper of the Orbbec depth camera SDK.</p>
+        </div>
+        <div class="item-card">
+          <h3><a href="https://github.com/Robotic-Park-Lab/crazyflie-firmware" target="_blank" rel="noopener">crazyflie-firmware</a></h3>
+          <p>Fork of the Crazyflie Nano/Bolt Quadcopter firmware used in the lab.</p>
+        </div>
+        <div class="item-card">
+          <h3><a href="https://github.com/Robotic-Park-Lab/crazyflie-lib-python" target="_blank" rel="noopener">crazyflie-lib-python</a></h3>
+          <p>Python library for communicating with the Crazyflie.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <span>© 2026 Robotic Park Lab — UNED</span>
+    <span><a href="contacto_en.html">lab.nanodrones@dia.uned.es</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

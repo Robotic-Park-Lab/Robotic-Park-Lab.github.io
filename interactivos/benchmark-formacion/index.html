@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Formation benchmark">Benchmark de formaciones</title>
+<meta name="description" content="Publicación interactiva: benchmark para el diseño y el control de formaciones en sistemas multi-agente robóticos en Robotic Park (Jornadas de Automática 2024 y Control Systems Benchmarks, Springer 2025). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>.stage-md{height:400px}</style>
+</head>
+<body>
+<header class="ip-topbar"><div class="ip-wrap">
+  <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
+  <nav class="ip-topnav"><a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a><a href="#problema1"><span lang="es">Problema 1</span><span lang="en">Problem 1</span></a><a href="#problema2"><span lang="es">Problema 2</span><span lang="en">Problem 2</span></a><a href="#ranking">Ranking</a><a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a></nav>
+</div><div class="ip-progress"></div></header>
+
+<section class="ip-hero"><div class="ip-wrap">
+  <div>
+    <p class="ip-kicker">Jornadas de Automática 2024 · Control Systems Benchmarks (Springer, 2025) · <span lang="es">Publicación interactiva</span><span lang="en">Interactive publication</span></p>
+    <h1><span lang="es">Un benchmark abierto para formaciones multi-robot</span><span lang="en">An open benchmark for multi-robot formations</span></h1>
+    <p class="ip-authors"><strong>F. J. Mañas-Álvarez</strong>, M. Guinaldo, R. Dormido y S. Dormido · UNED</p>
+    <p class="ip-lead"><span lang="es">¿Cómo comparar dos algoritmos de formación de forma justa? Este benchmark de Robotic Park propone dos problemas con sus métricas: (1) repartir 15 drones sobre una semiesfera de 1 m y (2) controlarlos desde el suelo hasta esa formación con el menor coste en precisión, comunicaciones y cómputo. Aquí puedes resolver ambos y competir.</span><span lang="en">How can two formation algorithms be compared fairly? This Robotic Park benchmark proposes two problems with their metrics: (1) distribute 15 drones over a 1 m hemisphere and (2) control them from the ground to that formation at the lowest cost in accuracy, communication and computation. Here you can solve both and compete.</span></p>
+    <div class="ip-btns"><a class="ip-btn" href="#problema1"><span lang="es">Resolver el benchmark</span><span lang="en">Solve the benchmark</span></a><a class="ip-btn ghost" href="https://doi.org/10.1007/978-3-031-76312-0_10" target="_blank" rel="noopener"><span lang="es">Capítulo (Springer)</span><span lang="en">Chapter (Springer)</span></a><a class="ip-btn ghost" href="../../benchmarks.html" data-href-en="../../benchmarks_en.html">Benchmarks</a></div>
+    <div class="ip-hero-stats"><div class="ip-hero-stat"><b>N = 15</b><span lang="es">drones, R = 1 m</span><span lang="en">drones, R = 1 m</span></div><div class="ip-hero-stat"><b>J₁ · J₂</b><span lang="es">dos índices de coste</span><span lang="en">two cost indices</span></div><div class="ip-hero-stat"><b>ROS 2</b><span lang="es">virtual, físico o híbrido</span><span lang="en">virtual, physical or hybrid</span></div></div>
+  </div>
+  <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+</div></section>
+
+<main>
+<section class="ip-section" id="mapa"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">1</span><span lang="es">Mapa conceptual</span><span lang="en">Concept map</span></p><h2><span lang="es">El benchmark de un vistazo</span><span lang="en">The benchmark at a glance</span></h2></div>
+  <div class="ip-cmap ip-reveal"><div id="cmap"></div><aside class="ip-card ip-cmap-panel" id="cmapPanel"></aside></div>
+</div></section>
+
+<section class="ip-section" id="problema1"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">2</span><span lang="es">Problema 1 · diseño</span><span lang="en">Problem 1 · design</span></p>
+    <h2><span lang="es">Repartir 15 agentes sobre la semiesfera</span><span lang="en">Distribute 15 agents over the hemisphere</span></h2>
+    <p><span lang="es">Hay que elegir las posiciones y los enlaces (distancias objetivo) sobre \(x^2+y^2+(z-z_0)^2=R^2\), \(z\ge z_0\). El índice premia el algoritmo rápido, las distancias homogéneas y una malla poco «energética»:</span><span lang="en">Positions and edges (target distances) must be chosen over \(x^2+y^2+(z-z_0)^2=R^2\), \(z\ge z_0\). The index rewards fast algorithms, homogeneous distances and a low-"energy" mesh:</span></p>
+    <div class="ip-eq">$$J_1=2.4283\,\tau_{CPU}+1.0\,\big(\max d^*_{ij}-\min d^*_{ij}\big)+0.0079\sum_{(i,j)\in\mathcal E}\frac{1}{d^{*2}_{ij}}$$</div></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-stage stage-md"><canvas id="cv1"></canvas></div></div>
+    <div class="ip-card"><div id="ctl1"></div><div class="ip-readouts" id="ro1" style="margin-top:14px"></div><p class="ip-small ip-muted" style="margin-top:8px"><span lang="es">τ_CPU se mide en tu navegador (s). Los pesos λ son los del benchmark, escogidos para que cada término pese lo mismo en el caso de referencia.</span><span lang="en">τ_CPU is measured in your browser (s). The λ weights are the benchmark's, chosen so each term weighs the same in the reference case.</span></p></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="problema2"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">3</span><span lang="es">Problema 2 · control</span><span lang="en">Problem 2 · control</span></p>
+    <h2><span lang="es">Del suelo a la semiesfera</span><span lang="en">From the ground to the hemisphere</span></h2>
+    <p><span lang="es">Los drones despegan desde \(z = 0\) y, ya en vuelo estacionario a \(z \approx 1\) m, deben alcanzar la formación con centro \(z_0 = 1\) m usando sólo información de sus vecinos (\(\dot p_i = u_i\)). Se penalizan los mensajes \(n_m\), las ejecuciones del controlador \(n_u\), el tiempo de establecimiento al 2 % \(t_s\), el IAE y el ITAE de cada agente:</span><span lang="en">The drones take off from \(z = 0\) and, once hovering at \(z \approx 1\) m, must reach the formation centred at \(z_0 = 1\) m using only neighbour information (\(\dot p_i = u_i\)). Messages \(n_m\), controller executions \(n_u\), 2% settling time \(t_s\), and each agent's IAE and ITAE are penalised:</span></p>
+    <div class="ip-eq">$$J_2=\sum_{i=1}^{N}\big(0.02\,n_{m,i}+0.1\,n_{u,i}+0.3\,t_{s,i}+0.1\,IAE_i+0.01\,ITAE_i\big)$$</div></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-toolbar"><button class="ip-btn accent" id="run2" type="button">▶ <span lang="es">Ejecutar mi controlador</span><span lang="en">Run my controller</span></button><span class="ip-pill muted" id="tt2"></span></div><div class="ip-stage stage-md"><canvas id="cv2"></canvas></div></div>
+    <div class="ip-card"><div id="ctl2"></div><div class="ip-readouts" id="ro2" style="margin-top:14px"></div></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="ranking"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">4</span>Ranking</p><h2><span lang="es">Tus mejores intentos</span><span lang="en">Your best attempts</span></h2><p><span lang="es">Se guardan sólo en este navegador. Para el ranking oficial con robots reales, envía tus resultados como se explica en <a href="../../benchmarks.html">Benchmarks</a>.</span><span lang="en">Stored only in this browser. For the official ranking with real robots, submit your results as explained in <a href="../../benchmarks_en.html">Benchmarks</a>.</span></p></div>
+  <div class="ip-card ip-reveal"><div class="ip-table-wrap"><table class="ip-table" id="rank"></table></div><div class="ip-btns"><button class="ip-btn ghost small" id="clear" type="button"><span lang="es">Borrar mi ranking</span><span lang="en">Clear my ranking</span></button></div></div>
+</div></section>
+
+<section class="ip-section" id="quiz"><div class="ip-wrap"><div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">5</span><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></p><h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2></div><div id="quizBox" class="ip-reveal"></div></div></section>
+
+<section class="ip-section" id="citar"><div class="ip-wrap"><div class="ip-grid cols-2 ip-reveal">
+  <div class="ip-card"><h3><span lang="es">Cómo citar</span><span lang="en">How to cite</span></h3>
+    <p>Mañas-Álvarez, F. J., Guinaldo, M., &amp; Dormido, R. (2025). A Benchmark on Formation Control of Multi-agent Robotic System. In <em>Control Systems Benchmarks</em> (pp. 151–167). Springer. <a href="https://doi.org/10.1007/978-3-031-76312-0_10" target="_blank" rel="noopener">doi:10.1007/978-3-031-76312-0_10</a></p>
+    <p>Mañas-Álvarez, F. J., Guinaldo, M., Dormido, R., &amp; Dormido, S. (2024). Un benchmark para el diseño y control de formaciones en sistemas multi-agente. <em>Jornadas de Automática</em>, 45. <a href="https://doi.org/10.17979/JA-CEA.2024.45.10749" target="_blank" rel="noopener">doi:10.17979/JA-CEA.2024.45.10749</a></p></div>
+  <div class="ip-code" id="bibtex">@incollection{ManasAlvarez2025Benchmark,
+  title     = {A Benchmark on Formation Control of Multi-agent Robotic System},
+  author    = {Ma{\~n}as-{\'A}lvarez, F. J. and Guinaldo, M. and Dormido, R.},
+  booktitle = {Control Systems Benchmarks},
+  pages     = {151--167},
+  publisher = {Springer},
+  year      = {2025},
+  doi       = {10.1007/978-3-031-76312-0_10}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+</div></div></section>
+</main>
+<footer class="ip-footer"><div class="ip-wrap"><span><span lang="es">Material docente interactivo · Proyecto de innovación docente</span><span lang="en">Interactive teaching material · Teaching innovation project</span> · <a href="../../index.html">Robotic Park Lab</a> — UNED</span><span lang="es">Simulación didáctica del benchmark; el oficial se ejecuta en Robotic Park con ROS 2 y Webots.</span><span lang="en">Teaching simulation of the benchmark; the official one runs in Robotic Park with ROS 2 and Webots.</span></div></footer>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="../lib/formacion.js"></script>
+<script defer src="../lib/multiagente.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

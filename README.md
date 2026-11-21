@@ -15,16 +15,16 @@ plataforma.html         Hardware y repositorios de software de Robotic Park
 equipo.html             Investigadores del laboratorio
 benchmarks.html         Benchmarks reproducibles publicados por el laboratorio
 contacto.html           Datos de contacto
+*_en.html               Réplica en inglés de cada página (index_en.html, investigacion_en.html…)
 assets/
   style.css               Hoja de estilos compartida (paleta verde/naranja del logo)
   img/logo.png            Logotipo del laboratorio
   img/publications/       Portadas de las publicaciones (miniaturas, ≤ 420 px de ancho)
 interactivos/             Publicaciones interactivas (innovación docente), ver interactivos/README.md
-  lib/                      Librería común: ip.css, ip.js, scene3d.js (3D) y formacion.js
+  lib/                      Librería común: ip.css, ip.js, scene3d.js (3D), formacion.js,
+                            multiagente.js y altitud.js
   plantilla/                Plantilla para crear una página nueva
-  relay-autotuning/         «Relay-based autotuning for quadrotor attitude and rate control»
-  escudo-multi-uav/         «Distributed multi-UAV shield formation based on virtual surface constraints»
-  formacion-lagrange/       «Rigid formation control in multi-robot systems using Lagrange multipliers»
+  <una carpeta por artículo>  17 páginas bilingües (listado en interactivos/README.md)
 ```
 
 HTML/CSS plano, sin generador ni build: GitHub Pages sirve el repositorio tal cual desde la rama
@@ -57,6 +57,10 @@ carpeta con `python3 -m http.server`).
   cuando haya resultados reales).
 - **Nueva página**: añade el `<a>` correspondiente al bloque `<nav class="site-nav">` de
   *todas* las páginas (cabecera repetida en cada archivo, no hay layout compartido).
+- **Inglés**: cada página `x.html` tiene su réplica `x_en.html` con la misma estructura; el botón
+  «English»/«Español» de la cabecera (`.lang-switch`) enlaza una con otra. Cualquier cambio de
+  contenido hay que hacerlo en las dos. En `publicaciones_en.html` los enlaces a las versiones
+  interactivas llevan `?lang=en`; las páginas de `interactivos/` son un único archivo bilingüe.
 - **Estilos**: todo el diseño vive en `assets/style.css`, con variables CSS en `:root`
   (colores, radios, sombras) y un bloque `@media (prefers-color-scheme: dark)` para modo oscuro
   automático.

@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Escudo multi-UAV</title>
+<title data-en="Multi-UAV shield">Escudo multi-UAV</title>
 <meta name="description" content="Publicación interactiva: despliegue distribuido de un escudo de drones sobre una superficie cuádrica virtual con triangulación de Delaunay y control por gradiente (Robotics and Autonomous Systems, 2024). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
 <link rel="icon" href="../../assets/img/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,17 +35,17 @@
 
 <header class="ip-topbar">
   <div class="ip-wrap">
-    <a class="ip-brand" href="../../publicaciones.html" title="Volver a Publicaciones"><img src="../../assets/img/logo.png" alt=""><span>← Publicaciones</span></a>
+    <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html" title="Volver a Publicaciones"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
     <nav class="ip-topnav" aria-label="Secciones">
-      <a href="#mapa">Mapa</a>
-      <a href="#superficie">Superficie</a>
-      <a href="#construccion">Algoritmo 1</a>
+      <a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a>
+      <a href="#superficie"><span lang="es">Superficie</span><span lang="en">Surface</span></a>
+      <a href="#construccion"><span lang="es">Algoritmo 1</span><span lang="en">Algorithm 1</span></a>
       <a href="#delaunay">Delaunay</a>
-      <a href="#control">Control</a>
-      <a href="#rigidez">Rigidez</a>
-      <a href="#experimento">Experimento</a>
-      <a href="#quiz">Autoevaluación</a>
-      <a href="#citar">Citar</a>
+      <a href="#control"><span lang="es">Control</span><span lang="en">Control</span></a>
+      <a href="#rigidez"><span lang="es">Rigidez</span><span lang="en">Rigidity</span></a>
+      <a href="#experimento"><span lang="es">Experimento</span><span lang="en">Experiment</span></a>
+      <a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a>
+      <a href="#citar"><span lang="es">Citar</span><span lang="en">Cite</span></a>
     </nav>
   </div>
   <div class="ip-progress"></div>
@@ -53,18 +54,18 @@
 <section class="ip-hero" id="inicio">
   <div class="ip-wrap">
     <div>
-      <p class="ip-kicker">Robotics and Autonomous Systems 176 (2024) 104684 · Publicación interactiva</p>
-      <h1>Un escudo de drones sobre una superficie virtual</h1>
-      <p class="ip-authors"><strong>M. Guinaldo</strong>, J. Sánchez-Moreno, S. Zaragoza y F. J. Mañas-Álvarez · UNED y Centro Universitario de la Defensa</p>
-      <p class="ip-lead">¿Cómo se reparten N drones sobre una cúpula para proteger una zona, usando sólo medidas locales? Este trabajo da una receta completa: modela el escudo como una cuádrica, calcula a qué distancia deben quedar los vecinos, comprueba que la malla es de Delaunay y diseña una ley de control distribuida cuya estabilidad se demuestra. Aquí podrás construir el escudo y verlo formarse.</p>
+      <p class="ip-kicker"><span lang="es">Robotics and Autonomous Systems 176 (2024) 104684 · Publicación interactiva</span><span lang="en">Robotics and Autonomous Systems 176 (2024) 104684 · Interactive publication</span></p>
+      <h1><span lang="es">Un escudo de drones sobre una superficie virtual</span><span lang="en">A drone shield over a virtual surface</span></h1>
+      <p class="ip-authors"><span lang="es"><strong>M. Guinaldo</strong>, J. Sánchez-Moreno, S. Zaragoza y F. J. Mañas-Álvarez · UNED y Centro Universitario de la Defensa</span><span lang="en"><strong>M. Guinaldo</strong>, J. Sánchez-Moreno, S. Zaragoza and F. J. Mañas-Álvarez · UNED and Centro Universitario de la Defensa</span></p>
+      <p class="ip-lead"><span lang="es">¿Cómo se reparten N drones sobre una cúpula para proteger una zona, usando sólo medidas locales? Este trabajo da una receta completa: modela el escudo como una cuádrica, calcula a qué distancia deben quedar los vecinos, comprueba que la malla es de Delaunay y diseña una ley de control distribuida cuya estabilidad se demuestra. Aquí podrás construir el escudo y verlo formarse.</span><span lang="en">How can N drones be spread over a dome to protect an area, using only local measurements? This work gives a complete recipe: it models the shield as a quadric, computes how far apart neighbours must be, checks that the mesh is Delaunay and designs a distributed control law whose stability is proven. Here you can build the shield and watch it form.</span></p>
       <div class="ip-btns">
-        <a class="ip-btn" href="#construccion">Construir un escudo</a>
-        <a class="ip-btn ghost" href="https://doi.org/10.1016/j.robot.2024.104684" target="_blank" rel="noopener">Leer el artículo (acceso abierto)</a>
+        <a class="ip-btn" href="#construccion"><span lang="es">Construir un escudo</span><span lang="en">Build a shield</span></a>
+        <a class="ip-btn ghost" href="https://doi.org/10.1016/j.robot.2024.104684" target="_blank" rel="noopener"><span lang="es">Leer el artículo (acceso abierto)</span><span lang="en">Read the paper (open access)</span></a>
       </div>
       <div class="ip-hero-stats">
-        <div class="ip-hero-stat"><b>2 parámetros</b><span>basta con la cuádrica y el número de drones</span></div>
-        <div class="ip-hero-stat"><b>&gt; 99,7 %</b><span>reducción del error de formación en 8 s</span></div>
-        <div class="ip-hero-stat"><b>12 UAV</b><span>6 Crazyflie reales + 6 virtuales</span></div>
+        <div class="ip-hero-stat"><b><span lang="es">2 parámetros</span><span lang="en">2 parameters</span></b><span><span lang="es">basta con la cuádrica y el número de drones</span><span lang="en">the quadric and the number of drones are enough</span></span></div>
+        <div class="ip-hero-stat"><b><span lang="es">&gt; 99,7 %</span><span lang="en">&gt; 99.7%</span></b><span><span lang="es">reducción del error de formación en 8 s</span><span lang="en">formation error reduction in 8 s</span></span></div>
+        <div class="ip-hero-stat"><b><span lang="es">12 UAV</span><span lang="en">12 UAVs</span></b><span><span lang="es">6 Crazyflie reales + 6 virtuales</span><span lang="en">6 real Crazyflies + 6 virtual</span></span></div>
       </div>
     </div>
     <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
@@ -76,9 +77,9 @@
 <section class="ip-section" id="mapa">
   <div class="ip-wrap">
     <div class="ip-section-head ip-reveal">
-      <p class="ip-eyebrow"><span class="ip-num">1</span>Mapa conceptual</p>
-      <h2>El artículo de un vistazo</h2>
-      <p>Dos problemas encadenados: <b>(I)</b> diseñar la formación objetivo (dónde va cada dron y con quién se mide) y <b>(II)</b> diseñar la ley de control distribuida que la alcanza. Pulsa cada concepto.</p>
+      <p class="ip-eyebrow"><span lang="es"><span class="ip-num">1</span>Mapa conceptual</span><span lang="en"><span class="ip-num">1</span>Concept map</span></p>
+      <h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2>
+      <p><span lang="es">Dos problemas encadenados: <b>(I)</b> diseñar la formación objetivo (dónde va cada dron y con quién se mide) y <b>(II)</b> diseñar la ley de control distribuida que la alcanza. Pulsa cada concepto.</span><span lang="en">Two chained problems: <b>(I)</b> design the target formation (where each drone goes and whom it measures against) and <b>(II)</b> design the distributed control law that reaches it. Click each concept.</span></p>
     </div>
     <div class="ip-cmap ip-reveal">
       <div id="cmap"></div>
@@ -90,14 +91,14 @@
 <section class="ip-section" id="superficie">
   <div class="ip-wrap">
     <div class="ip-section-head ip-reveal">
-      <p class="ip-eyebrow"><span class="ip-num">2</span>El escudo</p>
-      <h2>Una cuádrica en forma normal</h2>
-      <p>El escudo virtual se modela como una superficie cuádrica centrada en la zona a proteger (el origen), con \(z \ge 0\):</p>
+      <p class="ip-eyebrow"><span lang="es"><span class="ip-num">2</span>El escudo</span><span lang="en"><span class="ip-num">2</span>The shield</span></p>
+      <h2><span lang="es">Una cuádrica en forma normal</span><span lang="en">A quadric in normal form</span></h2>
+      <p><span lang="es">El escudo virtual se modela como una superficie cuádrica centrada en la zona a proteger (el origen), con \(z \ge 0\):</span><span lang="en">The virtual shield is modelled as a quadric surface centred on the area to protect (the origin), with \(z \ge 0\):</span></p>
       <div class="ip-eq">$$\mathcal{S}\equiv p^\top Q_1\,p + Q_2 = 0,\qquad f(p_i)=p_i^\top Q_1 p_i + Q_2 \;\;\Rightarrow\;\; f(p_i)=0 \iff p_i\in\mathcal{S}$$</div>
     </div>
     <div class="ip-grid side ip-reveal">
       <div class="ip-card">
-        <div class="ip-stage stage-md"><canvas id="surfCanvas"></canvas><span class="ip-stage-hint">Arrastra para girar</span></div>
+        <div class="ip-stage stage-md"><canvas id="surfCanvas"></canvas><span class="ip-stage-hint"><span lang="es">Arrastra para girar</span><span lang="en">Drag to rotate</span></span></div>
       </div>
       <div class="ip-card">
         <div id="surfControls"></div>
@@ -111,24 +112,24 @@
 <section class="ip-section" id="construccion">
   <div class="ip-wrap">
     <div class="ip-section-head ip-reveal">
-      <p class="ip-eyebrow"><span class="ip-num">3</span>Problema I · Algoritmo 1</p>
-      <h2>Repartir N drones casi uniformemente</h2>
-      <p>Idea clave: si la malla está formada por triángulos casi equiláteros de lado \(d\), su área total debe aproximar la de la superficie. Una triangulación con \(N\) nodos y \(e_b\) aristas en el borde tiene \(2N-2-e_b\) triángulos, y \(e_b \approx L_b/d\). Igualando áreas sale una cota para \(d\) y, aplicando la misma idea por encima de cada altura, los anillos:</p>
+      <p class="ip-eyebrow"><span lang="es"><span class="ip-num">3</span>Problema I · Algoritmo 1</span><span lang="en"><span class="ip-num">3</span>Problem I · Algorithm 1</span></p>
+      <h2><span lang="es">Repartir N drones casi uniformemente</span><span lang="en">Spreading N drones almost uniformly</span></h2>
+      <p><span lang="es">Idea clave: si la malla está formada por triángulos casi equiláteros de lado \(d\), su área total debe aproximar la de la superficie. Una triangulación con \(N\) nodos y \(e_b\) aristas en el borde tiene \(2N-2-e_b\) triángulos, y \(e_b \approx L_b/d\). Igualando áreas sale una cota para \(d\) y, aplicando la misma idea por encima de cada altura, los anillos:</span><span lang="en">Key idea: if the mesh is made of almost equilateral triangles of side \(d\), its total area must approximate that of the surface. A triangulation with \(N\) nodes and \(e_b\) boundary edges has \(2N-2-e_b\) triangles, and \(e_b \approx L_b/d\). Equating areas gives a bound for \(d\) and, applying the same idea above each height, the rings:</span></p>
       <div class="ip-eq">$$d \le \frac{L_b+\sqrt{L_b^2+\tfrac{32}{\sqrt3}A_{\mathcal S}(N-1)}}{4(N-1)}$$</div>
       <div class="ip-eq">$$A_k(h_k)\approx\Big(2N_k-2-\frac{L_k(h_k)}{d}\Big)\frac{\sqrt3}{4}d^2,\qquad n_k=\Big\lceil \frac{L_k}{d}\Big\rceil$$</div>
     </div>
     <div class="ip-grid side ip-reveal">
       <div class="ip-card">
         <div class="ip-toolbar">
-          <button class="ip-btn accent" id="buildAnim" type="button">▶ Construir anillo a anillo</button>
+          <button class="ip-btn accent" id="buildAnim" type="button"><span lang="es">▶ Construir anillo a anillo</span><span lang="en">▶ Build ring by ring</span></button>
           <select class="ip-select" id="buildPreset" style="width:auto">
-            <option value="">Cargar caso del artículo…</option>
-            <option value="t3">Tabla 3 · semielipsoide, N = 50</option>
-            <option value="t2">Tabla 2 · semiesfera R = 15, N = 50</option>
-            <option value="real">Experimento real · R = 1 m, N = 12</option>
+            <option value="" data-en="Load a case from the paper…">Cargar caso del artículo…</option>
+            <option value="t3" data-en="Table 3 · semi-ellipsoid, N = 50">Tabla 3 · semielipsoide, N = 50</option>
+            <option value="t2" data-en="Table 2 · hemisphere R = 15, N = 50">Tabla 2 · semiesfera R = 15, N = 50</option>
+            <option value="real" data-en="Real experiment · R = 1 m, N = 12">Experimento real · R = 1 m, N = 12</option>
           </select>
         </div>
-        <div class="ip-stage stage-lg"><canvas id="buildCanvas"></canvas><span class="ip-stage-hint">Colores: un color por anillo · líneas: enlaces de la triangulación</span></div>
+        <div class="ip-stage stage-lg"><canvas id="buildCanvas"></canvas><span class="ip-stage-hint"><span lang="es">Colores: un color por anillo · líneas: enlaces de la triangulación</span><span lang="en">Colours: one colour per ring · lines: triangulation links</span></span></div>
       </div>
       <div class="ip-card">
         <div id="buildControls"></div>
@@ -137,19 +138,19 @@
     </div>
     <div class="ip-grid cols-2 ip-reveal" style="margin-top:18px">
       <div class="ip-card">
-        <h3>Anillos calculados</h3>
+        <h3><span lang="es">Anillos calculados</span><span lang="en">Computed rings</span></h3>
         <div class="ip-table-wrap"><table class="ip-table" id="ringTable"></table></div>
         <p class="ip-small ip-muted" id="ringNote" style="margin-top:8px"></p>
       </div>
       <div class="ip-card">
-        <h3>Cómo se crean los enlaces</h3>
+        <h3><span lang="es">Cómo se crean los enlaces</span><span lang="en">How the links are created</span></h3>
         <ol class="ip-small" style="padding-left:1.2rem">
-          <li>Cada nodo se une a sus dos vecinos del anillo («izquierda» y «derecha»).</li>
-          <li>Cada nodo del anillo \(k\) se une a los del anillo \(k+1\) que están a \(d_{ij}\le d+\varepsilon\).</li>
-          <li>Si la proyección sobre \(z=0\) de un enlace nuevo cruza otro ya existente entre esos niveles, se descarta.</li>
-          <li>La distancia objetivo de cada enlace es la real: \(d^*_{ij}=d_{ij}\).</li>
+          <li><span lang="es">Cada nodo se une a sus dos vecinos del anillo («izquierda» y «derecha»).</span><span lang="en">Each node links to its two ring neighbours ("left" and "right").</span></li>
+          <li><span lang="es">Cada nodo del anillo \(k\) se une a los del anillo \(k+1\) que están a \(d_{ij}\le d+\varepsilon\).</span><span lang="en">Each node of ring \(k\) links to those of ring \(k+1\) at \(d_{ij}\le d+\varepsilon\).</span></li>
+          <li><span lang="es">Si la proyección sobre \(z=0\) de un enlace nuevo cruza otro ya existente entre esos niveles, se descarta.</span><span lang="en">If the projection onto \(z=0\) of a new link crosses an existing one between those levels, it is discarded.</span></li>
+          <li><span lang="es">La distancia objetivo de cada enlace es la real: \(d^*_{ij}=d_{ij}\).</span><span lang="en">The target distance of each link is the actual one: \(d^*_{ij}=d_{ij}\).</span></li>
         </ol>
-        <p class="ip-small">Una cota conservadora es \(\varepsilon \le (\sqrt2-1)\,d\) (Observación 2). El número de aristas queda acotado por la <b>Proposición 1</b>: \(2N-2 \le N_e \le 3N-6\).</p>
+        <p class="ip-small"><span lang="es">Una cota conservadora es \(\varepsilon \le (\sqrt2-1)\,d\) (Observación 2). El número de aristas queda acotado por la <b>Proposición 1</b>: \(2N-2 \le N_e \le 3N-6\).</span><span lang="en">A conservative bound is \(\varepsilon \le (\sqrt2-1)\,d\) (Remark 2). The number of edges is bounded by <b>Proposition 1</b>: \(2N-2 \le N_e \le 3N-6\).</span></p>
         <div class="ip-note info ip-small">Para el área por encima de cada anillo esta página usa la aproximación de medio elipsoide de semiejes \((a_k, b_k, c-h_k)\) con la fórmula de Knud Thomsen: con ella se reproducen al milímetro la Tabla 3 y los anillos del experimento real.</div>
       </div>
     </div>
@@ -159,26 +160,26 @@
 <section class="ip-section" id="delaunay">
   <div class="ip-wrap">
     <div class="ip-section-head ip-reveal">
-      <p class="ip-eyebrow"><span class="ip-num">4</span>Triangulación de Delaunay</p>
-      <h2>¿Hay algún vecino dentro de la circunferencia?</h2>
-      <p>Una triangulación es de Delaunay si ningún nodo cae dentro de la circunferencia circunscrita de ningún triángulo. Su grafo es <b>rígido</b>, que es lo que necesita el control por distancias. El artículo extiende la comprobación local del plano a la superficie 3D (una extensión «2D+»): cada agente la puede ejecutar con la información de sus vecinos.</p>
+      <p class="ip-eyebrow"><span lang="es"><span class="ip-num">4</span>Triangulación de Delaunay</span><span lang="en"><span class="ip-num">4</span>Delaunay triangulation</span></p>
+      <h2><span lang="es">¿Hay algún vecino dentro de la circunferencia?</span><span lang="en">Is any neighbour inside the circle?</span></h2>
+      <p><span lang="es">Una triangulación es de Delaunay si ningún nodo cae dentro de la circunferencia circunscrita de ningún triángulo. Su grafo es <b>rígido</b>, que es lo que necesita el control por distancias. El artículo extiende la comprobación local del plano a la superficie 3D (una extensión «2D+»): cada agente la puede ejecutar con la información de sus vecinos.</span><span lang="en">A triangulation is Delaunay if no node lies inside the circumcircle of any triangle. Its graph is <b>rigid</b>, which is what distance-based control needs. The paper extends the local test from the plane to the 3D surface (a "2D+" extension): each agent can run it with its neighbours' information.</span></p>
     </div>
     <div class="ip-grid cols-2 ip-reveal">
       <div class="ip-card fig1">
         <svg viewBox="0 0 600 220" id="fig1" role="img" aria-label="Tres triangulaciones del mismo conjunto de puntos"></svg>
-        <p class="ip-small ip-muted ip-center">Como la Fig. 1: sólo la primera triangulación de {A, B, C, D, E} es de Delaunay.</p>
-        <h3>El test en 3D (Lema 1 y Teorema 1)</h3>
+        <p class="ip-small ip-muted ip-center"><span lang="es">Como la Fig. 1: sólo la primera triangulación de {A, B, C, D, E} es de Delaunay.</span><span lang="en">As in Fig. 1: only the first triangulation of {A, B, C, D, E} is Delaunay.</span></p>
+        <h3><span lang="es">El test en 3D (Lema 1 y Teorema 1)</span><span lang="en">The 3D test (Lemma 1 and Theorem 1)</span></h3>
         <div class="ip-eq">$$\begin{pmatrix} m_{ABC}\\ \gamma\end{pmatrix}=\tfrac12\,\Lambda^{-1}\begin{pmatrix}\|p_A\|^2\\ \|p_B\|^2\\ \|p_C\|^2\\ 2|O_{ABC}|\end{pmatrix},\qquad \Lambda=\begin{pmatrix}O_{ABC} & \mathbf 1\\ v^\top & 0\end{pmatrix}$$</div>
         <div class="ip-eq">$$r_{ABC}^2=2\gamma+\|m_{ABC}\|^2,\qquad M_{ABCD}=\begin{pmatrix}\Lambda & v_P\\ p_D^\top \;\; 1 & \|p_D\|^2\end{pmatrix}$$</div>
         <div class="ip-eq">$$|M_{ABCD}| &gt; 0 \;\Longrightarrow\; \|p_D-m_{ABC}\| \lt r_{ABC}\quad\text{(ABC no es de Delaunay)}$$</div>
       </div>
       <div class="ip-card">
         <div class="ip-toolbar">
-          <button class="ip-btn small ghost" id="triPrev" type="button">◀ Triángulo</button>
-          <button class="ip-btn small ghost" id="triNext" type="button">Triángulo ▶</button>
+          <button class="ip-btn small ghost" id="triPrev" type="button"><span lang="es">◀ Triángulo</span><span lang="en">◀ Triangle</span></button>
+          <button class="ip-btn small ghost" id="triNext" type="button"><span lang="es">Triángulo ▶</span><span lang="en">Triangle ▶</span></button>
           <span class="ip-pill" id="triBadge"></span>
         </div>
-        <div class="ip-stage stage-md"><canvas id="delCanvas"></canvas><span class="ip-stage-hint">Naranja: triángulo y su circunferencia · rojo: nodo dentro</span></div>
+        <div class="ip-stage stage-md"><canvas id="delCanvas"></canvas><span class="ip-stage-hint"><span lang="es">Naranja: triángulo y su circunferencia · rojo: nodo dentro</span><span lang="en">Orange: triangle and its circle · red: node inside</span></span></div>
         <div id="delControls" style="margin-top:12px"></div>
         <div class="ip-readouts" id="delReadouts" style="margin-top:12px"></div>
       </div>
@@ -189,21 +190,21 @@
 <section class="ip-section" id="control">
   <div class="ip-wrap">
     <div class="ip-section-head ip-reveal">
-      <p class="ip-eyebrow"><span class="ip-num">5</span>Problema II · Ley de control</p>
-      <h2>Descenso por el gradiente de un potencial</h2>
-      <p>Cada dron se modela como un integrador simple, \(\dot p_i = u_i\). La función potencial penaliza a la vez los errores de distancia con los vecinos y la distancia a la superficie, y su gradiente da una ley distribuida que sólo usa posiciones relativas de los vecinos y la propia posición:</p>
+      <p class="ip-eyebrow"><span lang="es"><span class="ip-num">5</span>Problema II · Ley de control</span><span lang="en"><span class="ip-num">5</span>Problem II · Control law</span></p>
+      <h2><span lang="es">Descenso por el gradiente de un potencial</span><span lang="en">Gradient descent on a potential</span></h2>
+      <p><span lang="es">Cada dron se modela como un integrador simple, \(\dot p_i = u_i\). La función potencial penaliza a la vez los errores de distancia con los vecinos y la distancia a la superficie, y su gradiente da una ley distribuida que sólo usa posiciones relativas de los vecinos y la propia posición:</span><span lang="en">Each drone is modelled as a single integrator, \(\dot p_i = u_i\). The potential function penalises both the distance errors with neighbours and the distance to the surface, and its gradient gives a distributed law that only uses neighbours' relative positions and the agent's own position:</span></p>
       <div class="ip-eq">$$W=\frac{\kappa_1}{4}\sum_{(i,j)\in\mathcal E}\big(d_{ij}^2-d_{ij}^{*2}\big)^2+\frac{\kappa_2}{4}\sum_{i=1}^N f(p_i)^2$$</div>
       <div class="ip-eq">$$\begin{aligned}u_i=&-\kappa_1\sum_{j\in\mathcal N_i}\big(d_{ij}^2-d_{ij}^{*2}\big)(p_i-p_j)\\&-\frac{\kappa_2}{2}f(p_i)\frac{\partial f(p_i)}{\partial p_i}+u_{r,i}\end{aligned}$$</div>
-      <p class="ip-small">\(u_{r,i}\) es un campo repulsivo que impide cruzar el plano \(z=0\) (ec. 46). El <b>Teorema 2</b> garantiza estabilidad asintótica local en la formación deseada sobre la superficie.</p>
+      <p class="ip-small"><span lang="es">\(u_{r,i}\) es un campo repulsivo que impide cruzar el plano \(z=0\) (ec. 46). El <b>Teorema 2</b> garantiza estabilidad asintótica local en la formación deseada sobre la superficie.</span><span lang="en">\(u_{r,i}\) is a repulsive field that prevents crossing the plane \(z=0\) (eq. 46). <b>Theorem 2</b> guarantees local asymptotic stability of the desired formation on the surface.</span></p>
     </div>
     <div class="ip-grid side ip-reveal">
       <div class="ip-card">
         <div class="ip-toolbar">
-          <button class="ip-btn accent" id="ctlRun" type="button">▶ Lanzar desde nuevas condiciones iniciales</button>
-          <button class="ip-btn ghost small" id="ctlPause" type="button">Pausar</button>
+          <button class="ip-btn accent" id="ctlRun" type="button"><span lang="es">▶ Lanzar desde nuevas condiciones iniciales</span><span lang="en">▶ Launch from new initial conditions</span></button>
+          <button class="ip-btn ghost small" id="ctlPause" type="button"><span lang="es">Pausar</span><span lang="en">Pause</span></button>
           <span class="ip-pill muted" id="ctlTime">t = 0 s</span>
         </div>
-        <div class="ip-stage stage-lg"><canvas id="ctlCanvas"></canvas><span class="ip-stage-hint">Trazas: trayectorias · enlaces verdes cuando |e<sub>ij</sub>| es pequeño</span></div>
+        <div class="ip-stage stage-lg"><canvas id="ctlCanvas"></canvas><span class="ip-stage-hint"><span lang="es">Trazas: trayectorias · enlaces verdes cuando |e<sub>ij</sub>| es pequeño</span><span lang="en">Traces: trajectories · green links when |e<sub>ij</sub>| is small</span></span></div>
       </div>
       <div class="ip-card">
         <div id="ctlControls"></div>
@@ -211,8 +212,8 @@
       </div>
     </div>
     <div class="ip-grid cols-2 ip-reveal" style="margin-top:18px">
-      <div class="ip-card"><div class="ip-plot-title"><span>log₁₀ ‖e(z)‖ — error de distancias</span></div><div id="ctlPlotE"></div></div>
-      <div class="ip-card"><div class="ip-plot-title"><span>log₁₀ ‖f(p)‖ — distancia a la superficie</span></div><div id="ctlPlotF"></div></div>
+      <div class="ip-card"><div class="ip-plot-title"><span><span lang="es">log₁₀ ‖e(z)‖ — error de distancias</span><span lang="en">log₁₀ ‖e(z)‖ — distance error</span></span></div><div id="ctlPlotE"></div></div>
+      <div class="ip-card"><div class="ip-plot-title"><span><span lang="es">log₁₀ ‖f(p)‖ — distancia a la superficie</span><span lang="en">log₁₀ ‖f(p)‖ — distance to the surface</span></span></div><div id="ctlPlotF"></div></div>
     </div>
   </div>
 </section>
@@ -220,22 +221,22 @@
 <section class="ip-section" id="rigidez">
   <div class="ip-wrap">
     <div class="ip-section-head ip-reveal">
-      <p class="ip-eyebrow"><span class="ip-num">6</span>Rigidez y simetrías</p>
-      <h2>¿Qué movimientos deja libres la superficie?</h2>
-      <p>En el espacio libre, una formación rígida en 3D sólo puede trasladarse y girar (6 movimientos). Pegada a la superficie ya no puede trasladarse, pero sí girar si la cuádrica tiene simetrías. El Lema 4 lo mide con el rango de la matriz aumentada que apila la matriz de rigidez y el jacobiano de la superficie:</p>
+      <p class="ip-eyebrow"><span lang="es"><span class="ip-num">6</span>Rigidez y simetrías</span><span lang="en"><span class="ip-num">6</span>Rigidity and symmetries</span></p>
+      <h2><span lang="es">¿Qué movimientos deja libres la superficie?</span><span lang="en">Which motions does the surface leave free?</span></h2>
+      <p><span lang="es">En el espacio libre, una formación rígida en 3D sólo puede trasladarse y girar (6 movimientos). Pegada a la superficie ya no puede trasladarse, pero sí girar si la cuádrica tiene simetrías. El Lema 4 lo mide con el rango de la matriz aumentada que apila la matriz de rigidez y el jacobiano de la superficie:</span><span lang="en">In free space, a rigid 3D formation can only translate and rotate (6 motions). Attached to the surface it can no longer translate, but it can still rotate if the quadric has symmetries. Lemma 4 measures this with the rank of the augmented matrix stacking the rigidity matrix and the surface Jacobian:</span></p>
       <div class="ip-eq">$$J_R=\begin{pmatrix}\kappa_1 R(z)\\ \kappa_2 J(p)\end{pmatrix},\qquad \operatorname{rank}J_R = 3N-s,\quad s=\begin{cases}0 & q_1,q_2,q_3 \text{ distintos}\\ 1 & \text{dos iguales}\\ 3 & \text{esfera}\end{cases}$$</div>
     </div>
     <div class="ip-grid cols-2 ip-reveal">
       <div class="ip-card">
         <div id="rankControls"></div>
         <div class="ip-readouts" id="rankReadouts" style="margin-top:14px"></div>
-        <div class="ip-stage stage-sm" style="margin-top:14px"><canvas id="rankCanvas"></canvas><span class="ip-stage-hint">Animación: un movimiento del núcleo de J<sub>R</sub> (si existe)</span></div>
+        <div class="ip-stage stage-sm" style="margin-top:14px"><canvas id="rankCanvas"></canvas><span class="ip-stage-hint"><span lang="es">Animación: un movimiento del núcleo de J<sub>R</sub> (si existe)</span><span lang="en">Animation: a motion in the null space of J<sub>R</sub> (if any)</span></span></div>
         <p class="ip-small ip-muted" id="rankNote" style="margin-top:8px"></p>
       </div>
       <div class="ip-card">
-        <h3>Ejemplo 2: mismas reglas, distinto final</h3>
-        <p class="ip-small">Semiesfera con N = 12 y dos condiciones iniciales distintas (rojo y azul). Ambas alcanzan la formación, pero <b>giradas</b> una respecto de la otra: es la simetría s = 3 de la esfera.</p>
-        <div class="ip-toolbar"><button class="ip-btn small" id="ex2Run" type="button">▶ Repetir</button><span class="ip-pill muted" id="ex2Angle"></span></div>
+        <h3><span lang="es">Ejemplo 2: mismas reglas, distinto final</span><span lang="en">Example 2: same rules, different outcome</span></h3>
+        <p class="ip-small"><span lang="es">Semiesfera con N = 12 y dos condiciones iniciales distintas (rojo y azul). Ambas alcanzan la formación, pero <b>giradas</b> una respecto de la otra: es la simetría s = 3 de la esfera.</span><span lang="en">Hemisphere with N = 12 and two different initial conditions (red and blue). Both reach the formation, but <b>rotated</b> with respect to each other: this is the s = 3 symmetry of the sphere.</span></p>
+        <div class="ip-toolbar"><button class="ip-btn small" id="ex2Run" type="button"><span lang="es">▶ Repetir</span><span lang="en">▶ Replay</span></button><span class="ip-pill muted" id="ex2Angle"></span></div>
         <div class="ip-stage stage-md"><canvas id="ex2Canvas"></canvas></div>
       </div>
     </div>
@@ -245,20 +246,20 @@
 <section class="ip-section" id="experimento">
   <div class="ip-wrap">
     <div class="ip-section-head ip-reveal">
-      <p class="ip-eyebrow"><span class="ip-num">7</span>Experimento</p>
-      <h2>12 Crazyflie en Robotic Park</h2>
-      <p>Seis drones reales (rojo) y seis virtuales (azul) interactúan como si todos fueran reales gracias a la plataforma en ROS 2. La semiesfera tiene R = 1 m y centro en (0, 0, 0,8) m; el Algoritmo 1 da d = 0,97 m y dos anillos de 7 y 5 drones a 0,8 y 1,57 m, con 26 enlaces. El controlador del artículo es una capa de <b>coordinación a 10 Hz</b> sobre el control de posición (100 Hz) y de actitud (500 Hz) de cada dron.</p>
+      <p class="ip-eyebrow"><span lang="es"><span class="ip-num">7</span>Experimento</span><span lang="en"><span class="ip-num">7</span>Experiment</span></p>
+      <h2><span lang="es">12 Crazyflie en Robotic Park</span><span lang="en">12 Crazyflies in Robotic Park</span></h2>
+      <p><span lang="es">Seis drones reales (rojo) y seis virtuales (azul) interactúan como si todos fueran reales gracias a la plataforma en ROS 2. La semiesfera tiene R = 1 m y centro en (0, 0, 0,8) m; el Algoritmo 1 da d = 0,97 m y dos anillos de 7 y 5 drones a 0,8 y 1,57 m, con 26 enlaces. El controlador del artículo es una capa de <b>coordinación a 10 Hz</b> sobre el control de posición (100 Hz) y de actitud (500 Hz) de cada dron.</span><span lang="en">Six real (red) and six virtual (blue) drones interact as if all were real thanks to the ROS 2 platform. The hemisphere has R = 1 m and centre (0, 0, 0.8) m; Algorithm 1 gives d = 0.97 m and two rings of 7 and 5 drones at 0.8 and 1.57 m, with 26 links. The paper's controller is a <b>10 Hz coordination layer</b> on top of each drone's position (100 Hz) and attitude (500 Hz) control.</span></p>
     </div>
     <div class="ip-grid cols-2 ip-reveal">
       <div class="ip-card">
-        <div class="ip-toolbar"><button class="ip-btn accent" id="expRun" type="button">▶ Reproducir el experimento (simulado)</button><span class="ip-pill muted" id="expTime"></span></div>
-        <div class="ip-stage stage-md"><canvas id="expCanvas"></canvas><span class="ip-stage-hint">Rojo: Crazyflie reales · azul: virtuales</span></div>
+        <div class="ip-toolbar"><button class="ip-btn accent" id="expRun" type="button"><span lang="es">▶ Reproducir el experimento (simulado)</span><span lang="en">▶ Replay the experiment (simulated)</span></button><span class="ip-pill muted" id="expTime"></span></div>
+        <div class="ip-stage stage-md"><canvas id="expCanvas"></canvas><span class="ip-stage-hint"><span lang="es">Rojo: Crazyflie reales · azul: virtuales</span><span lang="en">Red: real Crazyflies · blue: virtual</span></span></div>
       </div>
       <div class="ip-card">
-        <div class="ip-plot-title"><span>Error de cada uno de los 26 enlaces, e<sub>ij</sub> (m²)</span></div>
+        <div class="ip-plot-title"><span><span lang="es">Error de cada uno de los 26 enlaces, e<sub>ij</sub> (m²)</span><span lang="en">Error of each of the 26 links, e<sub>ij</sub> (m²)</span></span></div>
         <div id="expPlot"></div>
-        <div class="ip-plot-title" style="margin-top:10px"><span>Vídeo del experimento real</span></div>
-        <div class="video" id="video"><a class="ph" href="https://youtu.be/j8SpkPp_5zs" target="_blank" rel="noopener">▶ Ver el vídeo en YouTube</a></div>
+        <div class="ip-plot-title" style="margin-top:10px"><span><span lang="es">Vídeo del experimento real</span><span lang="en">Video of the real experiment</span></span></div>
+        <div class="video" id="video"><a class="ph" href="https://youtu.be/j8SpkPp_5zs" target="_blank" rel="noopener"><span lang="es">▶ Ver el vídeo en YouTube</span><span lang="en">▶ Watch the video on YouTube</span></a></div>
       </div>
     </div>
   </div>
@@ -267,8 +268,8 @@
 <section class="ip-section" id="quiz">
   <div class="ip-wrap">
     <div class="ip-section-head ip-reveal">
-      <p class="ip-eyebrow"><span class="ip-num">8</span>Autoevaluación</p>
-      <h2>¿Lo has entendido?</h2>
+      <p class="ip-eyebrow"><span lang="es"><span class="ip-num">8</span>Autoevaluación</span><span lang="en"><span class="ip-num">8</span>Quiz</span></p>
+      <h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2>
     </div>
     <div id="quizBox" class="ip-reveal"></div>
   </div>
@@ -277,16 +278,16 @@
 <section class="ip-section" id="citar">
   <div class="ip-wrap">
     <div class="ip-section-head ip-reveal">
-      <p class="ip-eyebrow"><span class="ip-num">9</span>Cómo citar</p>
-      <h2>Referencia</h2>
+      <p class="ip-eyebrow"><span lang="es"><span class="ip-num">9</span>Cómo citar</span><span lang="en"><span class="ip-num">9</span>How to cite</span></p>
+      <h2><span lang="es">Referencia</span><span lang="en">Reference</span></h2>
     </div>
     <div class="ip-grid cols-2 ip-reveal">
       <div class="ip-card">
         <p>Guinaldo, M., Sánchez-Moreno, J., Zaragoza, S., &amp; Mañas-Álvarez, F. J. (2024). Distributed multi-UAV shield formation based on virtual surface constraints. <em>Robotics and Autonomous Systems</em>, 176, 104684. <a href="https://doi.org/10.1016/j.robot.2024.104684" target="_blank" rel="noopener">doi:10.1016/j.robot.2024.104684</a></p>
-        <p class="ip-small ip-muted">Artículo en acceso abierto (CC BY-NC-ND 4.0). Financiado por el proyecto RECOVERY (PID2020-112658RB-I00). Continuación: <a href="../formacion-lagrange/">control de formaciones rígidas con multiplicadores de Lagrange</a>.</p>
+        <p class="ip-small ip-muted"><span lang="es">Artículo en acceso abierto (CC BY-NC-ND 4.0). Financiado por el proyecto RECOVERY (PID2020-112658RB-I00). Continuación: <a href="../formacion-lagrange/">control de formaciones rígidas con multiplicadores de Lagrange</a>.</span><span lang="en">Open-access paper (CC BY-NC-ND 4.0). Funded by the RECOVERY project (PID2020-112658RB-I00). Follow-up: <a href="../formacion-lagrange/">rigid formation control with Lagrange multipliers</a>.</span></p>
         <div class="ip-btns">
-          <a class="ip-btn" href="https://doi.org/10.1016/j.robot.2024.104684" target="_blank" rel="noopener">Artículo</a>
-          <a class="ip-btn ghost" href="../../publicaciones.html">Más publicaciones</a>
+          <a class="ip-btn" href="https://doi.org/10.1016/j.robot.2024.104684" target="_blank" rel="noopener"><span lang="es">Artículo</span><span lang="en">Paper</span></a>
+          <a class="ip-btn ghost" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><span lang="es">Más publicaciones</span><span lang="en">More publications</span></a>
         </div>
       </div>
       <div class="ip-code" id="bibtex">@article{Guinaldo2024Shield,
@@ -299,7 +300,7 @@
   pages   = {104684},
   year    = {2024},
   doi     = {10.1016/j.robot.2024.104684}
-}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex"><span lang="es">Copiar</span><span lang="en">Copy</span></button></div>
     </div>
   </div>
 </section>
@@ -308,8 +309,8 @@
 
 <footer class="ip-footer">
   <div class="ip-wrap">
-    <span>Material docente interactivo · Proyecto de innovación docente · <a href="../../index.html">Robotic Park Lab</a> — UNED</span>
-    <span>Simulaciones calculadas en tu navegador con los algoritmos del artículo.</span>
+    <span><span lang="es">Material docente interactivo · Proyecto de innovación docente · <a href="../../index.html" data-href-en="../../index_en.html">Robotic Park Lab</a> — UNED</span><span lang="en">Interactive teaching material · Teaching innovation project · <a href="../../index.html" data-href-en="../../index_en.html">Robotic Park Lab</a> — UNED</span></span>
+    <span><span lang="es">Simulaciones calculadas en tu navegador con los algoritmos del artículo.</span><span lang="en">Simulations computed in your browser with the paper's algorithms.</span></span>
   </div>
 </footer>
 

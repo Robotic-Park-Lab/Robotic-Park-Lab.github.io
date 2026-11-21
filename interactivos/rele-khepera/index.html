@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Relay on Khepera IV">Relé en Khepera IV</title>
+<meta name="description" content="Publicación interactiva: identificación en línea de robots diferenciales mediante técnicas de relé y autosintonía SIMC en el Khepera IV (Jornadas de Automática 2025). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+</head>
+<body>
+<header class="ip-topbar"><div class="ip-wrap">
+  <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
+  <nav class="ip-topnav"><a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a><a href="#rele"><span lang="es">Relé</span><span lang="en">Relay</span></a><a href="#modelos"><span lang="es">Modelos</span><span lang="en">Models</span></a><a href="#simc">SIMC</a><a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a></nav>
+</div><div class="ip-progress"></div></header>
+
+<section class="ip-hero"><div class="ip-wrap">
+  <div>
+    <p class="ip-kicker">Jornadas de Automática 46 (2025) · <span lang="es">Publicación interactiva</span><span lang="en">Interactive publication</span></p>
+    <h1><span lang="es">Un robot que se identifica a sí mismo en 0,3 s</span><span lang="en">A robot that identifies itself in 0.3 s</span></h1>
+    <p class="ip-authors"><strong>F. J. Mañas-Álvarez</strong>, M. Guinaldo, R. Dormido y S. Dormido · UNED</p>
+    <p class="ip-lead"><span lang="es">Cuando un robot diferencial carga peso, su dinámica de velocidad cambia y el PID de fábrica deja de funcionar bien. Sustituyendo un instante el PID por un relé con histéresis, el Khepera IV oscila de forma controlada, estima su propio modelo y se resintoniza con las reglas SIMC para responder siempre igual.</span><span lang="en">When a differential robot carries weight, its velocity dynamics change and the factory PID stops working well. By briefly replacing the PID with a relay with hysteresis, the Khepera IV oscillates in a controlled way, estimates its own model and retunes itself with SIMC rules to always respond the same way.</span></p>
+    <div class="ip-btns"><a class="ip-btn" href="#rele"><span lang="es">Lanzar el relé</span><span lang="en">Run the relay</span></a><a class="ip-btn ghost" href="https://doi.org/10.17979/JA-CEA.2025.46.12189" target="_blank" rel="noopener"><span lang="es">Leer el artículo</span><span lang="en">Read the paper</span></a></div>
+    <div class="ip-hero-stats"><div class="ip-hero-stat"><b>&lt; 0,3 s</b><span lang="es">para identificar</span><span lang="en">to identify</span></div><div class="ip-hero-stat"><b>−25 %</b><span lang="es">de ganancia con 2 kg</span><span lang="en">gain with 2 kg</span></div><div class="ip-hero-stat"><b>τ<sub>BC</sub> = 0,1 s</b><span lang="es">con cualquier carga</span><span lang="en">with any load</span></div></div>
+  </div>
+  <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+</div></section>
+
+<main>
+<section class="ip-section" id="mapa"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">1</span><span lang="es">Mapa conceptual</span><span lang="en">Concept map</span></p><h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2><p><span lang="es">Es la base de la <a href="../relay-autotuning/">autosintonía por relé de un gimbal (Mechatronics 2026)</a>.</span><span lang="en">It is the basis of the <a href="../relay-autotuning/">relay autotuning of a gimbal (Mechatronics 2026)</a>.</span></p></div>
+  <div class="ip-cmap ip-reveal"><div id="cmap"></div><aside class="ip-card ip-cmap-panel" id="cmapPanel"></aside></div>
+</div></section>
+
+<section class="ip-section" id="rele"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">2</span><span lang="es">Experimento del relé</span><span lang="en">Relay experiment</span></p>
+    <h2><span lang="es">Un ciclo límite que revela el modelo</span><span lang="en">A limit cycle that reveals the model</span></h2>
+    <p><span lang="es">El relé de amplitud \(d\) e histéresis \(\delta\) provoca una oscilación de amplitud \(a\) y frecuencia \(\omega_u\). La función descriptiva da la ganancia crítica:</span><span lang="en">The relay of amplitude \(d\) and hysteresis \(\delta\) causes an oscillation of amplitude \(a\) and frequency \(\omega_u\). The describing function gives the critical gain:</span></p>
+    <div class="ip-eq">$$-\frac{1}{N(a)}=-\frac{\pi}{4d}\Big(\sqrt{a^2-\delta^2}+j\,\delta\Big),\qquad K_u=\frac{4d}{\pi\sqrt{a^2-\delta^2}}$$</div></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-toolbar"><div id="loadSeg"></div><button class="ip-btn accent small" id="run" type="button">▶ <span lang="es">Relé</span><span lang="en">Relay</span></button></div>
+      <div class="ip-plot-title"><span lang="es">Velocidad v (mm/s) y señal del relé u (% PWM)</span><span lang="en">Velocity v (mm/s) and relay signal u (% PWM)</span></div><div id="pv"></div><div id="pu"></div></div>
+    <div class="ip-card"><div id="ctl"></div><div class="ip-readouts" id="ro" style="margin-top:14px"></div><p class="ip-small ip-muted" style="margin-top:10px"><span lang="es">Planta de ejemplo de primer orden con retardo (D = 0,02 s) y los valores relativos del artículo: pérdida de ganancia y aumento de τ con la carga. Para ajustar los modelos se usa el primer armónico del ciclo, más preciso que la aproximación de la función descriptiva cuando la oscilación no es senoidal.</span><span lang="en">Example first-order-plus-delay plant (D = 0.02 s) with the paper's relative values: gain loss and τ increase with load. The models are fitted with the cycle's first harmonic, more accurate than the describing-function approximation when the oscillation is not sinusoidal.</span></p></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="modelos"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">3</span><span lang="es">Del ciclo límite al modelo</span><span lang="en">From limit cycle to model</span></p>
+    <h2><span lang="es">FOTD o SOTD, fijando el retardo</span><span lang="en">FOTD or SOTD, fixing the delay</span></h2>
+    <p><span lang="es">Con un único punto de la respuesta en frecuencia hay que prefijar un parámetro: el retardo medido \(D = 0{,}02\) s. El modelo integrador con retardo se descartó: daba ganancias hasta 20 veces mayores que las medidas.</span><span lang="en">With a single frequency-response point one parameter must be fixed: the measured delay \(D = 0.02\) s. The integrator-plus-delay model was rejected: it gave gains up to 20 times larger than measured.</span></p>
+    <div class="ip-eq">$$G_1(s)=\frac{k_p}{\tau s+1}e^{-Ds}\qquad G_2(s)=\frac{k_p}{(\tau s+1)^2}e^{-Ds}$$</div></div>
+  <div class="ip-grid cols-2 ip-reveal">
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Plano de Nyquist: G(jω) real, modelos y −1/N(a)</span><span lang="en">Nyquist plane: true G(jω), models and −1/N(a)</span></div><div id="pn"></div></div>
+    <div class="ip-card"><div class="ip-table-wrap"><table class="ip-table" id="tm"></table></div><div class="ip-plot-title" style="margin-top:14px"><span lang="es">Ganancia estática relativa k<sub>p</sub> (artículo)</span><span lang="en">Relative static gain k<sub>p</sub> (paper)</span></div><div id="pk"></div></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="simc"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">4</span><span lang="es">Autosintonía SIMC</span><span lang="en">SIMC autotuning</span></p>
+    <h2><span lang="es">La misma respuesta con o sin carga</span><span lang="en">The same response with or without load</span></h2>
+    <p><span lang="es">Con \(\tau_c = 0{,}1\) s, la regla SIMC fija el PID a partir del modelo identificado:</span><span lang="en">With \(\tau_c = 0.1\) s, the SIMC rule sets the PID from the identified model:</span></p>
+    <div class="ip-eq">$$K_P=\frac{1}{k_p}\frac{\tau}{\tau_c+D},\qquad T_I=\min\{\tau,\;4(\tau_c+D)\},\qquad T_D=\begin{cases}-&amp;\text{FOTD}\\ \tau&amp;\text{SOTD}\end{cases}$$</div></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Escalón de velocidad de 50 mm/s</span><span lang="en">50 mm/s velocity step</span></div><div id="ps"></div></div>
+    <div class="ip-card"><div id="ctl2"></div><div class="ip-readouts" id="ro2" style="margin-top:14px"></div><div class="ip-note ip-small" style="margin-top:12px"><span lang="es"><b>Artículo:</b> el controlador de serie oscila al cargar el robot; el resintonizado con SIMC mantiene \(\tau_{BC} = 0{,}1\) s sea cual sea la carga.</span><span lang="en"><b>Paper:</b> the factory controller oscillates when the robot is loaded; the SIMC-retuned one keeps \(\tau_{BC} = 0.1\) s regardless of the load.</span></div></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="quiz"><div class="ip-wrap"><div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">5</span><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></p><h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2></div><div id="quizBox" class="ip-reveal"></div></div></section>
+
+<section class="ip-section" id="citar"><div class="ip-wrap"><div class="ip-grid cols-2 ip-reveal">
+  <div class="ip-card"><h3><span lang="es">Cómo citar</span><span lang="en">How to cite</span></h3><p>Mañas-Álvarez, F. J., Guinaldo, M., Dormido, R., &amp; Dormido, S. (2025). Identificación en línea de robots diferenciales mediante técnicas de relé. <em>Jornadas de Automática</em>, 46. <a href="https://doi.org/10.17979/JA-CEA.2025.46.12189" target="_blank" rel="noopener">doi:10.17979/JA-CEA.2025.46.12189</a></p></div>
+  <div class="ip-code" id="bibtex">@inproceedings{ManasAlvarez2025Rele,
+  title     = {Identificaci{\'o}n en l{\'i}nea de robots diferenciales
+               mediante t{\'e}cnicas de rel{\'e}},
+  author    = {Ma{\~n}as-{\'A}lvarez, F. J. and Guinaldo, M. and Dormido, R.
+               and Dormido, S.},
+  booktitle = {Jornadas de Autom{\'a}tica},
+  number    = {46},
+  year      = {2025},
+  doi       = {10.17979/JA-CEA.2025.46.12189}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+</div></div></section>
+</main>
+<footer class="ip-footer"><div class="ip-wrap"><span><span lang="es">Material docente interactivo · Proyecto de innovación docente</span><span lang="en">Interactive teaching material · Teaching innovation project</span> · <a href="../../index.html">Robotic Park Lab</a> — UNED</span><span lang="es">Simulación didáctica con una planta de ejemplo.</span><span lang="en">Teaching simulation with an example plant.</span></div></footer>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Blockchain controllers">Controladores en blockchain</title>
+<meta name="description" content="Publicación interactiva: controladores en la nube basados en blockchain para sistemas de control en red fiables, con control por eventos (Journal of Industrial Information Integration 2025). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>
+  .chain{display:flex;gap:8px;overflow:hidden;padding:6px 2px;min-height:62px;align-items:center}
+  .blk{flex:0 0 auto;width:74px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);padding:6px 8px;font-family:var(--font-mono);font-size:.68rem;color:var(--muted);position:relative;animation:blkIn .35s ease}
+  .blk b{display:block;color:var(--primary);font-size:.74rem}
+  .blk::before{content:'';position:absolute;left:-9px;top:50%;width:8px;border-top:2px solid var(--border)}
+  .blk:first-child::before{display:none}
+  .blk.pending{border-style:dashed;opacity:.6}
+  @keyframes blkIn{from{transform:translateY(-8px);opacity:0}to{transform:none;opacity:1}}
+  .lbars{display:grid;gap:8px}
+  .lbar{display:grid;grid-template-columns:90px 1fr 110px;gap:10px;align-items:center;font-size:.86rem}
+  .lbar .tr{height:16px;background:var(--surface-2);border-radius:8px;overflow:hidden;position:relative}
+  .lbar .tr i{position:absolute;inset:0 auto 0 0;background:var(--s1);border-radius:8px;transition:width .4s}
+  .lbar .tr i.r{background:var(--s2)}
+  .lbar span:last-child{font-family:var(--font-mono);text-align:right}
+  .lbar.no{opacity:.45}
+  @media(max-width:600px){.lbar{grid-template-columns:70px 1fr 90px}}
+</style>
+</head>
+<body>
+<header class="ip-topbar"><div class="ip-wrap">
+  <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
+  <nav class="ip-topnav"><a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a><a href="#lazo"><span lang="es">Lazo</span><span lang="en">Loop</span></a><a href="#redes"><span lang="es">Redes</span><span lang="en">Networks</span></a><a href="#invernadero"><span lang="es">Invernadero</span><span lang="en">Greenhouse</span></a><a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a></nav>
+</div><div class="ip-progress"></div></header>
+
+<section class="ip-hero"><div class="ip-wrap">
+  <div>
+    <p class="ip-kicker">Journal of Industrial Information Integration 47 (2025) 100902 · <span lang="es">Publicación interactiva</span><span lang="en">Interactive publication</span></p>
+    <h1><span lang="es">Un controlador que no se puede caer</span><span lang="en">A controller that cannot go down</span></h1>
+    <p class="ip-authors">Z. Lei, L. de la Torre, <strong>F. J. Mañas-Álvarez</strong> y W. Hu · Wuhan University y UNED</p>
+    <p class="ip-lead"><span lang="es">Si el controlador en la nube falla o es atacado, la planta se queda sin control. Programado como contrato inteligente en una blockchain, el controlador está replicado en todos los nodos: siempre disponible, abierto e inmutable. El precio son el tiempo de confirmación y el coste de cada transacción, que el control por eventos reduce drásticamente.</span><span lang="en">If the cloud controller fails or is attacked, the plant is left uncontrolled. Written as a smart contract on a blockchain, the controller is replicated on every node: always available, open and immutable. The price is the confirmation time and the cost of each transaction, which event-based control cuts drastically.</span></p>
+    <div class="ip-btns"><a class="ip-btn" href="#lazo"><span lang="es">Controlar desde la cadena</span><span lang="en">Control from the chain</span></a><a class="ip-btn ghost" href="https://doi.org/10.1016/J.JII.2025.100902" target="_blank" rel="noopener"><span lang="es">Leer el artículo</span><span lang="en">Read the paper</span></a></div>
+    <div class="ip-hero-stats"><div class="ip-hero-stat"><b>27,73×</b><span lang="es">menos coste en Fantom con eventos</span><span lang="en">lower cost on Fantom with events</span></div><div class="ip-hero-stat"><b>~95 %</b><span lang="es">menos transacciones</span><span lang="en">fewer transactions</span></div><div class="ip-hero-stat"><b>6</b><span lang="es">redes comparadas</span><span lang="en">networks compared</span></div></div>
+  </div>
+  <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+</div></section>
+
+<main>
+<section class="ip-section" id="mapa"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">1</span><span lang="es">Mapa conceptual</span><span lang="en">Concept map</span></p><h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2></div>
+  <div class="ip-cmap ip-reveal"><div id="cmap"></div><aside class="ip-card ip-cmap-panel" id="cmapPanel"></aside></div>
+</div></section>
+
+<section class="ip-section" id="lazo"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">2</span><span lang="es">Lazo cerrado a través de la cadena</span><span lang="en">Closed loop through the chain</span></p>
+    <h2><span lang="es">Un PI en un contrato inteligente</span><span lang="en">A PI in a smart contract</span></h2>
+    <p><span lang="es">La planta llama a <code>Update error</code> (escribe en la cadena: es una transacción con coste y tarda el TTF de la red en confirmarse) y lee <code>Compute control action</code> (lectura gratuita desde cualquier nodo). Con <i>send-on-delta</i> sólo se escribe cuando la medida cambia más de δ:</span><span lang="en">The plant calls <code>Update error</code> (it writes to the chain: a transaction that costs money and takes the network's TTF to confirm) and reads <code>Compute control action</code> (a free read from any node). With send-on-delta it only writes when the measurement changes by more than δ:</span></p>
+    <div class="ip-eq">$$u(t_k)=K_p\,e(t_k)+K_i\sum_{j=0}^{k}e(t_j)\,\Delta t_j,\qquad |x(t_k)-x(t_s)|&gt;\delta,\qquad y_{cost}=c_{cpt}\,n_t$$</div></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-toolbar"><div id="sampSeg"></div><button class="ip-btn accent small" id="run" type="button">▶ <span lang="es">Reiniciar</span><span lang="en">Restart</span></button><span class="ip-pill muted" id="tt"></span></div>
+      <div class="ip-plot-title"><span lang="es">Temperatura interior del invernadero (°C)</span><span lang="en">Greenhouse indoor temperature (°C)</span></div><div id="py"></div>
+      <div class="ip-plot-title" style="margin-top:6px"><span lang="es">Últimos bloques con tu controlador</span><span lang="en">Latest blocks with your controller</span></div><div class="chain" id="chain"></div></div>
+    <div class="ip-card"><div id="ctl"></div><div class="ip-readouts" id="ro" style="margin-top:12px"></div></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="redes"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">3</span><span lang="es">¿Qué red sirve?</span><span lang="en">Which network works?</span></p>
+    <h2><span lang="es">Tiempo de confirmación frente a coste</span><span lang="en">Confirmation time vs cost</span></h2>
+    <p><span lang="es">Una red sólo es viable si confirma antes del siguiente muestreo (TTF<sub>máx</sub> ≤ T<sub>s</sub>). Elige el periodo y mira el coste diario con muestreo periódico: \(y_{cost}=c_{cpt}\cdot 86400/T_s\).</span><span lang="en">A network is only viable if it confirms before the next sample (TTF<sub>max</sub> ≤ T<sub>s</sub>). Pick the period and see the daily cost with periodic sampling: \(y_{cost}=c_{cpt}\cdot 86400/T_s\).</span></p></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">TTF (escala logarítmica)</span><span lang="en">TTF (log scale)</span></div><div class="lbars" id="bTTF"></div><div class="ip-plot-title" style="margin-top:16px"><span lang="es">Coste diario a T<sub>s</sub> (escala logarítmica)</span><span lang="en">Daily cost at T<sub>s</sub> (log scale)</span></div><div class="lbars" id="bCost"></div></div>
+    <div class="ip-card"><div id="ctl2"></div><div class="ip-note ip-small" style="margin-top:12px"><span lang="es"><b>Artículo:</b> con T<sub>s</sub> = 3 s, Polygon cuesta 86,4 $/día y Fantom 1,152 $/día. Bitcoin (TTF ≈ 2400 s) sólo serviría para procesos lentísimos; las redes rápidas no valen para \(\tau &lt; 1\) s.</span><span lang="en"><b>Paper:</b> with T<sub>s</sub> = 3 s, Polygon costs $86.4/day and Fantom $1.152/day. Bitcoin (TTF ≈ 2400 s) would only suit extremely slow processes; even fast networks do not work for \(\tau &lt; 1\) s.</span></div><p class="ip-small ip-muted"><span lang="es">Costes por transacción del artículo; WAX (sin coste) no se incluye por no tener TTF comparable.</span><span lang="en">Per-transaction costs from the paper; WAX (no cost) is not included as it has no comparable TTF.</span></p></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="invernadero"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">4</span><span lang="es">Caso de estudio</span><span lang="en">Case study</span></p>
+    <h2><span lang="es">Un invernadero durante 8 días</span><span lang="en">A greenhouse over 8 days</span></h2>
+    <p><span lang="es">Seis variables con umbral δ = 5 % de su rango. Con eventos, el número de transacciones —y por tanto el coste— cae entre 9 y 43 veces; de media, 27,73 veces.</span><span lang="en">Six variables with threshold δ = 5% of their range. With events, the number of transactions —and therefore the cost— drops between 9 and 43 times; 27.73 times on average.</span></p></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-table-wrap"><table class="ip-table" id="tcase"></table></div></div>
+    <div class="ip-card"><div id="ctl3"></div><div class="ip-readouts" id="ro3" style="margin-top:12px"></div></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="quiz"><div class="ip-wrap"><div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">5</span><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></p><h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2></div><div id="quizBox" class="ip-reveal"></div></div></section>
+
+<section class="ip-section" id="citar"><div class="ip-wrap"><div class="ip-grid cols-2 ip-reveal">
+  <div class="ip-card"><h3><span lang="es">Cómo citar</span><span lang="en">How to cite</span></h3><p>Lei, Z., de la Torre, L., Mañas-Álvarez, F. J., &amp; Hu, W. (2025). Blockchain-based cloud controllers for reliable networked control systems. <em>Journal of Industrial Information Integration</em>, 47, 100902. <a href="https://doi.org/10.1016/J.JII.2025.100902" target="_blank" rel="noopener">doi:10.1016/J.JII.2025.100902</a></p></div>
+  <div class="ip-code" id="bibtex">@article{Lei2025Blockchain,
+  title   = {Blockchain-based cloud controllers for reliable
+             networked control systems},
+  author  = {Lei, Z. and de la Torre, L. and Ma{\~n}as-{\'A}lvarez, F. J.
+             and Hu, W.},
+  journal = {Journal of Industrial Information Integration},
+  volume  = {47}, pages = {100902},
+  year    = {2025},
+  doi     = {10.1016/J.JII.2025.100902}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+</div></div></section>
+</main>
+<footer class="ip-footer"><div class="ip-wrap"><span><span lang="es">Material docente interactivo · Proyecto de innovación docente</span><span lang="en">Interactive teaching material · Teaching innovation project</span> · <a href="../../index.html">Robotic Park Lab</a> — UNED</span><span lang="es">Simulación didáctica; TTF, costes y muestras, del artículo.</span><span lang="en">Teaching simulation; TTF, costs and samples from the paper.</span></div></footer>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

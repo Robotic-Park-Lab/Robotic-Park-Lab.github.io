@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Vision-based platform">Plataforma con visión</title>
+<meta name="description" content="Publicación interactiva: plataforma ROS 2 de navegación basada en visión (Vicon) para el aprendizaje de control con Crazyflie 2.1 (IFAC ACE 2022). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>
+  .arch svg { width: 100%; height: auto; }
+  .arch .nd { cursor: pointer; }
+  .arch .nd rect { fill: var(--surface-2); stroke: var(--border); stroke-width: 1.5; }
+  .arch .nd text { fill: var(--text); font: 600 13px var(--font); pointer-events: none; }
+  .arch .nd .sub { fill: var(--muted); font: 500 11px var(--font); }
+  .arch .nd.on rect { fill: var(--primary-soft); stroke: var(--primary); stroke-width: 2.5; }
+  .arch .nd.board rect { stroke: var(--accent); }
+  .arch .wire { stroke: var(--axis); stroke-width: 1.8; fill: none; }
+  .arch .pk { fill: var(--accent); }
+  .arch .zone { fill: none; stroke: var(--border); stroke-dasharray: 6 5; }
+  .arch .zl { font: 700 11px var(--font); fill: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<header class="ip-topbar"><div class="ip-wrap">
+  <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
+  <nav class="ip-topnav"><a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a><a href="#arquitectura"><span lang="es">Arquitectura</span><span lang="en">Architecture</span></a><a href="#altitud"><span lang="es">Altitud</span><span lang="en">Altitude</span></a><a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a></nav>
+</div><div class="ip-progress"></div></header>
+
+<section class="ip-hero"><div class="ip-wrap">
+  <div>
+    <p class="ip-kicker">IFAC ACE 2022 · Hamburg · <span lang="es">Publicación interactiva</span><span lang="en">Interactive publication</span></p>
+    <h1><span lang="es">Un laboratorio de nano-drones para aprender control</span><span lang="en">A nano-drone lab to learn control</span></h1>
+    <p class="ip-authors"><strong>F. J. Mañas-Álvarez</strong>, R. Dormido, M. Guinaldo, R. Socas y S. Dormido · UNED</p>
+    <p class="ip-lead"><span lang="es">Un Crazyflie 2.1 pesa 27 g y no puede ejecutar mucho más que su control de actitud. Esta plataforma, germen de Robotic Park, lo localiza con cámaras Vicon, saca el control de posición a un PC con ROS 2 y lo ejecuta por eventos para no saturar la radio.</span><span lang="en">A Crazyflie 2.1 weighs 27 g and can hardly run more than its attitude controller. This platform, the seed of Robotic Park, tracks it with Vicon cameras, moves position control to a ROS 2 PC and runs it event-based so as not to saturate the radio link.</span></p>
+    <div class="ip-btns"><a class="ip-btn" href="#arquitectura"><span lang="es">Explorar la arquitectura</span><span lang="en">Explore the architecture</span></a><a class="ip-btn ghost" href="https://doi.org/10.1016/j.ifacol.2022.09.270" target="_blank" rel="noopener"><span lang="es">Leer el artículo</span><span lang="en">Read the paper</span></a></div>
+    <div class="ip-hero-stats">
+      <div class="ip-hero-stat"><b><span lang="es">−92 %</span><span lang="en">−92%</span></b><span lang="es">mensajes del lazo de altitud</span><span lang="en">altitude-loop messages</span></div>
+      <div class="ip-hero-stat"><b><span lang="es">−52 %</span><span lang="en">−52%</span></b><span lang="es">mensajes del lazo de velocidad</span><span lang="en">velocity-loop messages</span></div>
+      <div class="ip-hero-stat"><b>≈</b><span lang="es">mismo IAE, ITAE y MSE</span><span lang="en">same IAE, ITAE and MSE</span></div>
+    </div>
+  </div>
+  <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+</div></section>
+
+<main>
+<section class="ip-section" id="mapa"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">1</span><span lang="es">Mapa conceptual</span><span lang="en">Concept map</span></p><h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2></div>
+  <div class="ip-cmap ip-reveal"><div id="cmap"></div><aside class="ip-card ip-cmap-panel" id="cmapPanel"></aside></div>
+</div></section>
+
+<section class="ip-section" id="arquitectura"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">2</span><span lang="es">Arquitectura</span><span lang="en">Architecture</span></p>
+    <h2><span lang="es">De las cámaras a los motores</span><span lang="en">From the cameras to the motors</span></h2>
+    <p><span lang="es">Pulsa cada bloque. Los puntos naranjas son mensajes: compara su densidad con muestreo periódico y por eventos.</span><span lang="en">Click each block. Orange dots are messages: compare their density with periodic and event-based sampling.</span></p></div>
+  <div class="ip-card ip-reveal">
+    <div class="ip-toolbar"><div id="archSeg"></div><span class="ip-pill muted" id="archRate"></span></div>
+    <div class="arch" id="arch"></div>
+    <div class="ip-note info ip-small" id="archInfo"></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="altitud"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">3</span><span lang="es">Caso de uso</span><span lang="en">Use case</span></p>
+    <h2><span lang="es">Escalón de altitud con PI en cascada fuera de placa</span><span lang="en">Altitude step with off-board cascaded PI</span></h2>
+    <p><span lang="es">Lazo externo de posición Z (\(K_p = 2\), \(K_i = 0{,}5\)) que manda consignas al lazo interno de velocidad W (\(K_p = 25\), \(K_i = 15\)), ambos en el PC a 100 Hz o por eventos con umbral adaptativo. El control de actitud sigue a bordo a 500 Hz.</span><span lang="en">An outer Z position loop (\(K_p = 2\), \(K_i = 0.5\)) feeds the inner W velocity loop (\(K_p = 25\), \(K_i = 15\)), both on the PC at 100 Hz or event-based with an adaptive threshold. Attitude control stays on board at 500 Hz.</span></p>
+    <div class="ip-eq">$$u_k = K_pe_k + I_k,\qquad I_k = I_{k-1}+K_i\,\Delta t\,e_{k-1},\qquad |e(t_k)-e(t)| > c_0 + a\,|e(t)| + c_n(t)\;\Rightarrow\;\text{evento / event}$$</div></div>
+  <div class="ip-grid side-left ip-reveal">
+    <div class="ip-card"><div id="ctl"></div><div class="ip-readouts" id="ro" style="margin-top:14px"></div></div>
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Altitud (m)</span><span lang="en">Altitude (m)</span></div><div id="pz"></div><div class="ip-plot-title" style="margin-top:10px"><span lang="es">Mensajes acumulados</span><span lang="en">Cumulative messages</span></div><div id="pm"></div></div>
+  </div>
+  <div class="ip-card ip-reveal" style="margin-top:18px"><h3><span lang="es">Resultados del artículo (Tabla 2)</span><span lang="en">Paper results (Table 2)</span></h3>
+    <div class="ip-table-wrap"><table class="ip-table"><thead><tr><th></th><th><span lang="es">Mensajes</span><span lang="en">Messages</span></th><th>IAE</th><th>ITAE</th><th>MSE</th></tr></thead><tbody>
+      <tr><td><span lang="es">PID periódico</span><span lang="en">Periodic PID</span></td><td class="num">1250</td><td class="num">1,7767</td><td class="num">13,9655</td><td class="num">0,2513</td></tr>
+      <tr class="best"><td><span lang="es">PID por eventos</span><span lang="en">Event-based PID</span></td><td class="num">593 (W) · 92 (Z)</td><td class="num">1,7721</td><td class="num">13,9388</td><td class="num">0,2474</td></tr>
+    </tbody></table></div></div>
+</div></section>
+
+<section class="ip-section" id="quiz"><div class="ip-wrap"><div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">4</span><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></p><h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2></div><div id="quizBox" class="ip-reveal"></div></div></section>
+
+<section class="ip-section" id="citar"><div class="ip-wrap"><div class="ip-grid cols-2 ip-reveal">
+  <div class="ip-card"><h3><span lang="es">Cómo citar</span><span lang="en">How to cite</span></h3><p>Mañas-Álvarez, F. J., Dormido, R., Guinaldo, M., Socas, R., &amp; Dormido, S. (2022). A vision based navigation platform for control learning. <em>IFAC-PapersOnLine</em>, 55(17), 138–143. <a href="https://doi.org/10.1016/j.ifacol.2022.09.270" target="_blank" rel="noopener">doi:10.1016/j.ifacol.2022.09.270</a></p></div>
+  <div class="ip-code" id="bibtex">@article{ManasAlvarez2022Vision,
+  title   = {A vision based navigation platform for control learning},
+  author  = {Ma{\~n}as-{\'A}lvarez, F. J. and Dormido, R. and Guinaldo, M.
+             and Socas, R. and Dormido, S.},
+  journal = {IFAC-PapersOnLine},
+  volume  = {55}, number = {17}, pages = {138--143},
+  year    = {2022},
+  doi     = {10.1016/j.ifacol.2022.09.270}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+</div></div></section>
+</main>
+<footer class="ip-footer"><div class="ip-wrap"><span><span lang="es">Material docente interactivo · Proyecto de innovación docente</span><span lang="en">Interactive teaching material · Teaching innovation project</span> · <a href="../../index.html">Robotic Park Lab</a> — UNED</span><span lang="es">Simulación didáctica; la Tabla 2 recoge los resultados experimentales.</span><span lang="en">Teaching simulation; Table 2 lists the experimental results.</span></div></footer>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="../lib/altitud.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>
