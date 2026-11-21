@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Investigación — Robotic Park Lab</title>
-<meta name="description" content="Líneas de investigación, proyectos y publicaciones de Robotic Park Lab (UNED): control multi-agente, sistemas ciberfísicos y realidad mixta.">
+<meta name="description" content="Líneas de investigación, propuestas de PFG y TFM, y proyectos de I+D+i e innovación docente de Robotic Park Lab (UNED).">
 <link rel="icon" href="assets/img/logo.png">
 <link rel="stylesheet" href="assets/style.css">
 </head>
@@ -16,6 +16,7 @@
     <nav class="site-nav">
       <a href="index.html">Inicio</a>
       <a href="investigacion.html" aria-current="page">Investigación</a>
+      <a href="publicaciones.html">Publicaciones</a>
       <a href="plataforma.html">Plataforma</a>
       <a href="equipo.html">Equipo</a>
       <a href="benchmarks.html">Benchmarks</a>
@@ -29,11 +30,20 @@
 
     <section class="section">
       <p class="eyebrow">Investigación</p>
-      <h1 class="section-title">Líneas, proyectos y publicaciones</h1>
+      <h1 class="section-title">Líneas, propuestas y proyectos</h1>
+      <p>
+        La investigación del laboratorio se centra en el control y la navegación de sistemas multi-agente
+        robóticos: formaciones de drones y robots móviles, control basado en eventos, sistemas ciberfísicos
+        cooperativos y realidad mixta. Todo se apoya en <a href="plataforma.html">Robotic Park</a>, una
+        plataforma experimental integrada en ROS 2 con robots aéreos y terrestres reales y virtuales.
+        Aquí se recogen las líneas de trabajo, las propuestas abiertas de PFG y TFM y los proyectos en los
+        que ha participado el laboratorio. Las publicaciones están en <a href="publicaciones.html">Publicaciones</a>.
+      </p>
       <nav class="toc" aria-label="Secciones de esta página">
         <a href="#lineas">Líneas de investigación</a>
-        <a href="#proyectos">Proyectos y contratos de I+D+i</a>
-        <a href="#publicaciones">Publicaciones</a>
+        <a href="#pfg-tfm">Propuestas de PFG y TFM</a>
+        <a href="#proyectos">Proyectos de investigación</a>
+        <a href="#innovaciondocente">Innovación docente</a>
       </nav>
     </section>
 
@@ -42,119 +52,148 @@
       <div class="grid-cards">
         <div class="item-card">
           <h3>Control de formaciones multi-robot</h3>
-          <p>Formaciones basadas en distancia, restricciones de superficie virtual y reconfiguración/morphing de formaciones en sistemas multi-agente.</p>
+          <p>Formaciones basadas en distancia, restricciones de superficie virtual, multiplicadores de Lagrange y reconfiguración o <em>morphing</em> de formaciones en sistemas multi-agente.</p>
         </div>
         <div class="item-card">
           <h3>Control basado en eventos</h3>
-          <p>Estrategias de muestreo y comunicación basadas en eventos aplicadas al control de formaciones y a plataformas aéreas (Crazyflie).</p>
+          <p>Estrategias de muestreo y comunicación basadas en eventos con umbrales adaptativos, aplicadas al control de formaciones y a plataformas aéreas (Crazyflie).</p>
         </div>
         <div class="item-card">
           <h3>Sistemas ciberfísicos cooperativos</h3>
-          <p>Diseño eficiente y control distribuido de sistemas ciberfísicos heterogéneos, con atención a restricciones de comunicación y computación.</p>
+          <p>Diseño eficiente y control distribuido de sistemas ciberfísicos heterogéneos, con atención a las restricciones de comunicación y computación.</p>
         </div>
         <div class="item-card">
           <h3>Resiliencia y seguridad</h3>
-          <p>Arquitecturas y algoritmos de control resilientes y seguros frente a amenazas y ataques en sistemas ciberfísicos cooperativos.</p>
+          <p>Arquitecturas y algoritmos de control resilientes y seguros frente a fallos y ataques en sistemas ciberfísicos cooperativos.</p>
         </div>
         <div class="item-card">
           <h3>Realidad mixta multi-agente</h3>
-          <p>Combinación de agentes reales y virtuales en un entorno extendido para escalar experimentos de enjambre más allá del espacio físico disponible.</p>
+          <p>Combinación de agentes reales y virtuales (gemelos digitales en Gazebo y Webots) para escalar experimentos de enjambre más allá del espacio físico disponible.</p>
         </div>
         <div class="item-card">
           <h3>Identificación y control híbrido</h3>
-          <p>Nuevos paradigmas de identificación y control híbrido para sistemas de alto rendimiento, incluyendo técnicas de autotuning basadas en relé.</p>
+          <p>Identificación por relé, autosintonía de controladores PID y nuevos paradigmas de identificación y control híbrido para sistemas de alto rendimiento.</p>
         </div>
         <div class="item-card">
           <h3>Robótica aérea</h3>
-          <p>Calibración, control de actitud/posición y formaciones distribuidas con cuadricópteros Crazyflie 2.X.</p>
+          <p>Calibración, control de actitud y posición, ensayos en gimbal y formaciones distribuidas con cuadricópteros Crazyflie 2.X.</p>
         </div>
         <div class="item-card">
           <h3>Robótica de campo</h3>
-          <p>Navegación autónoma de robots móviles y colaborativos para transporte en invernaderos mediterráneos.</p>
+          <p>Navegación autónoma de robots móviles y colaborativos para tareas de transporte en invernaderos mediterráneos.</p>
         </div>
+      </div>
+    </section>
+
+    <section class="section" id="pfg-tfm">
+      <h2 class="section-title">Propuestas de PFG y TFM</h2>
+      <p>
+        Trabajos abiertos para Proyecto Fin de Grado (Grado en Ingeniería de Tecnologías de la Información, 18 ECTS) y
+        Trabajo Fin de Máster (Máster en Ingeniería Informática, 12 ECTS). Si te interesa alguno, escribe a los
+        directores indicados.
+      </p>
+
+      <div class="card proposal">
+        <h3>Navegación cooperativa de formaciones multi-robot mediante estrategias de <em>morphing</em></h3>
+        <div class="proposal-meta">Directores: Francisco José Mañas Álvarez (<a href="mailto:fjmanas@dia.uned.es">fjmanas@dia.uned.es</a>), Raquel Dormido Canto (<a href="mailto:raquel@dia.uned.es">raquel@dia.uned.es</a>) y María Guinaldo Losada (<a href="mailto:mguinaldo@dia.uned.es">mguinaldo@dia.uned.es</a>)</div>
+        <p>El trabajo consistirá en el estudio, desarrollo e implementación de estrategias de <em>morphing</em> para la navegación cooperativa de sistemas multi-robot. El objetivo es permitir que una formación de robots modifique dinámicamente su geometría para adaptarse a restricciones del entorno, tales como obstáculos, pasillos estrechos o cambios en la misión, manteniendo la cohesión y conectividad del grupo. Se desarrollarán algoritmos de control distribuido y coordinación basados en representaciones geométricas de la formación, evaluándose inicialmente en simulación (ROS 2/Gazebo) y, de forma opcional, sobre plataformas robóticas reales. El trabajo permitirá abordar conceptos relacionados con control cooperativo, robótica multi-agente y planificación de trayectorias.</p>
+        <ul class="tag-list"><li>Control distribuido</li><li>Multi-robot</li><li>ROS 2 / Gazebo</li></ul>
+        <ul class="proposal-refs">
+          <li>Liu, L., &amp; Shell, D. A. (2014). Multi-robot formation morphing through a graph matching problem. In <em>Distributed Autonomous Robotic Systems: The 11th International Symposium</em> (pp. 291–306). Springer.</li>
+          <li>Oh, K.-K., Park, M.-C., &amp; Ahn, H.-S. (2015). A survey of multi-agent formation control. <em>Automatica</em>, 53, 424–440.</li>
+        </ul>
+      </div>
+
+      <div class="card proposal">
+        <h3>Identificación de modelos dinámicos y ajuste de controladores para robots mediante Factor Graphs y GTSAM</h3>
+        <div class="proposal-meta">Directores: Francisco José Mañas Álvarez (<a href="mailto:fjmanas@dia.uned.es">fjmanas@dia.uned.es</a>), Raquel Dormido Canto (<a href="mailto:raquel@dia.uned.es">raquel@dia.uned.es</a>) y María Guinaldo Losada (<a href="mailto:mguinaldo@dia.uned.es">mguinaldo@dia.uned.es</a>)</div>
+        <p>El trabajo consistirá en la investigación y aplicación de técnicas de optimización basadas en Factor Graphs para la identificación de modelos dinámicos de robots aéreos y el ajuste automático de sus controladores. Se utilizará la librería GTSAM (Georgia Tech Smoothing and Mapping) para formular problemas de estimación de parámetros a partir de datos experimentales obtenidos durante el vuelo. A partir de los modelos identificados, se estudiará el diseño y sintonización de controladores de actitud y posición, evaluando su rendimiento en simulación y, opcionalmente, en plataformas aéreas reales. El trabajo permitirá adquirir conocimientos en estimación probabilística, optimización no lineal, identificación de sistemas y control avanzado de vehículos aéreos no tripulados.</p>
+        <ul class="tag-list"><li>Identificación</li><li>Optimización</li><li>Robótica aérea</li></ul>
+        <ul class="proposal-refs">
+          <li>Dellaert, F., &amp; Kaess, M. (2017). Factor graphs for robot perception. <em>Foundations and Trends in Robotics</em>, 6(1–2), 1–139.</li>
+          <li>Kaess, M., Johannsson, H., Roberts, R., Ila, V., Leonard, J. J., &amp; Dellaert, F. (2012). iSAM2: Incremental smoothing and mapping using the Bayes tree. <em>The International Journal of Robotics Research</em>, 31(2), 216–235.</li>
+        </ul>
+      </div>
+
+      <div class="card proposal">
+        <h3>Prototipado de robots orientado a sistemas multi-agente híbridos</h3>
+        <div class="proposal-meta">Directores: Francisco José Mañas Álvarez (<a href="mailto:fjmanas@dia.uned.es">fjmanas@dia.uned.es</a>), Raquel Dormido Canto (<a href="mailto:raquel@dia.uned.es">raquel@dia.uned.es</a>) y María Guinaldo Losada (<a href="mailto:mguinaldo@dia.uned.es">mguinaldo@dia.uned.es</a>)</div>
+        <p>La simulación dinámica de robots es imprescindible para la puesta a punto de numerosas aplicaciones en robótica y permite tomar decisiones sobre la adecuación del sistema robotizado a un entorno y a sus características. El trabajo consistirá en el modelado y desarrollo completo de un robot en el entorno ROS 2 con un simulador de código abierto, conformando una interfaz que permita escribir el mismo código para el robot simulado y el real. El robot estará dotado de los sensores que incorpora de serie y de los dispositivos que faciliten su integración con otros sistemas de posicionamiento. Se desarrollará una interfaz integrable en la plataforma experimental Robotic Park, orientada a su uso en sistemas multi-agente híbridos.</p>
+        <ul class="tag-list"><li>Gemelo digital</li><li>ROS 2</li><li>Robotic Park</li></ul>
+        <ul class="proposal-refs">
+          <li>Mañas-Álvarez, F. J., Guinaldo, M., Dormido, R., &amp; Dormido, S. (2023). Robotic Park: Multi-Agent Platform for Teaching Control and Robotics. <em>IEEE Access</em>, 11, 34899–34911.</li>
+        </ul>
+      </div>
+
+      <div class="card proposal">
+        <h3>Desarrollo de la sombra digital de un robot móvil con ROS 2</h3>
+        <div class="proposal-meta">Directores: Francisco José Mañas Álvarez (<a href="mailto:fjmanas@dia.uned.es">fjmanas@dia.uned.es</a>), Raquel Dormido Canto (<a href="mailto:raquel@dia.uned.es">raquel@dia.uned.es</a>) y María Guinaldo Losada (<a href="mailto:mguinaldo@dia.uned.es">mguinaldo@dia.uned.es</a>)</div>
+        <p>Una sombra digital es una réplica virtual de un sistema físico que puede utilizarse para simular, analizar y optimizar su desempeño en tiempo real en distintos escenarios, y se caracteriza por una comunicación unidireccional en tiempo real desde el robot real. En este proyecto se propone diseñar la sombra digital de un robot móvil en distintos escenarios utilizando ROS 2: crear el modelo virtual del robot, integrar sus sensores y actuadores con el modelo virtual y simular escenarios característicos de este tipo de robots, como el entrenamiento de modelos, la detección de fallos, el ajuste dinámico de controladores o la navegación autónoma.</p>
+        <ul class="tag-list"><li>Sombra digital</li><li>Robótica móvil</li><li>ROS 2</li></ul>
+        <ul class="proposal-refs">
+          <li>Mañas-Álvarez, F. J., Guinaldo, M., Dormido, R., &amp; Dormido, S. (2023). Robotic Park: Multi-Agent Platform for Teaching Control and Robotics. <em>IEEE Access</em>, 11, 34899–34911.</li>
+        </ul>
       </div>
     </section>
 
     <section class="section" id="proyectos">
-      <h2 class="section-title">Proyectos y contratos de I+D+i</h2>
+      <h2 class="section-title">Proyectos de investigación</h2>
       <div class="card">
         <div class="entry">
-          <div class="entry-title">Collectively — Control of Multiagent Cooperative Cyber-Physical Systems</div>
-          <div class="entry-meta">Ministerio de Ciencia e Innovación — 01/09/2023–31/08/2027 · En curso</div>
-          <p>IP: Raquel Dormido Canto, Luis de la Torre Cubillo. Entidades: UNED, U. de Brescia (Italia), Telefónica de España, U. de Wuhan.</p>
-        </div>
-        <div class="entry">
-          <div class="entry-title">GO-HYBRID — Nuevos paradigmas para identificación y control híbrida en sistemas de alto rendimiento</div>
+          <div class="entry-title"><a href="https://blogs.uned.es/go-hybrid/" target="_blank" rel="noopener">GO-HYBRID — Nuevos paradigmas para identificación y control híbrida en sistemas de alto rendimiento</a></div>
           <div class="entry-meta">Ministerio de Ciencia e Innovación — 01/09/2025–31/08/2028 · En curso</div>
-          <p>IP: Raquel Dormido Canto, Luis de la Torre Cubillo. Entidades: UNED, U. de Brescia (Italia), Centro Superior de Estudios de la Defensa Nacional, KTH (Suecia).</p>
-        </div>
-        <div class="entry">
-          <div class="entry-title">RECOVERY — REsilient and secure COntrol of cooperatiVE cybeR-phYsical systems</div>
-          <div class="entry-meta">Ministerio de Ciencia e Innovación — 01/01/2021–31/12/2023 · Finalizado</div>
-          <p>IP: María Guinaldo, José Sánchez. Desarrollado sobre la plataforma experimental Robotic Park.</p>
-        </div>
-        <div class="entry">
-          <div class="entry-title">ECoDiC — Diseño Eficiente y Control Distribuido de Sistemas Ciber-Físicos</div>
-          <div class="entry-meta">Ministerio de Ciencia e Innovación — 2019–2021 · Finalizado</div>
-          <p>IP: Sebastián Dormido Bencomo, Raquel Dormido Canto. Entidades: UNED, U. de Brescia (Italia).</p>
+          <p class="entry-code">PID2024-156427OB-I00</p>
+          <p>IP: María Guinaldo Losada; IP2: José Sánchez Moreno.</p>
         </div>
       </div>
-      <p class="note">
-        Lista de ejemplo, no exhaustiva — amplía esta sección con el mismo patrón de bloque
-        <code>.entry</code> a medida que se incorporen nuevos proyectos del laboratorio.
-      </p>
+      <div class="card">
+        <div class="entry">
+          <div class="entry-title"><a href="https://blogs.uned.es/collectively/" target="_blank" rel="noopener">Collectively — Control de Sistemas Ciberfísicos Cooperativos Multiagente: aspectos teóricos y prácticos</a></div>
+          <div class="entry-meta">Ministerio de Ciencia e Innovación — 01/09/2023–31/08/2027 · En curso</div>
+          <p class="entry-code">PID2022-139187OB-I00</p>
+          <p>IP: Raquel Dormido Canto.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="entry">
+          <div class="entry-title"><a href="https://blogs.uned.es/recovery/" target="_blank" rel="noopener">RECOVERY — REsilient and secure COntrol of cooperatiVE cybeR-phYsical systems</a></div>
+          <div class="entry-meta">Ministerio de Ciencia e Innovación — 01/01/2022–31/12/2025 · Finalizado</div>
+          <p class="entry-code">PID2020-112658RB-I00</p>
+          <p>IP: María Guinaldo Losada. Desarrollado sobre la plataforma experimental Robotic Park.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="entry">
+          <div class="entry-title"><a href="http://portal.uned.es/portal/page?_pageid=93,63115277&amp;_dad=portal&amp;_schema=PORTAL&amp;idContenido=3" target="_blank" rel="noopener">ECoDiC — Diseño Eficiente y Control Distribuido de Sistemas Ciber-Físicos</a></div>
+          <div class="entry-meta">Ministerio de Ciencia e Innovación — 01/01/2019–31/12/2021 · Finalizado</div>
+          <p class="entry-code">RTI2018-094665-B-I00</p>
+          <p>IP: Raquel Dormido Canto.</p>
+        </div>
+      </div>
     </section>
 
-    <section class="section" id="publicaciones">
-      <h2 class="section-title">Publicaciones seleccionadas</h2>
-      <p>Selección de publicaciones directamente relacionadas con la plataforma y las líneas del laboratorio.</p>
-
-      <div class="pub-group">
-        <h3>Revistas</h3>
-        <ul class="link-list">
-          <li>Robotic Park. Multi-Agent Platform for Teaching Control and Robotics. <em>IEEE Access</em>, 2023.
-            <a href="https://doi.org/10.1109/ACCESS.2023.3264508" target="_blank" rel="noopener">doi</a></li>
-          <li>MultiVehicle Simulator (MVSim): lightweight dynamics simulator for multiagents and mobile robotics research. <em>SoftwareX</em>, 2023.
-            <a href="https://doi.org/10.1016/j.softx.2023.101443" target="_blank" rel="noopener">doi</a></li>
-          <li>Scalability of Cyber-Physical Systems with Real and Virtual Robots in ROS 2. <em>Sensors</em> 23(13), 6073, 2023.
-            <a href="https://doi.org/10.3390/s23136073" target="_blank" rel="noopener">doi</a></li>
-          <li>Distributed multi-UAV shield formation based on virtual surface constraints. <em>Robotics and Autonomous Systems</em>, 2024.
-            <a href="https://doi.org/10.1016/j.robot.2024.104684" target="_blank" rel="noopener">doi</a></li>
-          <li>Relay-based autotuning for quadrotor attitude and rate control. <em>Mechatronics</em>, 2026.
-            <a href="https://doi.org/10.1016/J.MECHATRONICS.2026.103572" target="_blank" rel="noopener">doi</a></li>
-        </ul>
-      </div>
-
-      <div class="pub-group">
-        <h3>Capítulos de libro</h3>
-        <ul class="link-list">
-          <li>A Benchmark on Formation Control of Multi-agent Robotic System. <em>Advances in Industrial Control</em>, Springer, 2025.
-            <a href="https://doi.org/10.1007/978-3-031-76312-0_10" target="_blank" rel="noopener">doi</a></li>
-        </ul>
-      </div>
-
-      <div class="pub-group">
-        <h3>Congresos</h3>
-        <ul class="link-list">
-          <li>Formation by consensus in heterogeneous robotic swarms with Twins-in-the-loop. <em>ROBOT2022, Fifth Iberian Robotics Conference</em>.
-            <a href="https://doi.org/10.1007/978-3-031-21065-5_36" target="_blank" rel="noopener">doi</a></li>
-          <li>Sistemas ciberfísicos multi-agente en realidad mixta. <em>II Simposio CEA (Modelado, Simulación, Optimización e Ingeniería de Control)</em>, 2023.</li>
-          <li>Un benchmark para el diseño y control de formaciones en sistemas multi-agente. <em>Jornadas de Automática</em>, 2024.
-            <a href="https://doi.org/10.17979/JA-CEA.2024.45.10749" target="_blank" rel="noopener">doi</a></li>
-          <li>Distributed reconfiguration of distance-based formations with virtual surface constraints. <em>2024 European Control Conference</em>.
-            <a href="https://doi.org/10.23919/ECC64448.2024.10591270" target="_blank" rel="noopener">doi</a></li>
-          <li>Morphing de formaciones en sistemas multi-agente robóticos. <em>Actas del II Simposio CEA</em>, Zaragoza.
-            <a href="https://doi.org/10.26754/uz.979-13-88046-11-7" target="_blank" rel="noopener">doi</a></li>
-          <li>Rigid Formation Control in Multi-Robot Systems Using Lagrange Multipliers. <em>2026 European Control Conference</em>.</li>
-        </ul>
-      </div>
-
-      <p class="note">
-        Listado de ejemplo centrado en publicaciones directamente ligadas a Robotic Park —
-        no exhaustivo. El listado completo de publicaciones del equipo está en el
-        <a href="https://orcid.org/0000-0003-2878-3011" target="_blank" rel="noopener">ORCID de Francisco José Mañas Álvarez</a>
-        y se puede ampliar aquí con las de cada investigador.
+    <section class="section" id="innovaciondocente">
+      <h2 class="section-title">Innovación docente</h2>
+      <p>
+        Robotic Park también se usa como herramienta docente. Un resultado de estos proyectos son las
+        <a href="publicaciones.html">publicaciones interactivas</a>: páginas que explican cada artículo con mapas
+        conceptuales, simuladores y autoevaluación. Por ejemplo,
+        <a href="interactivos/relay-autotuning/">autosintonía por relé de un cuadricóptero en un gimbal</a>.
       </p>
+      <div class="card">
+        <div class="entry">
+          <div class="entry-title">Desarrollo de metodologías didácticas mediante plataformas de experimentación configurables y personalizables para la mejora del proceso enseñanza-aprendizaje</div>
+          <div class="entry-meta">Universidad Nacional de Educación a Distancia — 2024/2025 · Finalizado</div>
+          <p>IP: Ernesto Aranda Escolástico.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="entry">
+          <div class="entry-title">Metodologías didácticas y métodos de evaluación basados en la experimentación para el fomento del interés y la motivación</div>
+          <div class="entry-meta">Universidad Nacional de Educación a Distancia — 2023/2024 · Finalizado</div>
+          <p>IP: David Moreno Salinas.</p>
+        </div>
+      </div>
     </section>
 
   </div>

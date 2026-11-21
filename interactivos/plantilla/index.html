@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- ============================================================
+     PLANTILLA DE PUBLICACIÓN INTERACTIVA — Robotic Park Lab
+     ------------------------------------------------------------
+     1. Copia esta carpeta entera a interactivos/<nombre-corto>/
+     2. Busca «EDITA AQUÍ» en este archivo y en app.js
+     3. Prueba en local:  python3 -m http.server  (desde la raíz
+        del repositorio) y abre
+        http://localhost:8000/interactivos/<nombre-corto>/
+     4. Enlaza la página desde publicaciones.html (botón
+        «Versión interactiva» de la tarjeta del artículo)
+     Guía completa: interactivos/README.md
+     ============================================================ -->
+
+<!-- EDITA AQUÍ: título corto (2-4 palabras) y descripción -->
+<title>Título corto</title>
+<meta name="description" content="Publicación interactiva: resumen en una frase del artículo. Robotic Park Lab, UNED.">
+
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<!-- KaTeX: fórmulas con $$ … $$ (bloque) y \( … \) (en línea). Si no usas fórmulas puedes quitarlo. -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>
+  /* Estilos propios de esta página (opcional). Usa siempre los tokens de color de ip.css
+     (var(--primary), var(--accent), var(--muted)…) para que funcione el modo oscuro. */
+</style>
+</head>
+<body>
+
+<!-- ============ Barra superior: un enlace por sección ============ -->
+<header class="ip-topbar">
+  <div class="ip-wrap">
+    <a class="ip-brand" href="../../publicaciones.html"><img src="../../assets/img/logo.png" alt=""><span>← Publicaciones</span></a>
+    <nav class="ip-topnav" aria-label="Secciones">
+      <a href="#mapa">Mapa</a>
+      <a href="#teoria">Teoría</a>
+      <a href="#simulador">Simulador</a>
+      <a href="#quiz">Autoevaluación</a>
+      <a href="#citar">Citar</a>
+    </nav>
+  </div>
+  <div class="ip-progress"></div>
+</header>
+
+<!-- ============ Portada ============ -->
+<section class="ip-hero" id="inicio">
+  <div class="ip-wrap">
+    <div>
+      <!-- EDITA AQUÍ: revista, título, autores, entradilla y DOI -->
+      <p class="ip-kicker">Revista · Año · Publicación interactiva</p>
+      <h1>Título del artículo en español</h1>
+      <p class="ip-authors"><strong>Autor/a 1</strong>, Autor/a 2 y Autor/a 3 · Dpto. de Informática y Automática, UNED</p>
+      <p class="ip-lead">Dos o tres frases que expliquen qué problema resuelve el trabajo y qué podrá experimentar el lector en esta página.</p>
+      <div class="ip-btns">
+        <a class="ip-btn" href="#simulador">Probar el simulador</a>
+        <a class="ip-btn ghost" href="https://doi.org/10.xxxx/xxxxx" target="_blank" rel="noopener">Leer el artículo</a>
+      </div>
+      <!-- Tres cifras destacadas del artículo -->
+      <div class="ip-hero-stats">
+        <div class="ip-hero-stat"><b>−30 %</b><span>resultado destacado 1</span></div>
+        <div class="ip-hero-stat"><b>×2</b><span>resultado destacado 2</span></div>
+        <div class="ip-hero-stat"><b>95 %</b><span>resultado destacado 3</span></div>
+      </div>
+    </div>
+    <!-- Visual de portada: un canvas animado desde app.js (o cambia por <img>) -->
+    <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+  </div>
+</section>
+
+<main>
+
+<!-- ============ 1. Mapa conceptual ============ -->
+<section class="ip-section" id="mapa">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">1</span>Mapa conceptual</p>
+      <h2>El artículo de un vistazo</h2>
+      <p>Pulsa cada concepto para ver su explicación. Los nodos y las flechas se definen en <code>app.js</code>.</p>
+    </div>
+    <div class="ip-cmap ip-reveal">
+      <div id="cmap"></div>
+      <aside class="ip-card ip-cmap-panel" id="cmapPanel" aria-live="polite"></aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. Teoría con fórmulas ============ -->
+<section class="ip-section" id="teoria">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">2</span>Fundamentos</p>
+      <h2>La idea en dos ecuaciones</h2>
+      <p>Texto introductorio. Las fórmulas se escriben en LaTeX dentro de <code>$$ … $$</code>.</p>
+    </div>
+    <div class="ip-grid cols-2 ip-reveal">
+      <div class="ip-card">
+        <h3>Modelo del proceso</h3>
+        <div class="ip-eq">$$G(s)=\frac{K}{Ts+1}\,e^{-Ls}$$</div>
+        <p class="ip-small">Primer orden con retardo: ganancia \(K\), constante de tiempo \(T\) y retardo \(L\).</p>
+      </div>
+      <div class="ip-card">
+        <h3>Controlador</h3>
+        <div class="ip-eq">$$u(t)=K_p\,e(t)+K_i\int_0^t e(\tau)\,d\tau$$</div>
+        <div class="ip-note info ip-small">Las notas resaltan ideas clave. Variantes: <code>ip-note</code>, <code>ip-note info</code>, <code>ip-note ok</code> y <code>ip-note danger</code>.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. Simulador interactivo ============ -->
+<section class="ip-section" id="simulador">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">3</span>Simulador</p>
+      <h2>Mueve los parámetros y observa la respuesta</h2>
+      <p>Ejemplo completo: controles → simulación → gráfica → lecturas numéricas.</p>
+    </div>
+    <div class="ip-grid side-left ip-reveal">
+      <div class="ip-card">
+        <div class="ip-toolbar"><div id="modeSeg"></div></div>
+        <div id="simControls"></div>
+      </div>
+      <div class="ip-card">
+        <div class="ip-plot-title"><span>Respuesta a un escalón unitario</span><span class="ip-pill" id="simBadge"></span></div>
+        <div id="simPlot"></div>
+        <div class="ip-readouts" id="simReadouts" style="margin-top:14px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. Autoevaluación ============ -->
+<section class="ip-section" id="quiz">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">4</span>Autoevaluación</p>
+      <h2>¿Lo has entendido?</h2>
+    </div>
+    <div id="quizBox" class="ip-reveal"></div>
+  </div>
+</section>
+
+<!-- ============ 5. Cita ============ -->
+<section class="ip-section" id="citar">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">5</span>Cómo citar</p>
+      <h2>Referencia</h2>
+    </div>
+    <div class="ip-grid cols-2 ip-reveal">
+      <div class="ip-card">
+        <!-- EDITA AQUÍ: referencia en formato APA -->
+        <p>Apellido, N., Apellido, N. (Año). Título del artículo. <em>Revista</em>, vol, páginas. <a href="https://doi.org/10.xxxx/xxxxx" target="_blank" rel="noopener">doi:10.xxxx/xxxxx</a></p>
+        <div class="ip-btns">
+          <a class="ip-btn" href="https://doi.org/10.xxxx/xxxxx" target="_blank" rel="noopener">Artículo</a>
+          <a class="ip-btn ghost" href="../../publicaciones.html">Más publicaciones</a>
+        </div>
+      </div>
+      <!-- EDITA AQUÍ: BibTeX (el botón «Copiar» funciona solo) -->
+      <div class="ip-code" id="bibtex">@article{Clave2026,
+  title   = {Título},
+  author  = {Apellido, Nombre and Apellido, Nombre},
+  journal = {Revista},
+  year    = {2026},
+  doi     = {10.xxxx/xxxxx}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ip-footer">
+  <div class="ip-wrap">
+    <span>Material docente interactivo · Proyecto de innovación docente · <a href="../../index.html">Robotic Park Lab</a> — UNED</span>
+    <span>Simulación didáctica; consulta el artículo para los resultados experimentales.</span>
+  </div>
+</footer>
+
+<!-- Orden de carga: KaTeX (opcional) → librería ip → código de la página -->
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

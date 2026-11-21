@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autosintonía por relé</title>
+<meta name="description" content="Publicación interactiva: identificación por relé y autosintonía PID de la actitud y la velocidad angular de un Crazyflie 2.1 montado en un gimbal (Mechatronics, 2026). Robotic Park Lab, UNED.">
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>
+  .mass-bars { display: grid; gap: 10px; margin: 14px 0 6px; }
+  .mass-bar { display: grid; grid-template-columns: 64px 1fr 56px; gap: 10px; align-items: center; font-size: 0.86rem; }
+  .mass-bar .track { height: 12px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; position: relative; }
+  .mass-bar .track i { position: absolute; inset: 0 auto 0 0; border-radius: 999px; }
+  .mass-bar .track .lim { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--danger); }
+  .mass-bar b { font-family: var(--font-mono); font-size: 0.82rem; text-align: right; }
+  .heat { position: relative; }
+  .heat canvas { width: 100%; height: 280px; }
+  .zone-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
+  .zone-legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -2px; background: var(--c); opacity: 0.55; }
+  .kpi { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+  .kpi .ip-card { padding: 18px; }
+  .kpi b { display: block; font-family: var(--font-head); font-size: 2.1rem; line-height: 1.05; color: var(--primary); }
+  .kpi span { font-size: 0.86rem; color: var(--muted); }
+  .bars svg { width: 100%; height: auto; }
+  .bars text { font: 500 11px var(--font); fill: var(--muted); }
+  .bars .val { font: 600 10.5px var(--font-mono); fill: var(--text); }
+  .stage-sm { height: 300px; }
+  .stage-md { height: 420px; }
+  .twin { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .twin .ip-stage { height: 230px; }
+  .twin .cap { position: absolute; left: 10px; top: 8px; }
+  @media (max-width: 600px) { .stage-md { height: 330px; } .twin .ip-stage { height: 170px; } }
+  .eq-card .ip-eq { font-size: 0.98rem; }
+  .relay-fig svg { width: 100%; max-width: 260px; margin: 0 auto; }
+  .relay-fig .ax { stroke: var(--axis); stroke-width: 1.5; fill: none; }
+  .relay-fig .rl { stroke: var(--accent); stroke-width: 3; fill: none; }
+  .relay-fig text { font: italic 600 13px var(--font-head); fill: var(--muted); }
+  #cmapPanel { min-height: 240px; }
+  .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); margin-right: 6px; animation: ip-pulse 1s infinite; }
+  .paused .live-dot { background: var(--muted); animation: none; }
+</style>
+</head>
+<body>
+
+<header class="ip-topbar">
+  <div class="ip-wrap">
+    <a class="ip-brand" href="../../publicaciones.html" title="Volver a Publicaciones"><img src="../../assets/img/logo.png" alt=""><span>← Publicaciones</span></a>
+    <nav class="ip-topnav" aria-label="Secciones">
+      <a href="#mapa">Mapa</a>
+      <a href="#banco">Gimbal</a>
+      <a href="#rele">Relé</a>
+      <a href="#modelo">Modelo</a>
+      <a href="#sintonia">Sintonía</a>
+      <a href="#eventos">Eventos</a>
+      <a href="#resultados">Resultados</a>
+      <a href="#quiz">Autoevaluación</a>
+      <a href="#citar">Citar</a>
+    </nav>
+  </div>
+  <div class="ip-progress"></div>
+</header>
+
+<!-- ======================= PORTADA ======================= -->
+<section class="ip-hero" id="inicio">
+  <div class="ip-wrap">
+    <div>
+      <p class="ip-kicker">Mechatronics 119 (2026) 103572 · Publicación interactiva</p>
+      <h1>Autosintonía por relé del control de actitud y velocidad de un cuadricóptero</h1>
+      <p class="ip-authors"><strong>F.-J. Mañas-Álvarez</strong>, M. Guinaldo, R. Dormido y S. Dormido · Dpto. de Informática y Automática, UNED</p>
+      <p class="ip-lead">Un Crazyflie 2.1 montado en un gimbal no vuela igual que libre: la estructura añade inercia y el PID de fábrica deja de funcionar. Aquí verás cómo un simple relé hace oscilar al dron de forma controlada, cómo de esa oscilación sale un modelo y cómo el modelo da un PID nuevo en segundos. Todo se ejecuta en tu navegador.</p>
+      <div class="ip-btns">
+        <a class="ip-btn" href="#rele">Probar el laboratorio del relé</a>
+        <a class="ip-btn ghost" href="https://doi.org/10.1016/j.mechatronics.2026.103572" target="_blank" rel="noopener">Leer el artículo (acceso abierto)</a>
+      </div>
+      <div class="ip-hero-stats">
+        <div class="ip-hero-stat"><b>−30,56 %</b><span>carga de CPU con control por eventos</span></div>
+        <div class="ip-hero-stat"><b>85,9 %</b><span>tiempo de subida más rápido en roll</span></div>
+        <div class="ip-hero-stat"><b>≤ 96 %</b><span>menos ejecuciones del controlador</span></div>
+      </div>
+    </div>
+    <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroGimbal"></canvas></div>
+  </div>
+</section>
+
+<main>
+
+<!-- ======================= 1. MAPA ======================= -->
+<section class="ip-section" id="mapa">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">1</span>Mapa conceptual</p>
+      <h2>El artículo de un vistazo</h2>
+      <p>Cada caja es un concepto del trabajo. Púlsala para ver qué significa, de dónde viene y a dónde lleva; las flechas animadas muestran el flujo de información.</p>
+    </div>
+    <div class="ip-cmap ip-reveal">
+      <div id="cmap"></div>
+      <aside class="ip-card ip-cmap-panel" id="cmapPanel" aria-live="polite"></aside>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 2. BANCO ======================= -->
+<section class="ip-section" id="banco">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">2</span>Banco de ensayo</p>
+      <h2>Cómo funciona el Open Gimbal</h2>
+      <p>Tres estructuras en cascada impresas en PLA ligero (0,8 g/cm³) liberan o bloquean los tres giros del dron. Sus ejes se cortan en el centro de gravedad del Crazyflie, así que el dron puede girar sin desplazarse y sin necesidad de volar.</p>
+    </div>
+    <div class="ip-grid side ip-reveal">
+      <div class="ip-card">
+        <div class="ip-toolbar">
+          <span class="ip-small ip-muted">Arrastra para girar la cámara · pasa el ratón por los controles para resaltar cada anillo</span>
+        </div>
+        <div class="ip-stage stage-md"><canvas id="benchGimbal"></canvas><span class="ip-stage-hint">Viga verde: roll · anillo blanco: pitch · anillo gris: yaw</span></div>
+      </div>
+      <div class="ip-card">
+        <h3>Mueve el gimbal</h3>
+        <div id="benchControls"></div>
+        <hr style="border:0;border-top:1px solid var(--border);margin:18px 0">
+        <h3>Masa que arrastra cada eje</h3>
+        <p class="ip-small ip-muted">El Crazyflie 2.1 levanta unos 60 g de empuje. Cada nivel del gimbal añade masa que el dron debe mover:</p>
+        <div class="mass-bars" id="massBars"></div>
+        <p class="ip-small ip-muted">Por eso el yaw (57 g) no es ensayable y el pitch, con cinco veces más masa que el roll, resulta ser el eje más lento y con más retardo.</p>
+      </div>
+    </div>
+
+    <div class="ip-card ip-reveal" style="margin-top:18px">
+      <div class="ip-toolbar">
+        <h3 style="margin:0 auto 0 0">Arquitectura de control en cascada (500 Hz)</h3>
+        <div id="archSeg"></div>
+      </div>
+      <div class="ip-diagram" id="archDiagram"></div>
+      <p class="ip-small ip-muted" id="archText"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 3. RELÉ ======================= -->
+<section class="ip-section" id="rele">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">3</span>Laboratorio del relé</p>
+      <h2>Haz oscilar al dron y mide el ciclo límite</h2>
+      <p>El relé sustituye temporalmente al PID: entrega +<i>d</i> o −<i>d</i> según el signo del error, con una histéresis <i>δ</i> que evita conmutaciones por ruido. El lazo entra en un ciclo límite estable cuya amplitud <i>a</i> y periodo <i>T<sub>u</sub></i> contienen el modelo del proceso.</p>
+    </div>
+
+    <div class="ip-grid cols-2 ip-reveal" style="grid-template-columns:minmax(0,1fr) minmax(0,260px);margin-bottom:18px">
+      <div class="ip-card">
+        <h3>Relé con histéresis</h3>
+        <p class="ip-small">La salida sólo cambia cuando el error supera ±<i>δ</i>. Su función descriptiva inversa es una recta horizontal en el plano complejo (ec. 6 del artículo):</p>
+        <div class="ip-eq">$$-\frac{1}{N(a)} = -\frac{\pi}{4d}\left(\sqrt{a^{2}-\delta^{2}} + j\,\delta\right)$$</div>
+        <p class="ip-small">El ciclo límite aparece donde la curva de Nyquist del proceso <i>G</i>(<i>jω</i>) corta esa recta. Del punto de corte se obtienen la ganancia crítica y la frecuencia crítica:</p>
+        <div class="ip-eq">$$K_u = \frac{4d}{\pi\sqrt{a^{2}-\delta^{2}}}, \qquad \omega_u = \frac{2\pi}{T_u}$$</div>
+      </div>
+      <div class="ip-card relay-fig">
+        <svg viewBox="0 0 220 180" role="img" aria-label="Característica del relé con histéresis">
+          <line class="ax" x1="110" y1="10" x2="110" y2="170"/><line class="ax" x1="10" y1="90" x2="210" y2="90"/>
+          <path class="rl" d="M20 140 H130 V40 H200"/><path class="rl" d="M200 40 H90 V140 H20" style="opacity:.55"/>
+          <path d="M126 88 l4 -8 l4 8" fill="var(--accent)"/><path d="M86 92 l4 8 l4 -8" fill="var(--accent)"/>
+          <text x="196" y="106">e</text><text x="116" y="20">u</text>
+          <text x="136" y="36">+d</text><text x="60" y="156">−d</text>
+          <text x="124" y="104">δ</text><text x="80" y="82">−δ</text>
+        </svg>
+        <p class="ip-small ip-muted ip-center">Característica del relé (Fig. 6)</p>
+      </div>
+    </div>
+
+    <div class="ip-card ip-reveal" id="relayLab">
+      <div class="ip-toolbar">
+        <div id="labAxis"></div>
+        <div id="labLevel"></div>
+        <button class="ip-btn accent" id="labRelayBtn" type="button">Activar relé (s = 1)</button>
+        <button class="ip-btn ghost small" id="labPlay" type="button"><span class="live-dot"></span>Pausar</button>
+        <button class="ip-btn ghost small" id="labReset" type="button">Reiniciar</button>
+        <select class="ip-select" id="labPreset" style="width:auto">
+          <option value="">Cargar ensayo del artículo…</option>
+          <option value="rollRate">Fig. 14 · velocidad roll</option>
+          <option value="pitchRate">Fig. 13 · velocidad pitch</option>
+          <option value="roll">Fig. 18 · actitud roll</option>
+          <option value="pitch">Fig. 19 · actitud pitch</option>
+        </select>
+      </div>
+      <div class="ip-grid side">
+        <div>
+          <div class="ip-plot-title"><span id="labYTitle">Salida del proceso</span><span class="ip-pill muted" id="labMode">PID activo</span></div>
+          <div id="labPlotY"></div>
+          <div class="ip-plot-title" style="margin-top:10px"><span id="labUTitle">Acción de control</span></div>
+          <div id="labPlotU"></div>
+          <h3 style="margin-top:22px">Medidas en línea del ciclo límite</h3>
+          <div class="ip-readouts" id="labReadouts"></div>
+          <div class="ip-note info" id="labHint" style="margin-top:14px"></div>
+        </div>
+        <div>
+          <div class="ip-stage stage-sm"><canvas id="labGimbal"></canvas><span class="ip-stage-hint">Flechas: empuje de cada motor</span></div>
+          <div id="labControls" style="margin-top:14px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ip-grid cols-2 ip-reveal" style="margin-top:18px">
+      <div class="ip-card">
+        <div class="ip-plot-title"><span>Diagrama de Nyquist y función descriptiva</span></div>
+        <div id="nyqPlot"></div>
+        <p class="ip-small ip-muted" style="margin-top:8px">Curva verde: <i>G</i>(<i>jω</i>) del proceso que ve el relé. Recta naranja: −1/<i>N</i>(<i>a</i>) para tu <i>d</i> y tu <i>δ</i>. El rombo es la predicción teórica del ciclo límite; el círculo, lo medido en la simulación.</p>
+      </div>
+      <div class="ip-card">
+        <h3>Predicción frente a medida</h3>
+        <div class="ip-readouts" id="nyqReadouts"></div>
+        <div class="ip-note" style="margin-top:14px">
+          <p><b>Prueba esto:</b> sube la histéresis <i>δ</i>. La recta baja, corta a <i>G</i>(<i>jω</i>) a menor frecuencia y el periodo <i>T<sub>u</sub></i> crece. Con <i>δ</i> demasiado pequeño frente al ruido, el relé conmuta sin control (por eso el pitch, con una relación señal/ruido muy baja, necesita filtrado).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 4. MODELO ======================= -->
+<section class="ip-section" id="modelo">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">4</span>Identificación</p>
+      <h2>Del ciclo límite al modelo</h2>
+      <p>Con <i>K<sub>u</sub></i>, <i>T<sub>u</sub></i> y el retardo <i>D</i> (tiempo entre una conmutación y el siguiente pico) se ajustan dos modelos de bajo orden. El artículo muestra que el bueno es el integrador con retardo, y aquí puedes comprobar por qué.</p>
+    </div>
+    <div class="ip-grid cols-2 ip-reveal">
+      <div class="ip-card eq-card">
+        <h3>Integrador con retardo (ec. 8)</h3>
+        <div class="ip-eq">$$G(s)=\frac{k_p}{s}\,e^{-Ds}\;\;\Rightarrow\;\; k_p=\frac{\omega_u}{K_u}=\frac{2\pi}{K_u T_u},\qquad D=\frac{\pi}{2\omega_u}=\frac{T_u}{4}$$</div>
+        <h3>Primer orden con retardo (ec. 9)</h3>
+        <div class="ip-eq">$$G(s)=\frac{k_p}{\tau s+1}\,e^{-Ds}\;\;\Rightarrow\;\; \tau=\frac{\tan(\pi-D\omega_u)}{\omega_u},\qquad k_p=\frac{\sqrt{(\tau\omega_u)^2+1}}{K_u}$$</div>
+        <div class="ip-plot-title" style="margin-top:6px"><span>τ·ω<sub>u</sub> = tan(π − Dω<sub>u</sub>) según el retardo medido</span></div>
+        <div id="tauPlot"></div>
+        <div class="ip-note danger" id="fopdtWhy"><p>El primer orden necesita que <i>Dω<sub>u</sub></i> &gt; π/2 para dar <i>τ</i> &gt; 0. En un integrador el desfase de −90° ya lo aporta la propia planta, así que el retardo medido cumple <i>Dω<sub>u</sub></i> &lt; π/2 y la ec. 9 devuelve constantes de tiempo negativas o absurdas, igual que en la Tabla 2 del artículo (<i>τ</i> = −0,32 s en pitch y 1,75·10¹³ s en roll).</p></div>
+      </div>
+      <div class="ip-card">
+        <div class="ip-toolbar"><h3 style="margin:0 auto 0 0">Tu modelo identificado</h3><span class="ip-pill muted" id="idSource">Esperando un ciclo límite…</span></div>
+        <div class="ip-table-wrap"><table class="ip-table" id="idTable"></table></div>
+        <div class="ip-plot-title" style="margin-top:16px"><span>Validación: respuesta a un escalón en la entrada</span></div>
+        <div id="idPlot"></div>
+      </div>
+    </div>
+
+    <div class="ip-card ip-reveal" style="margin-top:18px">
+      <div class="ip-toolbar">
+        <h3 style="margin:0 auto 0 0">Barrido paramétrico del relé</h3>
+        <select class="ip-select" id="sweepVar" style="width:auto"><option value="kp">Ganancia estimada kₚ</option><option value="D">Retardo estimado D</option></select>
+        <button class="ip-btn small" id="sweepBtn" type="button">Ejecutar 110 ensayos</button>
+      </div>
+      <p class="ip-small ip-muted">Como en las Figs. 15–16 y 20–21 del artículo: se repite el ensayo para una rejilla de amplitudes <i>d</i> e histéresis <i>δ</i> y se representa el parámetro estimado. Las zonas de color homogéneo marcan el rango de parámetros en el que la identificación es fiable.</p>
+      <div class="heat" id="sweepHeat"><canvas></canvas><div class="ip-plot-tip"></div></div>
+      <p class="ip-small" id="sweepNote"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 5. SINTONÍA ======================= -->
+<section class="ip-section" id="sintonia">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">5</span>Sintonía</p>
+      <h2>Reglas AMIGO y SIMC, y validación</h2>
+      <p>Con el modelo se calculan las ganancias del PID mediante reglas heurísticas pensadas tanto para seguimiento de referencia como para rechazo de perturbaciones (Tabla 1 del artículo). El PID del Crazyflie usa la forma paralela: <i>K<sub>i</sub></i> = <i>K<sub>p</sub></i>/<i>T<sub>i</sub></i>, <i>K<sub>d</sub></i> = <i>K<sub>p</sub></i>·<i>T<sub>d</sub></i>.</p>
+    </div>
+
+    <div class="ip-card ip-reveal">
+      <div class="ip-table-wrap">
+        <table class="ip-table" style="font-size:0.92rem">
+          <thead><tr><th>Regla</th><th>Proceso</th><th style="text-align:center">K<sub>p</sub></th><th style="text-align:center">T<sub>i</sub></th><th style="text-align:center">T<sub>d</sub></th></tr></thead>
+          <tbody>
+            <tr><td>AMIGO PI</td><td>Integrador</td><td style="text-align:center">\(\dfrac{0.35}{k_pD}\)</td><td style="text-align:center">\(13.4D\)</td><td style="text-align:center">0</td></tr>
+            <tr><td>AMIGO PID</td><td>Integrador</td><td style="text-align:center">\(\dfrac{0.45}{k_pD}\)</td><td style="text-align:center">\(8D\)</td><td style="text-align:center">\(0.5D\)</td></tr>
+            <tr><td>SIMC (PI)</td><td>Integrador</td><td style="text-align:center">\(\dfrac{1}{k_p(\tau_c+D)}\)</td><td style="text-align:center">\(4(\tau_c+D)\)</td><td style="text-align:center">0</td></tr>
+            <tr><td>AMIGO PI</td><td>1er orden</td><td style="text-align:center">\(\dfrac{0.15}{k_p}+\left(0.35-\dfrac{D\tau}{(D+\tau)^2}\right)\dfrac{\tau}{k_pD}\)</td><td style="text-align:center">\(0.35D+\dfrac{13D\tau^2}{\tau^2+12D\tau+7D^2}\)</td><td style="text-align:center">0</td></tr>
+            <tr><td>AMIGO PID</td><td>1er orden</td><td style="text-align:center">\(\dfrac{1}{k_p}\left(0.2+0.45\dfrac{\tau}{D}\right)\)</td><td style="text-align:center">\(\dfrac{0.4D+0.8\tau}{D+0.1\tau}D\)</td><td style="text-align:center">\(\dfrac{0.5D\tau}{0.3D+\tau}\)</td></tr>
+            <tr><td>SIMC (PI)</td><td>1er orden</td><td style="text-align:center">\(\dfrac{\tau}{k_p(\tau_c+D)}\)</td><td style="text-align:center">\(\min\{\tau,\,4(\tau_c+D)\}\)</td><td style="text-align:center">0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="ip-grid side-left ip-reveal" style="margin-top:18px">
+      <div class="ip-card">
+        <h3>Configura la comparación</h3>
+        <div id="tuneControls"></div>
+        <div class="ip-note info ip-small" style="margin-top:14px">La referencia es la del artículo: PID de velocidad de fábrica (250 / 500 / 2,5) y un P de actitud ajustado a mano (Tabla 5). Si eliges los valores de serie del firmware (Kp = 6, Ki = 3), verás cómo el pitch se vuelve inestable por la inercia añadida del gimbal.</div>
+      </div>
+      <div class="ip-card">
+        <div class="ip-plot-title"><span>Escalón de 10° en actitud · cascada completa</span><span class="ip-pill" id="tuneBadge"></span></div>
+        <div id="tunePlot"></div>
+        <div class="ip-table-wrap" style="margin-top:14px"><table class="ip-table" id="tuneTable"></table></div>
+        <p class="ip-small ip-muted" style="margin-top:8px">\(J_1 = 0.35\,\Delta IAE + 0.35\,\Delta ITAE + 0.30\,\Delta E\), \(J_2 = 0.3J_1 + 0.3\Delta t_r + 0.3\Delta t_s + 0.1\Delta O\) (ecs. 13–14), con cada Δ relativo al controlador de referencia. <i>E</i> son las ejecuciones del controlador; en ejecución periódica coinciden para todos. Menor es mejor.</p>
+      </div>
+    </div>
+
+    <div class="ip-card ip-reveal" style="margin-top:18px" id="pipeline">
+      <div class="ip-toolbar">
+        <h3 style="margin:0 auto 0 0">Experimento completo de autosintonía (como la Fig. 24)</h3>
+        <div id="pipeAxis"></div>
+        <select class="ip-select" id="pipeRule" style="width:auto"><option>AMIGO PID</option><option>AMIGO PI</option><option>SIMC</option></select>
+        <button class="ip-btn accent" id="pipeRun" type="button">▶ Ejecutar autosintonía</button>
+      </div>
+      <div class="ip-steps" id="pipeSteps">
+        <div class="ip-step">Controlador inicial</div>
+        <div class="ip-step">Relé en velocidad</div>
+        <div class="ip-step">Relé en actitud</div>
+        <div class="ip-step">Controlador autosintonizado</div>
+      </div>
+      <div class="ip-grid side">
+        <div>
+          <div id="pipePlot"></div>
+          <div class="zone-legend"><span style="--c:#7f8c8d">Sintonía inicial</span><span style="--c:#f0a35f">Relé en velocidad</span><span style="--c:#e6c34a">Relé en actitud</span><span style="--c:#4fb98a">Autosintonizado</span></div>
+        </div>
+        <div>
+          <div class="ip-stage stage-sm"><canvas id="pipeGimbal"></canvas><span class="ip-stage-badge ip-pill muted" id="pipeZone">Listo</span></div>
+        </div>
+      </div>
+      <div class="ip-readouts" id="pipeReadouts" style="margin-top:16px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 6. EVENTOS ======================= -->
+<section class="ip-section" id="eventos">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">6</span>Control basado en eventos</p>
+      <h2>Ejecutar el PID sólo cuando hace falta</h2>
+      <p>En lugar de calcular el PID 500 veces por segundo, se ejecuta sólo cuando el error ha cambiado lo suficiente desde la última ejecución. El umbral se adapta a la distancia a la referencia y al ruido (ec. 11):</p>
+      <div class="ip-eq">$$f\big(e(t),x(t)\big) = \big|e(t)-e(t_k)\big| - \Big(c_0 + a_i\,\big|x(t)-x_{ref}\big| + c_n(t)\Big) > 0 \;\Rightarrow\; \text{evento}$$</div>
+      <p class="ip-small"><i>c</i><sub>0</sub>: error tolerado junto a la referencia · <i>a<sub>i</sub></i> = 0,05: relaja el umbral lejos de ella · <i>c<sub>n</sub></i>(<i>t</i>): nivel de ruido del error en una ventana de 0,2 s, para no disparar eventos por ruido (en esta simulación se estima con la desviación típica de los incrementos del error, de modo que la tendencia del transitorio no infle el umbral). Un controlador mejor sintonizado mantiene el sistema cerca de la referencia con menos correcciones, así que <b>menos eventos también indican una sintonía mejor</b>.</p>
+    </div>
+    <div class="ip-grid side-left ip-reveal">
+      <div class="ip-card">
+        <div id="evControls"></div>
+        <div class="ip-readouts" id="evReadouts" style="margin-top:16px"></div>
+      </div>
+      <div class="ip-card">
+        <div class="ip-plot-title"><span>Respuesta periódica frente a la basada en eventos</span></div>
+        <div id="evPlot"></div>
+        <div class="ip-plot-title" style="margin-top:10px"><span>Condición de disparo: |e − e<sub>k</sub>| frente al umbral</span></div>
+        <div id="evPlot2"></div>
+      </div>
+    </div>
+    <div class="ip-grid cols-2 ip-reveal" style="margin-top:18px">
+      <div class="ip-card">
+        <div class="ip-toolbar"><h3 style="margin:0 auto 0 0">Barrido del umbral c<sub>0</sub></h3><button class="ip-btn small" id="evSweep" type="button">Barrer c₀</button></div>
+        <div id="evSweepPlot"></div>
+        <p class="ip-small ip-muted">Como en las Figs. 17 y 23: al subir <i>c</i><sub>0</sub> caen las ejecuciones, pero a partir de cierto punto el error crece. Los lazos de velocidad, más rápidos, toleran umbrales mayores que los de actitud.</p>
+      </div>
+      <div class="ip-card">
+        <h3>Carga de CPU en el Crazyflie 2.1 (Tabla 6)</h3>
+        <div class="bars" id="cpuBars"></div>
+        <p class="ip-small ip-muted">Ciclos de reloj por llamada al control, tiempo por llamada y tiempo de CPU consumido por segundo. La versión por eventos baja de 6,50 a 4,51 ms/s: un <b>30,56 %</b> menos, tiempo que queda libre para percepción, planificación o comportamientos cooperativos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 7. RESULTADOS ======================= -->
+<section class="ip-section" id="resultados">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">7</span>Resultados del artículo</p>
+      <h2>Lo que se midió en el laboratorio</h2>
+      <p>Valores experimentales del Crazyflie 2.1 real en el Open Gimbal, tomados del artículo. Las simulaciones de esta página son una aproximación didáctica calibrada con esos datos.</p>
+    </div>
+    <div class="kpi ip-reveal" id="kpis"></div>
+    <div class="ip-grid cols-2 ip-reveal" style="margin-top:18px">
+      <div class="ip-card"><div class="ip-toolbar"><h3 style="margin:0 auto 0 0">Ganancias del lazo de velocidad (Tabla 3)</h3><div id="barsRateAxis"></div></div><div class="bars" id="barsRate"></div></div>
+      <div class="ip-card"><div class="ip-toolbar"><h3 style="margin:0 auto 0 0">Ganancias del lazo de actitud (Tabla 5)</h3><div id="barsAttAxis"></div></div><div class="bars" id="barsAtt"></div></div>
+    </div>
+    <div class="ip-card ip-reveal" style="margin-top:18px">
+      <h3>Limitaciones y trabajo futuro</h3>
+      <p>El gimbal no reproduce el acoplamiento aerodinámico, los efectos de traslación ni las perturbaciones del vuelo libre: los modelos identificados son los del sistema acoplado dron–gimbal. El relé con histéresis limita la clase de modelos a integradores y primeros órdenes con retardo; para órdenes superiores harían falta relés asimétricos o multinivel. Quedan pendientes la validación en vuelo, el estudio del efecto de la inercia añadida y un benchmark sistemático.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 8. QUIZ ======================= -->
+<section class="ip-section" id="quiz">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">8</span>Autoevaluación</p>
+      <h2>¿Lo has entendido?</h2>
+      <p>Seis preguntas para comprobarlo. Cada respuesta incluye una explicación.</p>
+    </div>
+    <div id="quizBox" class="ip-reveal"></div>
+  </div>
+</section>
+
+<!-- ======================= 9. CITAR ======================= -->
+<section class="ip-section" id="citar">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">9</span>Cómo citar</p>
+      <h2>Referencia</h2>
+    </div>
+    <div class="ip-grid cols-2 ip-reveal">
+      <div class="ip-card">
+        <p>Mañas-Álvarez, F.-J., Guinaldo, M., Dormido, R., &amp; Dormido, S. (2026). Relay-based autotuning for quadrotor attitude and rate control. <em>Mechatronics</em>, 119, 103572. <a href="https://doi.org/10.1016/j.mechatronics.2026.103572" target="_blank" rel="noopener">doi:10.1016/j.mechatronics.2026.103572</a></p>
+        <p class="ip-small ip-muted">Artículo en acceso abierto bajo licencia CC BY-NC-ND 4.0.</p>
+        <div class="ip-btns">
+          <a class="ip-btn" href="https://doi.org/10.1016/j.mechatronics.2026.103572" target="_blank" rel="noopener">Artículo</a>
+          <a class="ip-btn ghost" href="../../publicaciones.html">Más publicaciones</a>
+          <a class="ip-btn ghost" href="../../plataforma.html">Plataforma Robotic Park</a>
+        </div>
+      </div>
+      <div class="ip-code" id="bibtex">@article{ManasAlvarez2026Relay,
+  title   = {Relay-based autotuning for quadrotor attitude and rate control},
+  author  = {Ma{\~n}as-{\'A}lvarez, Francisco-Jos{\'e} and Guinaldo, Mar{\'i}a
+             and Dormido, Raquel and Dormido, Sebasti{\'a}n},
+  journal = {Mechatronics},
+  volume  = {119},
+  pages   = {103572},
+  year    = {2026},
+  doi     = {10.1016/j.mechatronics.2026.103572}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ip-footer">
+  <div class="ip-wrap">
+    <span>Material docente interactivo · Proyecto de innovación docente · <a href="../../index.html">Robotic Park Lab</a> — UNED</span>
+    <span>Simulación didáctica calibrada con los datos del artículo; no sustituye a los resultados experimentales.</span>
+  </div>
+</footer>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="gimbal3d.js"></script>
+<script defer src="modelo.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

@@ -9,7 +9,8 @@ Web oficial de **Robotic Park Lab** (UNED), publicada con GitHub Pages en
 
 ```
 index.html            Portada
-investigacion.html      Líneas de investigación, proyectos y publicaciones
+investigacion.html      Líneas de investigación, propuestas de PFG/TFM, proyectos e innovación docente
+publicaciones.html      Publicaciones (tarjetas con portada, cita, DOI y resumen)
 plataforma.html         Hardware y repositorios de software de Robotic Park
 equipo.html             Investigadores del laboratorio
 benchmarks.html         Benchmarks reproducibles publicados por el laboratorio
@@ -17,6 +18,11 @@ contacto.html           Datos de contacto
 assets/
   style.css               Hoja de estilos compartida (paleta verde/naranja del logo)
   img/logo.png            Logotipo del laboratorio
+  img/publications/       Portadas de las publicaciones (miniaturas, ≤ 420 px de ancho)
+interactivos/             Publicaciones interactivas (innovación docente), ver interactivos/README.md
+  lib/                      Librería común ip.css + ip.js
+  plantilla/                Plantilla para crear una página nueva
+  relay-autotuning/         «Relay-based autotuning for quadrotor attitude and rate control»
 ```
 
 HTML/CSS plano, sin generador ni build: GitHub Pages sirve el repositorio tal cual desde la rama
@@ -25,8 +31,17 @@ carpeta con `python3 -m http.server`).
 
 ## Cómo ampliar el sitio
 
-- **Nueva sección de investigación**: añade una tarjeta `.item-card` (líneas) o un bloque
-  `.entry` (proyectos/publicaciones) en `investigacion.html`.
+- **Nueva línea de investigación**: añade una tarjeta `.item-card` en `investigacion.html` (`#lineas`).
+- **Nueva propuesta de PFG/TFM**: copia un bloque `<div class="card proposal">` en `investigacion.html`
+  (`#pfg-tfm`): título, directores, descripción, etiquetas y referencias.
+- **Nuevo proyecto**: copia un bloque `<div class="card"><div class="entry">…` en `#proyectos` o
+  `#innovaciondocente`.
+- **Nueva publicación**: copia un bloque `<div class="card pub-card">` en la sección correspondiente de
+  `publicaciones.html` y guarda la portada en `assets/img/publications/` (reducida a ~420 px de ancho).
+- **Versión interactiva de una publicación**: copia `interactivos/plantilla/` a
+  `interactivos/<nombre>/`, sigue `interactivos/README.md` y añade en la tarjeta de la publicación
+  `<a class="pub-interactive" href="interactivos/<nombre>/">Versión interactiva</a>` (y la clase
+  `has-interactive` en la tarjeta).
 - **Nuevo miembro del equipo**: copia un bloque `.team-card` en `equipo.html`.
 - **Nuevo repositorio de software/hardware**: añade una tarjeta `.item-card` en `plataforma.html`.
 - **Nuevo benchmark**: duplica un bloque `<section class="benchmark">` completo en
