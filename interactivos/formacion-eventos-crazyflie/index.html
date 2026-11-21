@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Event-based leader-follower">Líder-seguidor por eventos</title>
+<meta name="description" content="Publicación interactiva: control de formación líder-seguidor con comunicación basada en eventos (send-on-delta) para tres Crazyflie 2.1 en Robotic Park (I Simposio CEA, 2022). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>.stage-md{height:440px}.arch svg{width:100%;height:auto}.arch text{font:600 12.5px var(--font);fill:var(--text)}.arch .s{font:500 11px var(--font);fill:var(--muted)}.arch .hot{cursor:pointer}.arch .hot:hover rect{stroke-width:2.5}.lbars{display:grid;gap:8px}.lbar{display:grid;grid-template-columns:120px 1fr 52px;gap:10px;align-items:center;font-size:.84rem}.lbar .tr{height:14px;background:var(--surface-2);border-radius:7px;overflow:hidden;position:relative}.lbar .tr i{position:absolute;inset:0 auto 0 0;background:var(--s1);border-radius:7px;transition:width .4s}.lbar .tr i.r{background:var(--s3)}.lbar span:last-child{font-family:var(--font-mono);text-align:right}</style>
+</head>
+<body>
+<header class="ip-topbar"><div class="ip-wrap">
+  <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
+  <nav class="ip-topnav"><a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a><a href="#plataforma"><span lang="es">Plataforma</span><span lang="en">Platform</span></a><a href="#eventos"><span lang="es">Eventos</span><span lang="en">Events</span></a><a href="#simulador"><span lang="es">Simulador</span><span lang="en">Simulator</span></a><a href="#resultados"><span lang="es">Resultados</span><span lang="en">Results</span></a><a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a></nav>
+</div><div class="ip-progress"></div></header>
+
+<section class="ip-hero"><div class="ip-wrap">
+  <div>
+    <p class="ip-kicker">I Simposio CEA · Burgos 2022 · <span lang="es">Publicación interactiva</span><span lang="en">Interactive publication</span></p>
+    <h1><span lang="es">Tres drones en formación que casi no hablan entre sí</span><span lang="en">Three drones in formation that barely talk to each other</span></h1>
+    <p class="ip-authors"><strong>F. J. Mañas-Álvarez</strong>, M. Guinaldo, R. Dormido, R. Socas <span lang="es">y</span><span lang="en">and</span> S. Dormido · UNED</p>
+    <p class="ip-lead"><span lang="es">Primera experiencia de Robotic Park: un Crazyflie líder recorre un cuadrado y otros dos lo siguen manteniendo su posición relativa. En lugar de enviar la posición cada 50 ms, cada dron sólo la publica cuando se ha movido más de un umbral (<i>send-on-delta</i>). Resultado: un 95,47 % menos de mensajes con la misma formación.</span><span lang="en">Robotic Park's first experiment: a leader Crazyflie flies a square and two others follow it keeping their relative position. Instead of sending the position every 50 ms, each drone only publishes it when it has moved more than a threshold (<i>send-on-delta</i>). Result: 95.47% fewer messages with the same formation.</span></p>
+    <div class="ip-btns"><a class="ip-btn" href="#simulador"><span lang="es">Volar la formación</span><span lang="en">Fly the formation</span></a><a class="ip-btn ghost" href="#citar"><span lang="es">Cómo citar</span><span lang="en">How to cite</span></a></div>
+    <div class="ip-hero-stats"><div class="ip-hero-stat"><b><span lang="es">−95,47 %</span><span lang="en">−95.47%</span></b><span lang="es">mensajes del líder</span><span lang="en">leader messages</span></div><div class="ip-hero-stat"><b>3 × Crazyflie</b><span lang="es">líder + 2 seguidores</span><span lang="en">leader + 2 followers</span></div><div class="ip-hero-stat"><b>Vicon 100 Hz</b><span lang="es">6 cámaras Vero</span><span lang="en">6 Vero cameras</span></div></div>
+  </div>
+  <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+</div></section>
+
+<main>
+<section class="ip-section" id="mapa"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">1</span><span lang="es">Mapa conceptual</span><span lang="en">Concept map</span></p><h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2></div>
+  <div class="ip-cmap ip-reveal"><div id="cmap"></div><aside class="ip-card ip-cmap-panel" id="cmapPanel"></aside></div>
+</div></section>
+
+<section class="ip-section" id="plataforma"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">2</span><span lang="es">Robotic Park en 2022</span><span lang="en">Robotic Park in 2022</span></p>
+    <h2><span lang="es">De las cámaras al dron, pasando por ROS 2</span><span lang="en">From the cameras to the drone, through ROS 2</span></h2>
+    <p><span lang="es">Volumen de trabajo de 2 × 2 × 2,5 m. Las cámaras localizan los marcadores reflectantes con precisión milimétrica, Tracker 3.9 estima la pose de cada robot y un nodo de ROS 2 Galactic la publica como <code>geometry_msgs/Pose</code>. El control de posición corre dentro de cada Crazyflie; el PC sólo gestiona trayectorias. Pulsa un bloque.</span><span lang="en">Working volume of 2 × 2 × 2.5 m. The cameras locate the reflective markers with millimetre accuracy, Tracker 3.9 estimates each robot's pose and a ROS 2 Galactic node publishes it as <code>geometry_msgs/Pose</code>. Position control runs inside each Crazyflie; the PC only manages trajectories. Click a block.</span></p></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card arch" id="arch"></div>
+    <aside class="ip-card" id="archInfo"></aside>
+  </div>
+</div></section>
+
+<section class="ip-section" id="eventos"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">3</span><span lang="es">Comunicación por eventos</span><span lang="en">Event-based communication</span></p>
+    <h2><span lang="es">Hablar sólo cuando hay algo nuevo que contar</span><span lang="en">Speak only when there is something new to say</span></h2>
+    <p><span lang="es">El líder conoce la consigna \(\gamma(t)\); cada seguidor \(i\) quiere mantener la posición relativa \(p^*_{ij}\) respecto a su vecino \(j\):</span><span lang="en">The leader knows the reference \(\gamma(t)\); each follower \(i\) wants to keep the relative position \(p^*_{ij}\) with respect to its neighbour \(j\):</span></p>
+    <div class="ip-eq">$$p_0(t)=\gamma(t),\qquad p_i-p_j=p^*_{ij}\quad\forall j\in\mathcal N_i$$</div>
+    <p><span lang="es">Cada agente publica su posición en los instantes \(t_{k+1}^i=\inf\{t>t_k^i:\ f_i>0\}\), con la condición de disparo <i>send-on-delta</i> (Miskowicz, 2006):</span><span lang="en">Each agent publishes its position at the instants \(t_{k+1}^i=\inf\{t>t_k^i:\ f_i>0\}\), with the <i>send-on-delta</i> trigger condition (Miskowicz, 2006):</span></p>
+    <div class="ip-eq">$$f_i(e_i(t))=\lVert e_i(t)\rVert-c_0^i,\qquad e_i(t)=p_i(t)-p_i(t_k^i)$$</div>
+    <p><span lang="es">Es decir, el dron puede moverse dentro de una esfera de radio \(c_0^i\) alrededor de la última posición que envió sin avisar a nadie. Mueve el umbral y mira cómo la señal recibida se convierte en una escalera:</span><span lang="en">That is, the drone may move inside a sphere of radius \(c_0^i\) around the last position it sent without telling anyone. Move the threshold and watch the received signal turn into a staircase:</span></p></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Coordenada x del líder (m): real y recibida por el seguidor</span><span lang="en">Leader x coordinate (m): actual and received by the follower</span></div><div id="sod"></div></div>
+    <div class="ip-card"><div id="sodCtl"></div><div class="ip-readouts" id="sodRo" style="margin-top:14px;grid-template-columns:1fr 1fr"></div></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="simulador"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">4</span><span lang="es">Simulador</span><span lang="en">Simulator</span></p>
+    <h2><span lang="es">El cuadrado de 0,5 m con tres Crazyflie</span><span lang="en">The 0.5 m square with three Crazyflies</span></h2>
+    <p><span lang="es">Topología del artículo: <b>dron01</b> recibe la trayectoria y envía su posición a <b>dron02</b>; dron02 y <b>dron03</b> se comunican entre sí. Desplazamientos deseados \(p^*_{12}=p^*_{23}=(0{,}25,\ 0{,}25,\ 0{,}1)^T\) m y cuadrado a 1 m de altura. La esfera translúcida es el umbral alrededor de la última posición enviada.</span><span lang="en">Paper topology: <b>dron01</b> receives the trajectory and sends its position to <b>dron02</b>; dron02 and <b>dron03</b> talk to each other. Desired offsets \(p^*_{12}=p^*_{23}=(0.25,\ 0.25,\ 0.1)^T\) m and a square at 1 m height. The translucent sphere is the threshold around the last position sent.</span></p></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-toolbar"><span id="modeSeg"></span><button class="ip-btn small ghost" id="replay" type="button">↺ <span lang="es">Repetir</span><span lang="en">Replay</span></button><span class="ip-pill muted" id="tt"></span></div><div class="ip-stage stage-md"><canvas id="cv"></canvas><span class="ip-stage-hint"><span lang="es">Arrastra para girar · destello = mensaje enviado</span><span lang="en">Drag to rotate · flash = message sent</span></span></div></div>
+    <div class="ip-card"><div id="ctl"></div><div class="ip-readouts" id="ro" style="margin-top:14px;grid-template-columns:1fr 1fr"></div></div>
+  </div>
+  <div class="ip-grid cols-2 ip-reveal" style="margin-top:18px">
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Error de posición relativa \(p_i-p_j-p^*_{ij}\) (m)</span><span lang="en">Relative position error \(p_i-p_j-p^*_{ij}\) (m)</span></div><div id="pe"></div></div>
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Periodo entre consignas recibidas por dron02 (s) · como la Fig. 10</span><span lang="en">Period between setpoints received by dron02 (s) · like Fig. 10</span></div><div id="pp"></div></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="resultados"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">5</span><span lang="es">Resultados</span><span lang="en">Results</span></p>
+    <h2><span lang="es">Misma formación, una fracción de los mensajes</span><span lang="en">Same formation, a fraction of the messages</span></h2>
+    <p><span lang="es">Comunicación periódica cada 50 ms (P) frente a eventos con umbral 5 (BE5) y 10 (BE10). El artículo no indica la unidad del umbral; por el tamaño del cuadrado (50 cm) y el número de mensajes, en la simulación se interpreta en centímetros.</span><span lang="en">Periodic communication every 50 ms (P) vs events with threshold 5 (BE5) and 10 (BE10). The paper does not state the threshold's unit; given the size of the square (50 cm) and the number of messages, the simulation interprets it in centimetres.</span></p></div>
+  <div class="ip-grid cols-2 ip-reveal">
+    <div class="ip-card"><h3><span lang="es">Mensajes transmitidos (Tabla 2)</span><span lang="en">Messages sent (Table 2)</span></h3><div id="cmpTable"></div>
+      <div class="ip-plot-title" style="margin-top:12px"><span lang="es">Mensajes del líder: artículo frente a simulación</span><span lang="en">Leader messages: paper vs simulation</span></div><div id="bars"></div></div>
+    <div class="ip-card"><h3><span lang="es">Posición relativa, µ ± σ en m (Tabla 1)</span><span lang="en">Relative position, µ ± σ in m (Table 1)</span></h3><div id="relTable"></div>
+      <p class="ip-small ip-muted" style="margin-top:8px"><span lang="es">La formación se mantiene igual en los tres casos. Lo único que cambia es el retardo entre la señal del líder y la del seguidor: 0,6 s con comunicación periódica (debido al canal), 0,8 s con BE5 y 1,0 s con BE10, algo esperado y sin efecto negativo en el comportamiento.</span><span lang="en">The formation is kept the same in all three cases. The only change is the lag between the leader's and the follower's signals: 0.6 s with periodic communication (due to the channel), 0.8 s with BE5 and 1.0 s with BE10, which is expected and has no negative effect on behaviour.</span></p></div>
+  </div>
+  <div class="ip-card ip-reveal" style="margin-top:18px"><h3><span lang="es">¿Cuántos bytes ahorra?</span><span lang="en">How many bytes are saved?</span></h3>
+    <p class="ip-small"><span lang="es">Cada mensaje <code>geometry_msgs/Pose</code> tiene 7 números <code>float64</code>: 56 bytes. Si se omite la orientación bastan 3, es decir, 24 bytes.</span><span lang="en">Each <code>geometry_msgs/Pose</code> message holds 7 <code>float64</code> numbers: 56 bytes. Dropping the orientation leaves 3, i.e. 24 bytes.</span></p>
+    <div id="bytesCtl"></div><div class="ip-readouts" id="bytesRo" style="margin-top:12px"></div></div>
+</div></section>
+
+<section class="ip-section" id="quiz"><div class="ip-wrap"><div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">6</span><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></p><h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2></div><div id="quizBox" class="ip-reveal"></div></div></section>
+
+<section class="ip-section" id="citar"><div class="ip-wrap"><div class="ip-grid cols-2 ip-reveal">
+  <div class="ip-card"><h3><span lang="es">Cómo citar</span><span lang="en">How to cite</span></h3><p>Mañas-Álvarez, F. J., Guinaldo, M., Dormido, R., Socas, R., &amp; Dormido, S. (2022). Control de formación basado en eventos para Crazyflie 2.1. In <em>Actas del I Simposio CEA de los GT: Ingeniería de Control, Modelado, Simulación y Optimización</em>. Burgos, España.</p></div>
+  <div class="ip-code" id="bibtex">@inproceedings{ManasAlvarez2022SimposioCEA,
+  title     = {Control de formaci{\'o}n basado en eventos para
+               Crazyflie 2.1},
+  author    = {Ma{\~n}as-{\'A}lvarez, F. J. and Guinaldo, M. and Dormido, R.
+               and Socas, R. and Dormido, S.},
+  booktitle = {Actas del I Simposio CEA de los GT: Ingenier{\'i}a de Control,
+               Modelado, Simulaci{\'o}n y Optimizaci{\'o}n},
+  address   = {Burgos, Espa{\~n}a},
+  year      = {2022}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+</div></div></section>
+</main>
+<footer class="ip-footer"><div class="ip-wrap"><span><span lang="es">Material docente interactivo · Proyecto de innovación docente</span><span lang="en">Interactive teaching material · Teaching innovation project</span> · <a href="../../index.html" data-href-en="../../index_en.html">Robotic Park Lab</a> — UNED</span><span lang="es">Simulación didáctica; las Tablas 1 y 2 recogen los resultados experimentales.</span><span lang="en">Teaching simulation; Tables 1 and 2 list the experimental results.</span></div></footer>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="modelo.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

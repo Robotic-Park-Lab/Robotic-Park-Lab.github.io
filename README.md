@@ -24,7 +24,7 @@ interactivos/             Publicaciones interactivas (innovación docente), ver 
   lib/                      Librería común: ip.css, ip.js, scene3d.js (3D), formacion.js,
                             multiagente.js y altitud.js
   plantilla/                Plantilla para crear una página nueva
-  <una carpeta por artículo>  17 páginas bilingües (listado en interactivos/README.md)
+  <una carpeta por artículo>  21 páginas bilingües (listado en interactivos/README.md)
 ```
 
 HTML/CSS plano, sin generador ni build: GitHub Pages sirve el repositorio tal cual desde la rama

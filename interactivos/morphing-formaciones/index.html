@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Formation morphing">Morphing de formaciones</title>
+<meta name="description" content="Publicación interactiva: morphing de formaciones en sistemas multi-agente robóticos, transición continua y distribuida entre geometrías (Simposio CEA, Zaragoza 2026). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>
+.stage-md{height:460px}
+.appr{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.appr .ip-card{padding:16px}.appr h3{margin:0 0 6px;font-size:1.02rem}.appr svg{width:100%;height:auto;margin:6px 0}
+.appr text{font:600 11px var(--font);fill:var(--muted)}
+.chal{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.chal .ip-card{padding:14px 16px}.chal b{display:block;margin-bottom:4px}
+</style>
+</head>
+<body>
+<header class="ip-topbar"><div class="ip-wrap">
+  <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
+  <nav class="ip-topnav"><a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a><a href="#concepto"><span lang="es">Concepto</span><span lang="en">Concept</span></a><a href="#simulador"><span lang="es">Simulador</span><span lang="en">Simulator</span></a><a href="#retos"><span lang="es">Retos</span><span lang="en">Challenges</span></a><a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a></nav>
+</div><div class="ip-progress"></div></header>
+
+<section class="ip-hero"><div class="ip-wrap">
+  <div>
+    <p class="ip-kicker">Simposio CEA · Zaragoza 2026 · <span lang="es">Publicación interactiva</span><span lang="en">Interactive publication</span></p>
+    <h1><span lang="es">Formaciones que cambian de forma sin romperse</span><span lang="en">Formations that change shape without breaking</span></h1>
+    <p class="ip-authors"><strong>F. J. Mañas-Álvarez</strong>, J. García-Lechuz, R. Aragüés, G. López-Nicolás, M. Guinaldo <span lang="es">y</span><span lang="en">and</span> R. Dormido · UNED · <span lang="es">Universidad de Zaragoza</span><span lang="en">University of Zaragoza</span></p>
+    <p class="ip-lead"><span lang="es">En un entorno cambiante, una formación fija puede quedarse atascada en un pasillo o bajo un techo bajo. El <i>morphing</i> es una transición continua y controlada entre geometrías que conserva el grafo de interacción y los objetivos de la misión, en lugar de saltar de una configuración a otra.</span><span lang="en">In a changing environment, a fixed formation may get stuck in a corridor or under a low ceiling. <i>Morphing</i> is a continuous, controlled transition between geometries that preserves the interaction graph and the mission goals, instead of jumping from one configuration to another.</span></p>
+    <div class="ip-btns"><a class="ip-btn" href="#simulador"><span lang="es">Transformar la formación</span><span lang="en">Morph the formation</span></a><a class="ip-btn ghost" href="https://doi.org/10.26754/uz.979-13-88046-11-7" target="_blank" rel="noopener"><span lang="es">Ver las actas</span><span lang="en">See the proceedings</span></a></div>
+    <div class="ip-hero-stats"><div class="ip-hero-stat"><b>UNED + I3A</b><span lang="es">colaboración</span><span lang="en">collaboration</span></div><div class="ip-hero-stat"><b><span lang="es">2 fases</span><span lang="en">2 phases</span></b><span lang="es">formación + morphing</span><span lang="en">formation + morphing</span></div><div class="ip-hero-stat"><b>C²</b><span lang="es">transición sin saltos</span><span lang="en">jump-free transition</span></div></div>
+  </div>
+  <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+</div></section>
+
+<main>
+<section class="ip-section" id="mapa"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">1</span><span lang="es">Mapa conceptual</span><span lang="en">Concept map</span></p><h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2></div>
+  <div class="ip-cmap ip-reveal"><div id="cmap"></div><aside class="ip-card ip-cmap-panel" id="cmapPanel"></aside></div>
+</div></section>
+
+<section class="ip-section" id="concepto"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">2</span><span lang="es">Qué es el morphing</span><span lang="en">What morphing is</span></p>
+    <h2><span lang="es">Tres formas de cambiar una formación</span><span lang="en">Three ways to change a formation</span></h2>
+    <p><span lang="es">El <i>morphing</i> se usa desde hace años en animación por ordenador (interpolar suavemente entre formas) y en <i>soft robotics</i>. En formaciones multi-agente, los trabajos previos cambiaban la geometría de otras maneras:</span><span lang="en">Morphing has long been used in computer animation (smoothly interpolating between shapes) and in soft robotics. In multi-agent formations, previous work changed the geometry in other ways:</span></p></div>
+  <div class="appr ip-reveal" id="appr"></div>
+  <div class="ip-grid side ip-reveal" style="margin-top:18px">
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Parámetro de transición \(s(t)\) y su velocidad \(\dot s(t)\)</span><span lang="en">Transition parameter \(s(t)\) and its rate \(\dot s(t)\)</span></div><div id="sp"></div></div>
+    <div class="ip-card"><h3><span lang="es">Sin saltos en las consignas</span><span lang="en">No jumps in the setpoints</span></h3>
+      <p class="ip-small"><span lang="es">Las distancias deseadas y la superficie dependen de \(s\in[0,1]\). Con una conmutación, \(s\) salta de 0 a 1 y todos los errores aparecen de golpe. Con un perfil polinómico de grado 5, \(s\), \(\dot s\) y \(\ddot s\) son continuas: las consignas evolucionan sin discontinuidades.</span><span lang="en">The desired distances and the surface depend on \(s\in[0,1]\). With switching, \(s\) jumps from 0 to 1 and all errors appear at once. With a degree-5 polynomial profile, \(s\), \(\dot s\) and \(\ddot s\) are continuous: the setpoints evolve without discontinuities.</span></p>
+      <div class="ip-eq">$$s(\tau)=10\tau^3-15\tau^4+6\tau^5,\quad \tau=\tfrac{t-t_m}{T_m}$$</div></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="simulador"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">3</span><span lang="es">Simulador</span><span lang="en">Simulator</span></p>
+    <h2><span lang="es">Fase 1: alcanzar la geometría. Fase 2: transformarla</span><span lang="en">Phase 1: reach the geometry. Phase 2: transform it</span></h2>
+    <p><span lang="es">Como en la Figura 1 del artículo: primero los drones convergen a una semiesfera con control por distancias y restricción de superficie (ley equivalente a la de Guinaldo et al., 2024); en \(t_m=10\) s cambia la geometría y las posiciones finales de la fase 1 son las condiciones iniciales de la fase 2. En modo <i>morphing</i>, un único dron conoce el perfil \(s(t)\) y el resto lo acuerda por consenso con sus vecinos:</span><span lang="en">As in the paper's Figure 1: first the drones converge to a hemisphere with distance control and a surface constraint (a law equivalent to Guinaldo et al., 2024); at \(t_m=10\) s the geometry changes and the final positions of phase 1 are the initial conditions of phase 2. In <i>morphing</i> mode a single drone knows the \(s(t)\) profile and the rest agree on it by consensus with their neighbours:</span></p>
+    <div class="ip-eq">$$\dot s_i=\gamma\sum_{j\in\mathcal N_i}(s_j-s_i),\qquad d^*_{ij}\!\left(\tfrac{s_i+s_j}{2}\right),\qquad \mathcal S(s_i)$$</div>
+    <p class="ip-small ip-muted"><span lang="es">El artículo plantea el marco general e ilustra la idea con un ejemplo preliminar en MATLAB. Esta simulación es una implementación didáctica de ese marco: la geometría final se obtiene escalando la inicial y el consenso actúa sobre el parámetro de transición.</span><span lang="en">The paper sets out the general framework and illustrates it with a preliminary MATLAB example. This simulation is a teaching implementation of that framework: the final geometry is obtained by scaling the initial one and consensus acts on the transition parameter.</span></p></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-toolbar"><span id="modeSeg"></span><button class="ip-btn small accent" id="run" type="button">▶ <span lang="es">Repetir</span><span lang="en">Replay</span></button><span class="ip-pill muted" id="tt"></span></div><div class="ip-stage stage-md"><canvas id="cv"></canvas><span class="ip-stage-hint"><span lang="es">Malla gris: geometría actual · malla de color: geometría final · arrastra para girar</span><span lang="en">Grey mesh: current geometry · coloured mesh: final geometry · drag to rotate</span></span></div></div>
+    <div class="ip-card"><div id="ctl"></div><div class="ip-readouts" id="ro" style="margin-top:14px;grid-template-columns:1fr 1fr"></div></div>
+  </div>
+  <div class="ip-grid cols-2 ip-reveal" style="margin-top:18px">
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Consenso sobre \(s_i\): cada línea es un dron</span><span lang="en">Consensus on \(s_i\): each line is a drone</span></div><div id="ps"></div></div>
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Mayor acción de control \(\max_i\lVert u_i\rVert\) antes de saturar (m/s)</span><span lang="en">Largest control action \(\max_i\lVert u_i\rVert\) before saturation (m/s)</span></div><div id="pu"></div></div>
+  </div>
+  <div class="ip-card ip-reveal" style="margin-top:18px"><div class="ip-plot-title"><span lang="es">Errores de distancia \(\sum|d_{ij}-d^*_{ij}|\) y de superficie \(\sum|f_i|\)</span><span lang="en">Distance \(\sum|d_{ij}-d^*_{ij}|\) and surface \(\sum|f_i|\) errors</span></div><div id="pe"></div></div>
+</div></section>
+
+<section class="ip-section" id="retos"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">4</span><span lang="es">Retos abiertos</span><span lang="en">Open challenges</span></p>
+    <h2><span lang="es">Mucho más que interpolar formas</span><span lang="en">Much more than interpolating shapes</span></h2>
+    <p><span lang="es">El artículo es un primer paso hacia estrategias de <i>morphing</i> más avanzadas y señala los retos de control que plantea, tanto en arquitecturas centralizadas como distribuidas:</span><span lang="en">The paper is a first step towards more advanced morphing strategies and points out the control challenges it raises, both in centralised and distributed architectures:</span></p></div>
+  <div class="chal ip-reveal" id="chal"></div>
+</div></section>
+
+<section class="ip-section" id="quiz"><div class="ip-wrap"><div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">5</span><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></p><h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2></div><div id="quizBox" class="ip-reveal"></div></div></section>
+
+<section class="ip-section" id="citar"><div class="ip-wrap"><div class="ip-grid cols-2 ip-reveal">
+  <div class="ip-card"><h3><span lang="es">Cómo citar</span><span lang="en">How to cite</span></h3><p>Mañas-Álvarez, F. J., García-Lechuz, J., Aragüés, R., López-Nicolás, G., Guinaldo, M., &amp; Dormido, R. (2026). Morphing de formaciones en sistemas multi-agente robóticos. <em>Actas del II Simposio CEA de los GT: Ingeniería de Control, Modelado, Simulación y Optimización, Educación en Automática</em>. Zaragoza, España. <a href="https://doi.org/10.26754/uz.979-13-88046-11-7" target="_blank" rel="noopener">doi:10.26754/uz.979-13-88046-11-7</a></p></div>
+  <div class="ip-code" id="bibtex">@inproceedings{ManasAlvarez2026Morphing,
+  title     = {Morphing de formaciones en sistemas multi-agente rob{\'o}ticos},
+  author    = {Ma{\~n}as-{\'A}lvarez, F. J. and Garc{\'i}a-Lechuz, J. and
+               Arag{\"u}{\'e}s, R. and L{\'o}pez-Nicol{\'a}s, G. and
+               Guinaldo, M. and Dormido, R.},
+  booktitle = {Actas del II Simposio CEA de los GT: Ingenier{\'i}a de Control,
+               Modelado, Simulaci{\'o}n y Optimizaci{\'o}n, Educaci{\'o}n en
+               Autom{\'a}tica},
+  address   = {Zaragoza, Espa{\~n}a},
+  year      = {2026},
+  doi       = {10.26754/uz.979-13-88046-11-7}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+</div></div></section>
+</main>
+<footer class="ip-footer"><div class="ip-wrap"><span><span lang="es">Material docente interactivo · Proyecto de innovación docente</span><span lang="en">Interactive teaching material · Teaching innovation project</span> · <a href="../../index.html" data-href-en="../../index_en.html">Robotic Park Lab</a> — UNED</span><span lang="es">Simulación didáctica del marco propuesto en el artículo.</span><span lang="en">Teaching simulation of the framework proposed in the paper.</span></div></footer>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="../lib/formacion.js"></script>
+<script defer src="modelo.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

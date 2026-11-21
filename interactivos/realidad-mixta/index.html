@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Mixed-reality swarms">Enjambres en realidad mixta</title>
+<meta name="description" content="Publicación interactiva: sistemas ciberfísicos multi-agente en realidad mixta, con Crazyflie y Khepera IV reales y virtuales en Robotic Park (II Simposio CEA, 2023). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>
+.stage-md{height:440px}.twin svg{width:100%;height:auto}.twin text{font:600 13px var(--font);fill:var(--text)}.twin .s{font:500 11.5px var(--font);fill:var(--muted)}
+.flow{stroke-dasharray:8 7;animation:flow 1.1s linear infinite}.flow.rev{animation-direction:reverse}@keyframes flow{to{stroke-dashoffset:-30}}
+@media (prefers-reduced-motion: reduce){.flow{animation:none}}
+.robots{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.robot{border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:var(--surface);cursor:pointer;text-align:left;font:inherit;color:inherit;transition:border-color .2s,transform .2s}
+.robot:hover,.robot.on{border-color:var(--primary);transform:translateY(-2px)}.robot b{display:block;font-size:.98rem}.robot i{font-style:normal;font-size:.8rem;color:var(--muted)}
+.robot .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.lbars{display:grid;gap:8px}.lbar{display:grid;grid-template-columns:70px 1fr 64px;gap:10px;align-items:center;font-size:.84rem}.lbar .tr{height:14px;background:var(--surface-2);border-radius:7px;overflow:hidden;position:relative}.lbar .tr i{position:absolute;inset:0 auto 0 0;background:var(--s1);border-radius:7px;transition:width .4s}.lbar .tr i.r{background:var(--s3)}.lbar span:last-child{font-family:var(--font-mono);text-align:right}
+.guess{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+</style>
+</head>
+<body>
+<header class="ip-topbar"><div class="ip-wrap">
+  <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
+  <nav class="ip-topnav"><a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a><a href="#gemelos"><span lang="es">Gemelos</span><span lang="en">Twins</span></a><a href="#robots">Robots</a><a href="#experimento"><span lang="es">Experimento</span><span lang="en">Experiment</span></a><a href="#resultados"><span lang="es">Resultados</span><span lang="en">Results</span></a><a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a></nav>
+</div><div class="ip-progress"></div></header>
+
+<section class="ip-hero"><div class="ip-wrap">
+  <div>
+    <p class="ip-kicker">II Simposio CEA · Madrid 2023 · <span lang="es">Publicación interactiva</span><span lang="en">Interactive publication</span></p>
+    <h1><span lang="es">¿Cuál de estos robots no existe?</span><span lang="en">Which of these robots does not exist?</span></h1>
+    <p class="ip-authors"><strong>F. J. Mañas-Álvarez</strong>, M. Guinaldo, R. Dormido, R. Socas <span lang="es">y</span><span lang="en">and</span> S. Dormido · UNED</p>
+    <p class="ip-lead"><span lang="es">Un Crazyflie y dos Khepera IV reales se coordinan en Robotic Park con dos Khepera que sólo existen en Webots. Como todos publican con la misma nomenclatura en ROS 2, para los controladores son indistinguibles. Y con comunicación por eventos el canal se libera un 98 %.</span><span lang="en">A Crazyflie and two real Khepera IV coordinate in Robotic Park with two Kheperas that only exist in Webots. Since they all publish with the same naming in ROS 2, the controllers cannot tell them apart. And with event-based communication the channel is freed by 98%.</span></p>
+    <div class="ip-btns"><a class="ip-btn" href="#experimento"><span lang="es">Adivina cuáles son virtuales</span><span lang="en">Guess which are virtual</span></a><a class="ip-btn ghost" href="#citar"><span lang="es">Cómo citar</span><span lang="en">How to cite</span></a></div>
+    <div class="ip-hero-stats"><div class="ip-hero-stat"><b>3 + 2</b><span lang="es">reales + virtuales</span><span lang="en">real + virtual</span></div><div class="ip-hero-stat"><b><span lang="es">−98 %</span><span lang="en">−98%</span></b><span lang="es">muestras transmitidas</span><span lang="en">samples transmitted</span></div><div class="ip-hero-stat"><b><span lang="es">−43 %</span><span lang="en">−43%</span></b>RMSE</div></div>
+  </div>
+  <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+</div></section>
+
+<main>
+<section class="ip-section" id="mapa"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">1</span><span lang="es">Mapa conceptual</span><span lang="en">Concept map</span></p><h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2></div>
+  <div class="ip-cmap ip-reveal"><div id="cmap"></div><aside class="ip-card ip-cmap-panel" id="cmapPanel"></aside></div>
+</div></section>
+
+<section class="ip-section" id="gemelos"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">2</span><span lang="es">Modelos, sombras y gemelos</span><span lang="en">Models, shadows and twins</span></p>
+    <h2><span lang="es">Lo que los distingue es hacia dónde viajan los datos</span><span lang="en">What tells them apart is where the data travels</span></h2>
+    <p><span lang="es">Un sistema ciberfísico combina componentes físicos y digitales. Según el artículo (siguiendo a Fuller et al., 2020), la diferencia entre un modelo digital, una sombra digital y un gemelo digital está en el flujo de datos entre el robot real y su versión virtual. Elige uno:</span><span lang="en">A cyber-physical system combines physical and digital components. According to the paper (following Fuller et al., 2020), the difference between a digital model, a digital shadow and a digital twin lies in the data flow between the real robot and its virtual version. Pick one:</span></p></div>
+  <div class="ip-card ip-reveal"><div id="twinSeg" style="margin-bottom:12px"></div><div class="ip-grid side" style="align-items:center"><div class="twin" id="twin"></div><div id="twinTxt"></div></div></div>
+</div></section>
+
+<section class="ip-section" id="robots"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">3</span><span lang="es">Robots disponibles</span><span lang="en">Available robots</span></p>
+    <h2><span lang="es">Cinco robots, una sola red de ROS 2 Humble</span><span lang="en">Five robots, a single ROS 2 Humble network</span></h2>
+    <p><span lang="es">Cada agente opera en su propio <i>namespace</i>, así que dos robots iguales no necesitan nombres de nodos ni de <i>topics</i> distintos. Gracias a los tipos estándar, un robot que ya tenga <i>driver</i> de ROS 2 se integra sin tocar el resto del sistema. Pulsa en cada robot para ver cómo se conecta.</span><span lang="en">Each agent runs in its own <i>namespace</i>, so two identical robots need no different node or <i>topic</i> names. Thanks to standard types, a robot that already has a ROS 2 <i>driver</i> joins without touching the rest of the system. Click each robot to see how it connects.</span></p></div>
+  <div class="ip-grid side ip-reveal"><div class="robots" id="robotList"></div><aside class="ip-card" id="robotInfo"></aside></div>
+</div></section>
+
+<section class="ip-section" id="experimento"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">4</span><span lang="es">Experimento en realidad mixta</span><span lang="en">Mixed-reality experiment</span></p>
+    <h2><span lang="es">Un dron y cuatro Khepera: dos de ellos están en Webots</span><span lang="en">One drone and four Kheperas: two of them live in Webots</span></h2>
+    <p><span lang="es">Cada agente aplica la ley de control de formación por distancias con ganancias unitarias, donde \(d^*_{ij}\) es la distancia deseada:</span><span lang="en">Each agent applies the distance-based formation control law with unit gains, where \(d^*_{ij}\) is the desired distance:</span></p>
+    <div class="ip-eq">$$u_i^s(k)=-\frac12\sum_{j\in\mathcal N_i}\mu_{ij}\left(\lVert p_i(k)-p_j(k)\rVert^2-{d^*_{ij}}^2\right)\left(p_i(k)-p_j(k)\right)$$</div>
+    <p><span lang="es">Caso A: muestreo continuo, a 100 Hz los Khepera (frecuencia de Vicon) y a 50 Hz el dron. Caso B: eventos con umbral constante de 1 cm. Antes de ver la simulación, intenta adivinar qué dos Khepera son virtuales pulsando sobre ellos.</span><span lang="en">Case A: continuous sampling, 100 Hz for the Kheperas (Vicon rate) and 50 Hz for the drone. Case B: events with a constant 1 cm threshold. Before watching the simulation, try to guess which two Kheperas are virtual by clicking on them.</span></p>
+    <p class="ip-small ip-muted"><span lang="es">La formación de la simulación (cuadrado de 0,8 m con el dron a 0,8 m de altura) es de ejemplo; la del artículo aparece en su Figura 3.</span><span lang="en">The simulated formation (0.8 m square with the drone at 0.8 m height) is an example; the paper's is shown in its Figure 3.</span></p></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-toolbar"><span id="caseSeg"></span><button class="ip-btn small accent" id="run" type="button">▶ <span lang="es">Nueva experiencia</span><span lang="en">New run</span></button><span class="ip-pill muted" id="tt"></span></div><div class="ip-stage stage-md"><canvas id="cv"></canvas><span class="ip-stage-hint"><span lang="es">Pulsa sobre un Khepera para marcarlo como virtual · arrastra para girar</span><span lang="en">Click a Khepera to mark it as virtual · drag to rotate</span></span></div></div>
+    <div class="ip-card"><div class="guess" id="guess"></div><div class="ip-readouts" id="ro" style="margin-top:14px;grid-template-columns:1fr 1fr"></div></div>
+  </div>
+  <div class="ip-card ip-reveal" style="margin-top:18px"><div class="ip-plot-title"><span lang="es">Error de formación \(\sum|d_{ij}-d^*_{ij}|\) (m)</span><span lang="en">Formation error \(\sum|d_{ij}-d^*_{ij}|\) (m)</span></div><div id="pe"></div></div>
+</div></section>
+
+<section class="ip-section" id="resultados"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">5</span><span lang="es">Resultados</span><span lang="en">Results</span></p>
+    <h2><span lang="es">Menos mensajes y, además, menos error</span><span lang="en">Fewer messages and, on top of that, less error</span></h2>
+    <p><span lang="es">El artículo compara cuatro índices: frecuencia media de transmisión \(f\), \(\mathrm{IAE}=\int|e|\,dt\), \(\mathrm{ITAE}=\int t\,|e|\,dt\) (pesa más los errores que persisten) y \(\mathrm{RMSE}=\sqrt{\tfrac1T\int e^2\,dt}\). Las barras muestran el Caso B normalizado respecto al Caso A (Figura 6): por debajo de 1, el sistema por eventos es mejor.</span><span lang="en">The paper compares four indices: mean transmission frequency \(f\), \(\mathrm{IAE}=\int|e|\,dt\), \(\mathrm{ITAE}=\int t\,|e|\,dt\) (weighting persistent errors more) and \(\mathrm{RMSE}=\sqrt{\tfrac1T\int e^2\,dt}\). The bars show Case B normalised to Case A (Figure 6): below 1, the event-based system is better.</span></p></div>
+  <div class="ip-grid cols-2 ip-reveal">
+    <div class="ip-card"><h3><span lang="es">Caso B / Caso A (artículo)</span><span lang="en">Case B / Case A (paper)</span></h3><div id="bars"></div></div>
+    <div class="ip-card"><h3><span lang="es">¿Por qué mejora también el error?</span><span lang="en">Why does the error improve too?</span></h3>
+      <p><span lang="es">Los robots apenas se desplazan una vez alcanzada la formación, así que dejan de generar eventos. Los Khepera tienen un movimiento muy estable; el Crazyflie, en cambio, oscila ligeramente en vuelo estacionario, por eso su reducción es menor (85 %).</span><span lang="en">The robots barely move once the formation is reached, so they stop generating events. The Kheperas move very steadily; the Crazyflie, instead, oscillates slightly in hover, which is why its reduction is smaller (85%).</span></p>
+      <p><span lang="es">La mejora del 15 % en IAE e ITAE y del 43 % en RMSE la atribuyen los autores al <b>efecto de filtrado</b>: con el umbral, las pequeñas oscilaciones del dron no llegan a los controladores de sus vecinos ni se propagan por el grafo.</span><span lang="en">The authors attribute the 15% improvement in IAE and ITAE and the 43% in RMSE to the <b>filtering effect</b>: with the threshold, the drone's small oscillations do not reach its neighbours' controllers nor propagate through the graph.</span></p>
+      <p class="ip-note info ip-small"><span lang="es">La simulación de esta página reproduce la reducción de mensajes (<b id="simF">—</b> en total, <b id="simCF">—</b> en el dron), pero su modelo simplificado no captura ese efecto de filtrado: por eso los índices de error experimentales se muestran sólo con los datos del artículo.</span><span lang="en">This page's simulation reproduces the message reduction (<b id="simFen">—</b> overall, <b id="simCFen">—</b> for the drone), but its simplified model does not capture that filtering effect: that is why the experimental error indices are shown only with the paper's data.</span></p></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="quiz"><div class="ip-wrap"><div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">6</span><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></p><h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2></div><div id="quizBox" class="ip-reveal"></div></div></section>
+
+<section class="ip-section" id="citar"><div class="ip-wrap"><div class="ip-grid cols-2 ip-reveal">
+  <div class="ip-card"><h3><span lang="es">Cómo citar</span><span lang="en">How to cite</span></h3><p>Mañas-Álvarez, F. J., Guinaldo, M., Dormido, R., Socas, R., &amp; Dormido, S. (2023). Sistemas ciberfísicos multi-agente en realidad mixta. In <em>Actas del II Simposio CEA de los GT: Ingeniería de Control, Modelado, Simulación y Optimización</em>. Madrid, España. ISBN 978-84-09-51177-8.</p></div>
+  <div class="ip-code" id="bibtex">@inproceedings{ManasAlvarez2023SimposioCEA,
+  title     = {Sistemas ciberf{\'i}sicos multi-agente en realidad mixta},
+  author    = {Ma{\~n}as-{\'A}lvarez, F. J. and Guinaldo, M. and Dormido, R.
+               and Socas, R. and Dormido, S.},
+  booktitle = {Actas del II Simposio CEA de los GT: Ingenier{\'i}a de Control,
+               Modelado, Simulaci{\'o}n y Optimizaci{\'o}n},
+  address   = {Madrid, Espa{\~n}a},
+  isbn      = {978-84-09-51177-8},
+  year      = {2023}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+</div></div></section>
+</main>
+<footer class="ip-footer"><div class="ip-wrap"><span><span lang="es">Material docente interactivo · Proyecto de innovación docente</span><span lang="en">Interactive teaching material · Teaching innovation project</span> · <a href="../../index.html" data-href-en="../../index_en.html">Robotic Park Lab</a> — UNED</span><span lang="es">Simulación didáctica; la Figura 6 recoge los resultados experimentales.</span><span lang="en">Teaching simulation; Figure 6 lists the experimental results.</span></div></footer>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="../lib/multiagente.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

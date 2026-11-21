@@ -13,7 +13,8 @@ interactivos/
     formacion.js        Formaciones rígidas sobre superficies (objeto FORM): cuádricas, Algoritmo 1,
                         test de Delaunay, rango de J_R, proyección de Lagrange y simulador
     multiagente.js      Enjambres heterogéneos (objeto MA): control jerárquico por distancias,
-                        consenso, muestreo periódico o por eventos y recuento de mensajes
+                        consenso, muestreo periódico o por eventos y recuento de mensajes;
+                        por agente: ruido de medida, oscilación propia y divisor de frecuencia
     altitud.js          Control de altitud del Crazyflie con PID periódico o por eventos (objeto ALT)
   plantilla/            ← punto de partida para una página nueva
     index.html
@@ -22,6 +23,10 @@ interactivos/
   plataforma-vision/      «A ROS2 Vision Based Navigation Platform…» (IFAC ACE, 2022)
   consenso-gemelos/       «Formation by consensus … with Twins-in-the-loop» (ROBOT, 2022)
   calibracion-crazyflie/  «Indirect Method for Calibrating Quadrotor Sensors…» (GlobConET, 2022)
+  formacion-eventos-crazyflie/ «Control de formación basado en eventos para Crazyflie 2.1» (Simposio CEA, 2022)
+  realidad-mixta/         «Sistemas ciberfísicos multi-agente en realidad mixta» (Simposio CEA, 2023)
+  plataforma-heterogenea/ «Desarrollo, control y evaluación de una plataforma… heterogénea» (Simposio CEA, 2024)
+  morphing-formaciones/   «Morphing de formaciones en sistemas multi-agente robóticos» (Simposio CEA, 2026)
   robotic-park/           «Robotic Park. Multi-Agent Platform…» (IEEE Access, 2023)
   escalabilidad-ros2/     «Scalability of Cyber-Physical Systems … in ROS 2» (Sensors, 2023)
   frecuencia-muestreo/    «Análisis de la frecuencia de muestreo…» (JA, 2023)

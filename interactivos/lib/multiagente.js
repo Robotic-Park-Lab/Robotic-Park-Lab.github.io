@@ -11,7 +11,9 @@
        con un retardo de primer orden τ. Los robots terrestres tienen z fija.
 
    new MA.Swarm({
-     agents: [{ type: 'cf'|'kh'|'tb'|'origin', p: [x,y,z], real: true }],
+     agents: [{ type: 'cf'|'kh'|'tb'|'origin', p: [x,y,z], real: true,
+                noise?: σ propio, every?: publica 1 de cada n periodos,
+                wobble?: intensidad de la oscilación propia }],
      edges:  [[i, j, d*]],                         // control por distancias
      law:    'distance' | 'consensus',
      rel:    [[i, j, [dx,dy,dz]]],                 // consenso: p_j − p_i deseado
@@ -46,7 +48,7 @@
       this.nb = A.map(() => []);
       (this.edges || []).forEach(([i, j, d], k) => { this.nb[i].push({ j, k, d }); this.nb[j].push({ j: i, k, d }); });
       (this.rel || []).forEach(([i, j, r], k) => { this.nb[i].push({ j, k, r }); this.nb[j].push({ j: i, k, r: r.map(x => -x) }); });
-      this.integ = A.map(() => [0, 0, 0]);
+      this.integ = A.map(() => [0, 0, 0]); this.wob = A.map(() => [0, 0, 0]);
       this.t = 0; this.nextC = 0; this.nextS = 0; this.nextChk = 0;
       this.msgs = A.map(() => 0); this.execs = A.map(() => 0);
       this.hist = { t: [], e: [], eAgent: A.map(() => []), msgs: [] };
@@ -54,13 +56,14 @@
       this.record();
     }
     measured(i) {   // medida con ruido del sistema de posicionamiento
-      const q = this.p[i]; if (!this.noise) return q.slice();
-      return [q[0] + this.noise * this.rng.g(), q[1] + this.noise * this.rng.g(), q[2] + this.noise * this.rng.g()];
+      const q = this.p[i], sg = this.agents[i].noise ?? this.noise; if (!sg) return q.slice();   // ruido propio del agente (opcional)
+      return [q[0] + sg * this.rng.g(), q[1] + sg * this.rng.g(), q[2] + sg * this.rng.g()];
     }
     publish() {
-      const s = this.sampling;
+      const s = this.sampling; this.pubTick = (this.pubTick || 0) + 1;
       for (let i = 0; i < this.N; i++) {
         if (this.agents[i].type === 'origin') continue;
+        if (s.mode === 'periodic' && this.agents[i].every > 1 && (this.pubTick - 1) % this.agents[i].every) continue;   // publica 1 de cada «every» ticks
         const m = this.measured(i);
         if (s.mode === 'periodic' || norm(sub(m, this.sent[i])) > s.delta) { this.sent[i] = m; this.msgs[i]++; }
       }
@@ -96,6 +99,8 @@
         for (let i = 0; i < this.N; i++) {
           if (this.agents[i].type === 'origin') continue;
           this.v[i] = add(this.v[i], mul(sub(this.u[i], this.v[i]), this.dt / this.tau));
+          const wb = this.agents[i].wobble;   // oscilación propia (p. ej. dron en estacionario): Ornstein-Uhlenbeck en velocidad
+          if (wb) { const w = this.wob[i]; for (let k = 0; k < 3; k++) { w[k] += -w[k] / 0.5 * this.dt + wb * Math.sqrt(this.dt) * this.rng.g(); } this.v[i] = add(this.v[i], mul(w, this.dt / this.tau)); }
           this.p[i] = add(this.p[i], mul(this.v[i], this.dt));
         }
         this.t += this.dt;

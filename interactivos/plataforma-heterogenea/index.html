@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Heterogeneous robot platform">Plataforma robótica heterogénea</title>
+<meta name="description" content="Publicación interactiva: desarrollo, control y evaluación de Robotic Park, una plataforma robótica multi-agente heterogénea (III Simposio CEA, Vigo 2024). Robotic Park Lab, UNED.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>
+.stage-md{height:420px}.arch svg{width:100%;height:auto}.arch text{font:600 12.5px var(--font);fill:var(--text)}.arch .s{font:500 11px var(--font);fill:var(--muted)}
+.feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.feat{border:1px solid var(--border);border-radius:12px;padding:10px 12px;background:var(--surface);cursor:pointer;text-align:left;font:inherit;color:inherit;transition:border-color .2s,transform .2s}
+.feat:hover,.feat.on{border-color:var(--primary);transform:translateY(-2px)}.feat b{display:block}.feat i{font-style:normal;font-size:.8rem;color:var(--muted)}
+.lbars{display:grid;gap:8px}.lbar{display:grid;grid-template-columns:150px 1fr 56px;gap:10px;align-items:center;font-size:.84rem}.lbar .tr{height:14px;background:var(--surface-2);border-radius:7px;overflow:hidden;position:relative}.lbar .tr i{position:absolute;inset:0 auto 0 0;background:var(--s1);border-radius:7px;transition:width .4s}.lbar .tr i.r{background:var(--s3)}.lbar .tr i.k{background:var(--s4)}.lbar span:last-child{font-family:var(--font-mono);text-align:right}
+@media (max-width:600px){.lbar{grid-template-columns:110px 1fr 48px}}
+</style>
+</head>
+<body>
+<header class="ip-topbar"><div class="ip-wrap">
+  <a class="ip-brand" href="../../publicaciones.html" data-href-en="../../publicaciones_en.html"><img src="../../assets/img/logo.png" alt=""><span><span lang="es">← Publicaciones</span><span lang="en">← Publications</span></span></a>
+  <nav class="ip-topnav"><a href="#mapa"><span lang="es">Mapa</span><span lang="en">Map</span></a><a href="#plataforma"><span lang="es">Plataforma</span><span lang="en">Platform</span></a><a href="#agentes"><span lang="es">Agentes</span><span lang="en">Agents</span></a><a href="#formacion"><span lang="es">Formación</span><span lang="en">Formation</span></a><a href="#escalabilidad"><span lang="es">Escalabilidad</span><span lang="en">Scalability</span></a><a href="#quiz"><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></a></nav>
+</div><div class="ip-progress"></div></header>
+
+<section class="ip-hero"><div class="ip-wrap">
+  <div>
+    <p class="ip-kicker">III Simposio CEA · Vigo 2024 · <span lang="es">Publicación interactiva</span><span lang="en">Interactive publication</span></p>
+    <h1><span lang="es">Robotic Park, de principio a fin</span><span lang="en">Robotic Park, from start to finish</span></h1>
+    <p class="ip-authors"><strong>F. J. Mañas-Álvarez</strong>, M. Guinaldo, R. Dormido <span lang="es">y</span><span lang="en">and</span> S. Dormido · UNED</p>
+    <p class="ip-lead"><span lang="es">Resumen de la tesis doctoral que dio lugar a Robotic Park: qué debe ofrecer una plataforma multi-agente heterogénea, cómo se controla cada agente con eventos, cómo se coordinan en formación hacia una geometría y hasta cuántos agentes reales y virtuales se pueden combinar.</span><span lang="en">Summary of the PhD thesis that gave rise to Robotic Park: what a heterogeneous multi-agent platform must offer, how each agent is controlled with events, how they coordinate in formation towards a geometry and how many real and virtual agents can be combined.</span></p>
+    <div class="ip-btns"><a class="ip-btn" href="#formacion"><span lang="es">Probar la formación</span><span lang="en">Try the formation</span></a><a class="ip-btn ghost" href="#citar"><span lang="es">Cómo citar</span><span lang="en">How to cite</span></a></div>
+    <div class="ip-hero-stats"><div class="ip-hero-stat"><b><span lang="es">−93 %</span><span lang="en">−93%</span></b><span lang="es">ejecuciones del control Z</span><span lang="en">Z controller runs</span></div><div class="ip-hero-stat"><b>30</b><span lang="es">agentes con Webots</span><span lang="en">agents with Webots</span></div><div class="ip-hero-stat"><b>10 Hz · 2 cm</b><span lang="es">muestreo óptimo</span><span lang="en">optimal sampling</span></div></div>
+  </div>
+  <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+</div></section>
+
+<main>
+<section class="ip-section" id="mapa"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">1</span><span lang="es">Mapa conceptual</span><span lang="en">Concept map</span></p><h2><span lang="es">El artículo de un vistazo</span><span lang="en">The paper at a glance</span></h2></div>
+  <div class="ip-cmap ip-reveal"><div id="cmap"></div><aside class="ip-card ip-cmap-panel" id="cmapPanel"></aside></div>
+</div></section>
+
+<section class="ip-section" id="plataforma"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">2</span><span lang="es">La plataforma</span><span lang="en">The platform</span></p>
+    <h2><span lang="es">Seis propiedades y una arquitectura que cambia por software</span><span lang="en">Six properties and an architecture that changes in software</span></h2>
+    <p><span lang="es">Robotic Park está pensada para investigación y docencia, presencial y remota: debe ser versátil, robusta frente a fallos y fácil de mantener. Pulsa cada propiedad:</span><span lang="en">Robotic Park is meant for research and teaching, both on-site and remote: it must be versatile, robust to failures and easy to maintain. Click each property:</span></p></div>
+  <div class="ip-grid side ip-reveal"><div class="feats" id="feats"></div><aside class="ip-card" id="featInfo"></aside></div>
+  <div class="ip-card ip-reveal" style="margin-top:18px"><h3><span lang="es">Elasticidad: dónde se ejecuta el control</span><span lang="en">Elasticity: where control runs</span></h3>
+    <p class="ip-small"><span lang="es">La misma experiencia puede funcionar con una arquitectura centralizada, distribuida en ROS 2 o distribuida en los microcontroladores de los agentes. Sólo cambia en qué unidad de cómputo se lanza cada nodo.</span><span lang="en">The same experiment can run with a centralised architecture, distributed in ROS 2 or distributed on the agents' microcontrollers. Only the computing unit where each node is launched changes.</span></p>
+    <div id="archSeg" style="margin-bottom:10px"></div><div class="arch" id="arch"></div></div>
+  <div class="ip-card ip-reveal" style="margin-top:18px"><h3><span lang="es">Simuladores en Robotic Park</span><span lang="en">Simulators in Robotic Park</span></h3>
+    <div class="ip-table-wrap"><table class="ip-table"><thead><tr><th></th><th><span lang="es">Integración con ROS 2</span><span lang="en">ROS 2 integration</span></th><th><span lang="es">Puntos fuertes</span><span lang="en">Strengths</span></th><th><span lang="es">Limitaciones</span><span lang="en">Limitations</span></th></tr></thead><tbody>
+      <tr><td>Matlab / Simulink</td><td>—</td><td><span lang="es">Sencillez para construir modelos y evaluar controladores (docencia)</span><span lang="en">Easy model building and controller evaluation (teaching)</span></td><td><span lang="es">Escalabilidad y mantenimiento de modelos entre versiones</span><span lang="en">Scalability and model maintenance across versions</span></td></tr>
+      <tr><td>Gazebo</td><td><span lang="es">Nodo configurado desde el modelo con <i>plugins</i></span><span lang="en">Node configured from the model through <i>plugins</i></span></td><td><span lang="es">El más usado en robótica; muy flexible para crear entornos</span><span lang="en">The most used in robotics; very flexible to build environments</span></td><td><span lang="es">Sin <i>plugins</i> de Crazyflie para ROS 2</span><span lang="en">No Crazyflie <i>plugins</i> for ROS 2</span></td></tr>
+      <tr class="best"><td>Webots</td><td><span lang="es">Nodo controlador fuera del simulador mediante librerías</span><span lang="en">Controller node outside the simulator through libraries</span></td><td><span lang="es">Gran rendimiento multi-agente, modelos de todos los robots de RP, interfaz intuitiva</span><span lang="en">High multi-agent performance, models of every RP robot, intuitive interface</span></td><td>—</td></tr>
+    </tbody></table></div></div>
+</div></section>
+
+<section class="ip-section" id="agentes"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">3</span><span lang="es">Control individual</span><span lang="en">Individual control</span></p>
+    <h2><span lang="es">Cuadricópteros: ejecutar el controlador sólo cuando hace falta</span><span lang="en">Quadrotors: run the controller only when needed</span></h2>
+    <p><span lang="es">Con la etapa de «distribución de energía», el modelo del cuadricóptero se desacopla en cuatro procesos: dos integradores en cascada para Z y guiñada, y cuatro para X e Y. En un microcontrolador con batería pequeña, cada ejecución del controlador cuenta. El artículo compara el PID periódico del Crazyflie con dos versiones por eventos en el eje Z: umbral fijo y umbral adaptativo (relativo al error).</span><span lang="en">With the "power distribution" stage, the quadrotor model decouples into four processes: two cascaded integrators for Z and yaw, and four for X and Y. On a microcontroller with a small battery, every controller run counts. The paper compares the Crazyflie's periodic PID with two event-based versions on the Z axis: fixed threshold and adaptive threshold (relative to the error).</span></p></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Altitud z (m) con escalón de referencia a mitad del ensayo</span><span lang="en">Altitude z (m) with a reference step halfway through the test</span></div><div id="zp"></div></div>
+    <div class="ip-card"><div id="zCtl"></div><div id="zBars" style="margin-top:14px"></div></div>
+  </div>
+  <p class="ip-small ip-muted ip-reveal"><span lang="es">Modelo vertical del Crazyflie y umbral relativo de la página <a href="../altitud-eventos/" data-href-en="../altitud-eventos/?lang=en">Altitud por eventos</a> (JA 2021); el escalón y el ruido son de ejemplo. Robots diferenciales: el artículo compara además un PID con el controlador IPC (Farias et al., 2020) en una trayectoria pseudoaleatoria; el PID rinde mejor con errores grandes y el IPC da una respuesta más homogénea en todo el rango.</span><span lang="en">Crazyflie vertical model and relative threshold from the <a href="../altitud-eventos/" data-href-en="../altitud-eventos/?lang=en">Event-based altitude</a> page (JA 2021); the step and noise are examples. Differential robots: the paper also compares a PID with the IPC controller (Farias et al., 2020) on a pseudo-random trajectory; the PID does better with large errors and the IPC gives a more homogeneous response across the range.</span></p>
+</div></section>
+
+<section class="ip-section" id="formacion"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">4</span><span lang="es">Control de formaciones</span><span lang="en">Formation control</span></p>
+    <h2><span lang="es">Distancias entre vecinos y, además, una geometría</span><span lang="en">Distances between neighbours and, on top, a geometry</span></h2>
+    <p><span lang="es">Control jerárquico: el nivel inferior estabiliza cada agente a alta frecuencia y el superior coordina la formación. La ley de Krick et al. (2009) da la posición objetivo de cada agente a partir de las distancias con sus vecinos; para que además converja a una superficie se añade un término hacia \(p^*_i\), el punto más cercano de la geometría, calculado con multiplicadores de Lagrange:</span><span lang="en">Hierarchical control: the lower level stabilises each agent at high frequency and the upper level coordinates the formation. Krick et al.'s (2009) law gives each agent's target position from the distances to its neighbours; to also converge to a surface, a term towards \(p^*_i\), the closest point of the geometry computed with Lagrange multipliers, is added:</span></p>
+    <div class="ip-eq">$$u_i=p_i-\kappa_1\sum_{j\in\mathcal N_i}\left(d_{ij}^2-{d^*_{ij}}^2\right)(p_i-p_j)-\kappa_2\,(p_i-p^*_i)$$</div>
+    <p><span lang="es">Cinco agentes hacia una semiesfera, como en la Figura 9. Prueba a quitar uno de los dos términos y, después, provoca el fallo de un robot: su <b>gemelo digital</b> ocupa su lugar y la formación no se rompe.</span><span lang="en">Five agents towards a hemisphere, as in Figure 9. Try removing one of the two terms and then make a robot fail: its <b>digital twin</b> takes its place and the formation does not break.</span></p></div>
+  <div class="ip-grid side ip-reveal">
+    <div class="ip-card"><div class="ip-toolbar"><button class="ip-btn accent" id="fRun" type="button">▶ <span lang="es">Nueva experiencia</span><span lang="en">New run</span></button><button class="ip-btn small ghost" id="fFail" type="button">⚠ <span lang="es">Fallo del robot 3</span><span lang="en">Robot 3 fails</span></button><span class="ip-pill muted" id="fT"></span></div><div class="ip-stage stage-md"><canvas id="fcv"></canvas><span class="ip-stage-hint"><span lang="es">Arrastra para girar</span><span lang="en">Drag to rotate</span></span></div></div>
+    <div class="ip-card"><div id="fCtl"></div><div class="ip-plot-title" style="margin-top:12px"><span lang="es">Errores de distancia y de superficie</span><span lang="en">Distance and surface errors</span></div><div id="fp"></div></div>
+  </div>
+</div></section>
+
+<section class="ip-section" id="escalabilidad"><div class="ip-wrap">
+  <div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">5</span><span lang="es">Escalabilidad y muestreo</span><span lang="en">Scalability and sampling</span></p>
+    <h2><span lang="es">¿Cuántos agentes caben y cada cuánto deben hablar?</span><span lang="en">How many agents fit and how often should they talk?</span></h2>
+    <p><span lang="es">Con realidad mixta el límite ya no es el espacio físico, sino el rendimiento del simulador. Formación en semiesfera con agentes aéreos y móviles, aumentando agentes reales y virtuales (Tabla 1). RTF: factor de tiempo real (1 = la simulación va a la velocidad del reloj).</span><span lang="en">With mixed reality the limit is no longer physical space but simulator performance. Hemisphere formation with aerial and mobile agents, increasing real and virtual agents (Table 1). RTF: real-time factor (1 = the simulation runs at wall-clock speed).</span></p></div>
+  <div class="ip-grid cols-2 ip-reveal">
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Factor de tiempo real frente a número de agentes</span><span lang="en">Real-time factor vs number of agents</span></div><div id="rtf"></div></div>
+    <div class="ip-card"><div class="ip-plot-title"><span lang="es">Uso de CPU (%) frente a número de agentes</span><span lang="en">CPU use (%) vs number of agents</span></div><div id="cpu"></div></div>
+  </div>
+  <div class="ip-card ip-reveal" style="margin-top:18px"><div class="ip-table-wrap" id="tab1"></div>
+    <p class="ip-small ip-muted" style="margin-top:8px"><span lang="es">Webots alcanza 30 agentes con un rendimiento similar al de Gazebo con 15. En F (40 agentes) Gazebo no llegó a funcionar. En la Tabla 1 del artículo, la última columna aparece rotulada como %CPU<sub>G</sub>, pero corresponde a Webots. Detalle completo en la página de <a href="../escalabilidad-ros2/" data-href-en="../escalabilidad-ros2/?lang=en">Escalabilidad en ROS 2</a>.</span><span lang="en">Webots reaches 30 agents with performance similar to Gazebo with 15. In F (40 agents) Gazebo did not run. In the paper's Table 1, the last column is labelled %CPU<sub>G</sub>, but it is Webots'. Full detail on the <a href="../escalabilidad-ros2/" data-href-en="../escalabilidad-ros2/?lang=en">Scalability in ROS 2</a> page.</span></p></div>
+  <div class="ip-card ip-reveal" style="margin-top:18px"><h3><span lang="es">Muestreo en la comunicación entre agentes</span><span lang="en">Sampling in agent-to-agent communication</span></h3>
+    <p class="ip-small"><span lang="es">Frecuencia periódica óptima: <b>10 Hz</b>. El mejor equilibrio entre desempeño y recursos lo da el umbral de <b>2 cm</b>, que reduce la comunicación en cada arquitectura:</span><span lang="en">Optimal periodic frequency: <b>10 Hz</b>. The best balance between performance and resources is the <b>2 cm</b> threshold, which reduces communication in each architecture:</span></p>
+    <div id="sampBars"></div>
+    <p class="ip-small ip-muted" style="margin-top:8px"><span lang="es">Resultados detallados en la página de <a href="../muestreo-comunicacion/" data-href-en="../muestreo-comunicacion/?lang=en">Muestreo y comunicación</a> (RIAI).</span><span lang="en">Detailed results on the <a href="../muestreo-comunicacion/" data-href-en="../muestreo-comunicacion/?lang=en">Sampling and communication</a> page (RIAI).</span></p></div>
+</div></section>
+
+<section class="ip-section" id="quiz"><div class="ip-wrap"><div class="ip-section-head ip-reveal"><p class="ip-eyebrow"><span class="ip-num">6</span><span lang="es">Autoevaluación</span><span lang="en">Quiz</span></p><h2><span lang="es">¿Lo has entendido?</span><span lang="en">Got it?</span></h2></div><div id="quizBox" class="ip-reveal"></div></div></section>
+
+<section class="ip-section" id="citar"><div class="ip-wrap"><div class="ip-grid cols-2 ip-reveal">
+  <div class="ip-card"><h3><span lang="es">Cómo citar</span><span lang="en">How to cite</span></h3><p>Mañas-Álvarez, F. J., Guinaldo, M., Dormido, R., &amp; Dormido, S. (2024). Desarrollo, control y evaluación de una plataforma robótica multi-agente heterogénea. <em>Actas del III Simposio CEA de los GT: Ingeniería de Control, Modelado, Simulación y Optimización</em>. Vigo, España.</p><p class="ip-small ip-muted"><span lang="es">Resume la tesis doctoral de F. J. Mañas-Álvarez (UNED, 2023), del mismo título.</span><span lang="en">It summarises F. J. Mañas-Álvarez's PhD thesis (UNED, 2023), with the same title.</span></p></div>
+  <div class="ip-code" id="bibtex">@inproceedings{ManasAlvarez2024SimposioCEA,
+  title     = {Desarrollo, control y evaluaci{\'o}n de una plataforma
+               rob{\'o}tica multi-agente heterog{\'e}nea},
+  author    = {Ma{\~n}as-{\'A}lvarez, F. J. and Guinaldo, M. and Dormido, R.
+               and Dormido, S.},
+  booktitle = {Actas del III Simposio CEA de los GT: Ingenier{\'i}a de Control,
+               Modelado, Simulaci{\'o}n y Optimizaci{\'o}n},
+  address   = {Vigo, Espa{\~n}a},
+  year      = {2024}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+</div></div></section>
+</main>
+<footer class="ip-footer"><div class="ip-wrap"><span><span lang="es">Material docente interactivo · Proyecto de innovación docente</span><span lang="en">Interactive teaching material · Teaching innovation project</span> · <a href="../../index.html" data-href-en="../../index_en.html">Robotic Park Lab</a> — UNED</span><span lang="es">Simulación didáctica; las tablas recogen los resultados del artículo.</span><span lang="en">Teaching simulation; the tables list the paper's results.</span></div></footer>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="../lib/formacion.js"></script>
+<script defer src="../lib/altitud.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>
