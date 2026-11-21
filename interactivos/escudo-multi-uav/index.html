@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escudo multi-UAV</title>
+<meta name="description" content="Publicación interactiva: despliegue distribuido de un escudo de drones sobre una superficie cuádrica virtual con triangulación de Delaunay y control por gradiente (Robotics and Autonomous Systems, 2024). Robotic Park Lab, UNED.">
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>
+  .stage-lg { height: 480px; }
+  .stage-md { height: 400px; }
+  .stage-sm { height: 300px; }
+  @media (max-width: 600px) { .stage-lg { height: 360px; } .stage-md { height: 320px; } }
+  .qmat { display: inline-grid; grid-template-columns: repeat(3, auto); gap: 2px 14px; padding: 6px 12px; border-left: 2px solid var(--axis); border-right: 2px solid var(--axis); border-radius: 6px; font-family: var(--font-mono); font-size: 0.85rem; vertical-align: middle; }
+  .qmat span { text-align: right; }
+  .twin { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .twin .ip-stage { height: 300px; }
+  .twin .cap { position: absolute; left: 10px; top: 8px; }
+  @media (max-width: 700px) { .twin { grid-template-columns: 1fr; } }
+  .video { position: relative; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); background: #000; }
+  .video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .video .ph { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; text-decoration: none; background: radial-gradient(circle, #1b2b23, #050a07); font-weight: 700; }
+  .fig1 svg { width: 100%; height: auto; }
+  .fig1 text { font: 600 13px var(--font); fill: var(--text); }
+  .fig1 .cap { font: 500 12px var(--font); fill: var(--muted); }
+</style>
+</head>
+<body>
+
+<header class="ip-topbar">
+  <div class="ip-wrap">
+    <a class="ip-brand" href="../../publicaciones.html" title="Volver a Publicaciones"><img src="../../assets/img/logo.png" alt=""><span>← Publicaciones</span></a>
+    <nav class="ip-topnav" aria-label="Secciones">
+      <a href="#mapa">Mapa</a>
+      <a href="#superficie">Superficie</a>
+      <a href="#construccion">Algoritmo 1</a>
+      <a href="#delaunay">Delaunay</a>
+      <a href="#control">Control</a>
+      <a href="#rigidez">Rigidez</a>
+      <a href="#experimento">Experimento</a>
+      <a href="#quiz">Autoevaluación</a>
+      <a href="#citar">Citar</a>
+    </nav>
+  </div>
+  <div class="ip-progress"></div>
+</header>
+
+<section class="ip-hero" id="inicio">
+  <div class="ip-wrap">
+    <div>
+      <p class="ip-kicker">Robotics and Autonomous Systems 176 (2024) 104684 · Publicación interactiva</p>
+      <h1>Un escudo de drones sobre una superficie virtual</h1>
+      <p class="ip-authors"><strong>M. Guinaldo</strong>, J. Sánchez-Moreno, S. Zaragoza y F. J. Mañas-Álvarez · UNED y Centro Universitario de la Defensa</p>
+      <p class="ip-lead">¿Cómo se reparten N drones sobre una cúpula para proteger una zona, usando sólo medidas locales? Este trabajo da una receta completa: modela el escudo como una cuádrica, calcula a qué distancia deben quedar los vecinos, comprueba que la malla es de Delaunay y diseña una ley de control distribuida cuya estabilidad se demuestra. Aquí podrás construir el escudo y verlo formarse.</p>
+      <div class="ip-btns">
+        <a class="ip-btn" href="#construccion">Construir un escudo</a>
+        <a class="ip-btn ghost" href="https://doi.org/10.1016/j.robot.2024.104684" target="_blank" rel="noopener">Leer el artículo (acceso abierto)</a>
+      </div>
+      <div class="ip-hero-stats">
+        <div class="ip-hero-stat"><b>2 parámetros</b><span>basta con la cuádrica y el número de drones</span></div>
+        <div class="ip-hero-stat"><b>&gt; 99,7 %</b><span>reducción del error de formación en 8 s</span></div>
+        <div class="ip-hero-stat"><b>12 UAV</b><span>6 Crazyflie reales + 6 virtuales</span></div>
+      </div>
+    </div>
+    <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+  </div>
+</section>
+
+<main>
+
+<section class="ip-section" id="mapa">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">1</span>Mapa conceptual</p>
+      <h2>El artículo de un vistazo</h2>
+      <p>Dos problemas encadenados: <b>(I)</b> diseñar la formación objetivo (dónde va cada dron y con quién se mide) y <b>(II)</b> diseñar la ley de control distribuida que la alcanza. Pulsa cada concepto.</p>
+    </div>
+    <div class="ip-cmap ip-reveal">
+      <div id="cmap"></div>
+      <aside class="ip-card ip-cmap-panel" id="cmapPanel" aria-live="polite"></aside>
+    </div>
+  </div>
+</section>
+
+<section class="ip-section" id="superficie">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">2</span>El escudo</p>
+      <h2>Una cuádrica en forma normal</h2>
+      <p>El escudo virtual se modela como una superficie cuádrica centrada en la zona a proteger (el origen), con \(z \ge 0\):</p>
+      <div class="ip-eq">$$\mathcal{S}\equiv p^\top Q_1\,p + Q_2 = 0,\qquad f(p_i)=p_i^\top Q_1 p_i + Q_2 \;\;\Rightarrow\;\; f(p_i)=0 \iff p_i\in\mathcal{S}$$</div>
+    </div>
+    <div class="ip-grid side ip-reveal">
+      <div class="ip-card">
+        <div class="ip-stage stage-md"><canvas id="surfCanvas"></canvas><span class="ip-stage-hint">Arrastra para girar</span></div>
+      </div>
+      <div class="ip-card">
+        <div id="surfControls"></div>
+        <p class="ip-small" style="margin-top:14px"><b>Q<sub>1</sub></b> = <span class="qmat" id="q1mat"></span></p><p class="ip-small"><b>Q<sub>2</sub></b> = <span class="mono" id="q2val"></span></p>
+        <p class="ip-small ip-muted" id="surfNote"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ip-section" id="construccion">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">3</span>Problema I · Algoritmo 1</p>
+      <h2>Repartir N drones casi uniformemente</h2>
+      <p>Idea clave: si la malla está formada por triángulos casi equiláteros de lado \(d\), su área total debe aproximar la de la superficie. Una triangulación con \(N\) nodos y \(e_b\) aristas en el borde tiene \(2N-2-e_b\) triángulos, y \(e_b \approx L_b/d\). Igualando áreas sale una cota para \(d\) y, aplicando la misma idea por encima de cada altura, los anillos:</p>
+      <div class="ip-eq">$$d \le \frac{L_b+\sqrt{L_b^2+\tfrac{32}{\sqrt3}A_{\mathcal S}(N-1)}}{4(N-1)}$$</div>
+      <div class="ip-eq">$$A_k(h_k)\approx\Big(2N_k-2-\frac{L_k(h_k)}{d}\Big)\frac{\sqrt3}{4}d^2,\qquad n_k=\Big\lceil \frac{L_k}{d}\Big\rceil$$</div>
+    </div>
+    <div class="ip-grid side ip-reveal">
+      <div class="ip-card">
+        <div class="ip-toolbar">
+          <button class="ip-btn accent" id="buildAnim" type="button">▶ Construir anillo a anillo</button>
+          <select class="ip-select" id="buildPreset" style="width:auto">
+            <option value="">Cargar caso del artículo…</option>
+            <option value="t3">Tabla 3 · semielipsoide, N = 50</option>
+            <option value="t2">Tabla 2 · semiesfera R = 15, N = 50</option>
+            <option value="real">Experimento real · R = 1 m, N = 12</option>
+          </select>
+        </div>
+        <div class="ip-stage stage-lg"><canvas id="buildCanvas"></canvas><span class="ip-stage-hint">Colores: un color por anillo · líneas: enlaces de la triangulación</span></div>
+      </div>
+      <div class="ip-card">
+        <div id="buildControls"></div>
+        <div class="ip-readouts" id="buildReadouts" style="margin-top:14px"></div>
+      </div>
+    </div>
+    <div class="ip-grid cols-2 ip-reveal" style="margin-top:18px">
+      <div class="ip-card">
+        <h3>Anillos calculados</h3>
+        <div class="ip-table-wrap"><table class="ip-table" id="ringTable"></table></div>
+        <p class="ip-small ip-muted" id="ringNote" style="margin-top:8px"></p>
+      </div>
+      <div class="ip-card">
+        <h3>Cómo se crean los enlaces</h3>
+        <ol class="ip-small" style="padding-left:1.2rem">
+          <li>Cada nodo se une a sus dos vecinos del anillo («izquierda» y «derecha»).</li>
+          <li>Cada nodo del anillo \(k\) se une a los del anillo \(k+1\) que están a \(d_{ij}\le d+\varepsilon\).</li>
+          <li>Si la proyección sobre \(z=0\) de un enlace nuevo cruza otro ya existente entre esos niveles, se descarta.</li>
+          <li>La distancia objetivo de cada enlace es la real: \(d^*_{ij}=d_{ij}\).</li>
+        </ol>
+        <p class="ip-small">Una cota conservadora es \(\varepsilon \le (\sqrt2-1)\,d\) (Observación 2). El número de aristas queda acotado por la <b>Proposición 1</b>: \(2N-2 \le N_e \le 3N-6\).</p>
+        <div class="ip-note info ip-small">Para el área por encima de cada anillo esta página usa la aproximación de medio elipsoide de semiejes \((a_k, b_k, c-h_k)\) con la fórmula de Knud Thomsen: con ella se reproducen al milímetro la Tabla 3 y los anillos del experimento real.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ip-section" id="delaunay">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">4</span>Triangulación de Delaunay</p>
+      <h2>¿Hay algún vecino dentro de la circunferencia?</h2>
+      <p>Una triangulación es de Delaunay si ningún nodo cae dentro de la circunferencia circunscrita de ningún triángulo. Su grafo es <b>rígido</b>, que es lo que necesita el control por distancias. El artículo extiende la comprobación local del plano a la superficie 3D (una extensión «2D+»): cada agente la puede ejecutar con la información de sus vecinos.</p>
+    </div>
+    <div class="ip-grid cols-2 ip-reveal">
+      <div class="ip-card fig1">
+        <svg viewBox="0 0 600 220" id="fig1" role="img" aria-label="Tres triangulaciones del mismo conjunto de puntos"></svg>
+        <p class="ip-small ip-muted ip-center">Como la Fig. 1: sólo la primera triangulación de {A, B, C, D, E} es de Delaunay.</p>
+        <h3>El test en 3D (Lema 1 y Teorema 1)</h3>
+        <div class="ip-eq">$$\begin{pmatrix} m_{ABC}\\ \gamma\end{pmatrix}=\tfrac12\,\Lambda^{-1}\begin{pmatrix}\|p_A\|^2\\ \|p_B\|^2\\ \|p_C\|^2\\ 2|O_{ABC}|\end{pmatrix},\qquad \Lambda=\begin{pmatrix}O_{ABC} & \mathbf 1\\ v^\top & 0\end{pmatrix}$$</div>
+        <div class="ip-eq">$$r_{ABC}^2=2\gamma+\|m_{ABC}\|^2,\qquad M_{ABCD}=\begin{pmatrix}\Lambda & v_P\\ p_D^\top \;\; 1 & \|p_D\|^2\end{pmatrix}$$</div>
+        <div class="ip-eq">$$|M_{ABCD}| &gt; 0 \;\Longrightarrow\; \|p_D-m_{ABC}\| \lt r_{ABC}\quad\text{(ABC no es de Delaunay)}$$</div>
+      </div>
+      <div class="ip-card">
+        <div class="ip-toolbar">
+          <button class="ip-btn small ghost" id="triPrev" type="button">◀ Triángulo</button>
+          <button class="ip-btn small ghost" id="triNext" type="button">Triángulo ▶</button>
+          <span class="ip-pill" id="triBadge"></span>
+        </div>
+        <div class="ip-stage stage-md"><canvas id="delCanvas"></canvas><span class="ip-stage-hint">Naranja: triángulo y su circunferencia · rojo: nodo dentro</span></div>
+        <div id="delControls" style="margin-top:12px"></div>
+        <div class="ip-readouts" id="delReadouts" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ip-section" id="control">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">5</span>Problema II · Ley de control</p>
+      <h2>Descenso por el gradiente de un potencial</h2>
+      <p>Cada dron se modela como un integrador simple, \(\dot p_i = u_i\). La función potencial penaliza a la vez los errores de distancia con los vecinos y la distancia a la superficie, y su gradiente da una ley distribuida que sólo usa posiciones relativas de los vecinos y la propia posición:</p>
+      <div class="ip-eq">$$W=\frac{\kappa_1}{4}\sum_{(i,j)\in\mathcal E}\big(d_{ij}^2-d_{ij}^{*2}\big)^2+\frac{\kappa_2}{4}\sum_{i=1}^N f(p_i)^2$$</div>
+      <div class="ip-eq">$$\begin{aligned}u_i=&-\kappa_1\sum_{j\in\mathcal N_i}\big(d_{ij}^2-d_{ij}^{*2}\big)(p_i-p_j)\\&-\frac{\kappa_2}{2}f(p_i)\frac{\partial f(p_i)}{\partial p_i}+u_{r,i}\end{aligned}$$</div>
+      <p class="ip-small">\(u_{r,i}\) es un campo repulsivo que impide cruzar el plano \(z=0\) (ec. 46). El <b>Teorema 2</b> garantiza estabilidad asintótica local en la formación deseada sobre la superficie.</p>
+    </div>
+    <div class="ip-grid side ip-reveal">
+      <div class="ip-card">
+        <div class="ip-toolbar">
+          <button class="ip-btn accent" id="ctlRun" type="button">▶ Lanzar desde nuevas condiciones iniciales</button>
+          <button class="ip-btn ghost small" id="ctlPause" type="button">Pausar</button>
+          <span class="ip-pill muted" id="ctlTime">t = 0 s</span>
+        </div>
+        <div class="ip-stage stage-lg"><canvas id="ctlCanvas"></canvas><span class="ip-stage-hint">Trazas: trayectorias · enlaces verdes cuando |e<sub>ij</sub>| es pequeño</span></div>
+      </div>
+      <div class="ip-card">
+        <div id="ctlControls"></div>
+        <div class="ip-readouts" id="ctlReadouts" style="margin-top:14px"></div>
+      </div>
+    </div>
+    <div class="ip-grid cols-2 ip-reveal" style="margin-top:18px">
+      <div class="ip-card"><div class="ip-plot-title"><span>log₁₀ ‖e(z)‖ — error de distancias</span></div><div id="ctlPlotE"></div></div>
+      <div class="ip-card"><div class="ip-plot-title"><span>log₁₀ ‖f(p)‖ — distancia a la superficie</span></div><div id="ctlPlotF"></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="ip-section" id="rigidez">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">6</span>Rigidez y simetrías</p>
+      <h2>¿Qué movimientos deja libres la superficie?</h2>
+      <p>En el espacio libre, una formación rígida en 3D sólo puede trasladarse y girar (6 movimientos). Pegada a la superficie ya no puede trasladarse, pero sí girar si la cuádrica tiene simetrías. El Lema 4 lo mide con el rango de la matriz aumentada que apila la matriz de rigidez y el jacobiano de la superficie:</p>
+      <div class="ip-eq">$$J_R=\begin{pmatrix}\kappa_1 R(z)\\ \kappa_2 J(p)\end{pmatrix},\qquad \operatorname{rank}J_R = 3N-s,\quad s=\begin{cases}0 & q_1,q_2,q_3 \text{ distintos}\\ 1 & \text{dos iguales}\\ 3 & \text{esfera}\end{cases}$$</div>
+    </div>
+    <div class="ip-grid cols-2 ip-reveal">
+      <div class="ip-card">
+        <div id="rankControls"></div>
+        <div class="ip-readouts" id="rankReadouts" style="margin-top:14px"></div>
+        <div class="ip-stage stage-sm" style="margin-top:14px"><canvas id="rankCanvas"></canvas><span class="ip-stage-hint">Animación: un movimiento del núcleo de J<sub>R</sub> (si existe)</span></div>
+        <p class="ip-small ip-muted" id="rankNote" style="margin-top:8px"></p>
+      </div>
+      <div class="ip-card">
+        <h3>Ejemplo 2: mismas reglas, distinto final</h3>
+        <p class="ip-small">Semiesfera con N = 12 y dos condiciones iniciales distintas (rojo y azul). Ambas alcanzan la formación, pero <b>giradas</b> una respecto de la otra: es la simetría s = 3 de la esfera.</p>
+        <div class="ip-toolbar"><button class="ip-btn small" id="ex2Run" type="button">▶ Repetir</button><span class="ip-pill muted" id="ex2Angle"></span></div>
+        <div class="ip-stage stage-md"><canvas id="ex2Canvas"></canvas></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ip-section" id="experimento">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">7</span>Experimento</p>
+      <h2>12 Crazyflie en Robotic Park</h2>
+      <p>Seis drones reales (rojo) y seis virtuales (azul) interactúan como si todos fueran reales gracias a la plataforma en ROS 2. La semiesfera tiene R = 1 m y centro en (0, 0, 0,8) m; el Algoritmo 1 da d = 0,97 m y dos anillos de 7 y 5 drones a 0,8 y 1,57 m, con 26 enlaces. El controlador del artículo es una capa de <b>coordinación a 10 Hz</b> sobre el control de posición (100 Hz) y de actitud (500 Hz) de cada dron.</p>
+    </div>
+    <div class="ip-grid cols-2 ip-reveal">
+      <div class="ip-card">
+        <div class="ip-toolbar"><button class="ip-btn accent" id="expRun" type="button">▶ Reproducir el experimento (simulado)</button><span class="ip-pill muted" id="expTime"></span></div>
+        <div class="ip-stage stage-md"><canvas id="expCanvas"></canvas><span class="ip-stage-hint">Rojo: Crazyflie reales · azul: virtuales</span></div>
+      </div>
+      <div class="ip-card">
+        <div class="ip-plot-title"><span>Error de cada uno de los 26 enlaces, e<sub>ij</sub> (m²)</span></div>
+        <div id="expPlot"></div>
+        <div class="ip-plot-title" style="margin-top:10px"><span>Vídeo del experimento real</span></div>
+        <div class="video" id="video"><a class="ph" href="https://youtu.be/j8SpkPp_5zs" target="_blank" rel="noopener">▶ Ver el vídeo en YouTube</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ip-section" id="quiz">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">8</span>Autoevaluación</p>
+      <h2>¿Lo has entendido?</h2>
+    </div>
+    <div id="quizBox" class="ip-reveal"></div>
+  </div>
+</section>
+
+<section class="ip-section" id="citar">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">9</span>Cómo citar</p>
+      <h2>Referencia</h2>
+    </div>
+    <div class="ip-grid cols-2 ip-reveal">
+      <div class="ip-card">
+        <p>Guinaldo, M., Sánchez-Moreno, J., Zaragoza, S., &amp; Mañas-Álvarez, F. J. (2024). Distributed multi-UAV shield formation based on virtual surface constraints. <em>Robotics and Autonomous Systems</em>, 176, 104684. <a href="https://doi.org/10.1016/j.robot.2024.104684" target="_blank" rel="noopener">doi:10.1016/j.robot.2024.104684</a></p>
+        <p class="ip-small ip-muted">Artículo en acceso abierto (CC BY-NC-ND 4.0). Financiado por el proyecto RECOVERY (PID2020-112658RB-I00). Continuación: <a href="../formacion-lagrange/">control de formaciones rígidas con multiplicadores de Lagrange</a>.</p>
+        <div class="ip-btns">
+          <a class="ip-btn" href="https://doi.org/10.1016/j.robot.2024.104684" target="_blank" rel="noopener">Artículo</a>
+          <a class="ip-btn ghost" href="../../publicaciones.html">Más publicaciones</a>
+        </div>
+      </div>
+      <div class="ip-code" id="bibtex">@article{Guinaldo2024Shield,
+  title   = {Distributed multi-UAV shield formation based on
+             virtual surface constraints},
+  author  = {Guinaldo, Mar{\'i}a and S{\'a}nchez-Moreno, Jos{\'e}
+             and Zaragoza, Salvador and Ma{\~n}as-{\'A}lvarez, Francisco Jos{\'e}},
+  journal = {Robotics and Autonomous Systems},
+  volume  = {176},
+  pages   = {104684},
+  year    = {2024},
+  doi     = {10.1016/j.robot.2024.104684}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ip-footer">
+  <div class="ip-wrap">
+    <span>Material docente interactivo · Proyecto de innovación docente · <a href="../../index.html">Robotic Park Lab</a> — UNED</span>
+    <span>Simulaciones calculadas en tu navegador con los algoritmos del artículo.</span>
+  </div>
+</footer>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="../lib/formacion.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

@@ -9,9 +9,14 @@ interactivos/
   lib/
     ip.css              Estilos comunes (paleta del laboratorio, modo claro/oscuro, componentes)
     ip.js               Librería de componentes (objeto global IP), sin dependencias
+    scene3d.js          Visor 3D ligero en canvas (IP.Scene3D): cámara orbital, líneas, polígonos, drones
+    formacion.js        Formaciones rígidas sobre superficies (objeto FORM): cuádricas, Algoritmo 1,
+                        test de Delaunay, rango de J_R, proyección de Lagrange y simulador
   plantilla/            ← punto de partida para una página nueva
     index.html
     app.js
+  escudo-multi-uav/     «Distributed multi-UAV shield formation…» (RAS, 2024)
+  formacion-lagrange/   «Rigid formation control … using Lagrange multipliers» (ECC, 2026)
   relay-autotuning/     Ejemplo completo: «Relay-based autotuning…» (Mechatronics, 2026)
     index.html
     app.js              Interfaz de cada sección
@@ -64,6 +69,8 @@ HTML, CSS y JavaScript planos: no hay build. GitHub Pages sirve los archivos tal
 | `IP.sim.rng(semilla)` | Números aleatorios reproducibles (`uniform()`, `gauss()`). |
 | `IP.sim.stepMetrics(t, y, ref, t0)` | Sobreoscilación, tiempo de subida (10–90 %), de establecimiento (5 %), IAE e ITAE. |
 | `IP.fmt(v, decimales)` | Números con coma decimal (formato español). |
+| `new IP.Scene3D(canvas, opts)` *(scene3d.js)* | Escena 3D en modo inmediato: `begin()`, `line`, `polyline`, `poly`, `point`, `drone`, `text`, `draw(dt)`. Se gira arrastrando; `onChange` permite sincronizar varias cámaras. |
+| `FORM.*` *(formacion.js)* | `surface`, `buildShield`, `delaunay`, `flipToDelaunay`, `rankJR`, `new FORM.Sim({...})` con las leyes `'ras'`, `'base'`, `'rfc'` y `'prf'`, y `drawScene` para dibujar una formación. |
 
 ### Clases CSS útiles (`ip.css`)
 

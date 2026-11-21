@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formaciones con Lagrange</title>
+<meta name="description" content="Publicación interactiva: control distribuido de formaciones rígidas sobre superficies 3D incorporando multiplicadores de Lagrange (RF+C y PRF) frente al control por gradiente (ECC 2026). Robotic Park Lab, UNED.">
+<link rel="icon" href="../../assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../lib/ip.css">
+<style>
+  .stage-md { height: 400px; }
+  .lag { position: relative; height: 420px; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--surface); touch-action: none; }
+  .lag canvas { width: 100%; height: 100%; cursor: grab; }
+  .trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .trio .ip-stage { height: 300px; }
+  .trio .lab { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .trio .lab b { font-family: var(--font-head); font-size: 1.05rem; }
+  @media (max-width: 860px) { .trio { grid-template-columns: 1fr; } .trio .ip-stage { height: 260px; } }
+  .law { border-left: 4px solid var(--c); }
+  .bars svg { width: 100%; height: auto; }
+  .bars text { font: 500 11px var(--font); fill: var(--muted); }
+  .kpi { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+  .kpi .ip-card b { display: block; font-family: var(--font-head); font-size: 2rem; color: var(--primary); line-height: 1.1; }
+  .kpi .ip-card span { font-size: 0.86rem; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header class="ip-topbar">
+  <div class="ip-wrap">
+    <a class="ip-brand" href="../../publicaciones.html" title="Volver a Publicaciones"><img src="../../assets/img/logo.png" alt=""><span>← Publicaciones</span></a>
+    <nav class="ip-topnav" aria-label="Secciones">
+      <a href="#mapa">Mapa</a>
+      <a href="#lagrange">Lagrange</a>
+      <a href="#controladores">Controladores</a>
+      <a href="#comparativa">Comparativa</a>
+      <a href="#resultados">Resultados</a>
+      <a href="#quiz">Autoevaluación</a>
+      <a href="#citar">Citar</a>
+    </nav>
+  </div>
+  <div class="ip-progress"></div>
+</header>
+
+<section class="ip-hero" id="inicio">
+  <div class="ip-wrap">
+    <div>
+      <p class="ip-kicker">2026 European Control Conference (ECC) · pp. 1520–1525 · Publicación interactiva</p>
+      <h1>Formaciones rígidas con multiplicadores de Lagrange</h1>
+      <p class="ip-authors"><strong>F. J. Mañas-Álvarez</strong>, M. Guinaldo, R. Dormido y S. Dormido · Dpto. de Informática y Automática, UNED</p>
+      <p class="ip-lead">El control por gradiente lleva a los drones a la formación, pero con órdenes de velocidad agresivas que saturan y hacen oscilar el enjambre al crecer. Este trabajo sustituye el término de superficie por el punto más cercano de la superficie, calculado con un multiplicador de Lagrange, y propone dos controladores (RF+C y PRF) más suaves y escalables. Compáralos aquí con hasta 20 drones.</p>
+      <div class="ip-btns">
+        <a class="ip-btn" href="#comparativa">Comparar los tres controladores</a>
+        <a class="ip-btn ghost" href="https://ieeexplore.ieee.org/abstract/document/11625262/" target="_blank" rel="noopener">Leer el artículo</a>
+      </div>
+      <div class="ip-hero-stats">
+        <div class="ip-hero-stat"><b>−63,5 %</b><span>tiempo de establecimiento con PRF</span></div>
+        <div class="ip-hero-stat"><b>≈ 10 %</b><span>sobreoscilación con PRF (53,86 % el gradiente)</span></div>
+        <div class="ip-hero-stat"><b>5 → 20</b><span>drones sin reajustar la ganancia</span></div>
+      </div>
+    </div>
+    <div class="ip-hero-visual" aria-hidden="true"><canvas id="heroCanvas"></canvas></div>
+  </div>
+</section>
+
+<main>
+
+<section class="ip-section" id="mapa">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">1</span>Mapa conceptual</p>
+      <h2>El artículo de un vistazo</h2>
+      <p>Parte del escudo sobre superficies virtuales (<a href="../escudo-multi-uav/">RAS 2024</a>) y cambia la forma de llevar cada dron a la superficie. Pulsa cada concepto.</p>
+    </div>
+    <div class="ip-cmap ip-reveal">
+      <div id="cmap"></div>
+      <aside class="ip-card ip-cmap-panel" id="cmapPanel" aria-live="polite"></aside>
+    </div>
+  </div>
+</section>
+
+<section class="ip-section" id="lagrange">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">2</span>Multiplicadores de Lagrange</p>
+      <h2>El punto de la superficie más cercano a cada dron</h2>
+      <p>Cada agente resuelve <b>localmente</b> un pequeño problema de optimización con restricción: minimizar su distancia a la superficie \(g(p)=0\). En el óptimo, el gradiente del objetivo y el de la restricción son paralelos, y el factor de proporcionalidad es el multiplicador \(\lambda\):</p>
+      <div class="ip-eq">$$\min_{x}\; f(x,p_i)=\|x-p_i\|^2\;\;\text{s.a.}\;\; g(x)=0 \quad\Longrightarrow\quad \nabla f(p_i^*,p_i)+\lambda\,\nabla g(p_i^*)=0,\;\; g(p_i^*)=0$$</div>
+      <p>A diferencia de la optimización distribuida (ADMM), aquí \(\lambda\) no se intercambia entre agentes: cada dron calcula su propio \(p_i^*\) y lo incorpora a su ley de control. <b>Arrastra el dron</b> de la figura:</p>
+    </div>
+    <div class="ip-grid side ip-reveal">
+      <div class="ip-card">
+        <div class="lag" id="lagBox"><canvas id="lagCanvas"></canvas></div>
+        <p class="ip-small ip-muted" style="margin-top:8px">Corte por el plano x–z. Circunferencias discontinuas: curvas de nivel de \(f\) (distancia al dron). La de radio mínimo es tangente a la superficie justo en \(p^*\), donde \(\nabla f\) y \(\nabla g\) son paralelos.</p>
+      </div>
+      <div class="ip-card">
+        <div id="lagControls"></div>
+        <div class="ip-readouts" id="lagReadouts" style="margin-top:14px"></div>
+        <div class="ip-note info ip-small" id="lagNote" style="margin-top:14px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ip-section" id="controladores">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">3</span>Tres leyes de control</p>
+      <h2>Del gradiente a la formación proyectada</h2>
+      <p>Las tres comparten el término de formación por distancias (con \(e_{ij}=d_{ij}^2-d_{ij}^{*2}\)) y difieren en cómo llevan el dron a la superficie y en qué puntos miden la formación.</p>
+    </div>
+    <div class="ip-grid cols-3 ip-reveal">
+      <div class="ip-card law" style="--c:var(--s5)">
+        <span class="ip-pill muted">Baseline · RAS 2024</span>
+        <h3 style="margin-top:8px">Gradiente</h3>
+        <div class="ip-eq">$$\begin{aligned}u_i=&-\kappa_1\!\sum_{j\in\mathcal N_i}\! e_{ij}(p_i-p_j)\\&-\tfrac{\kappa_2}{2}f(p_i)\nabla f(p_i)\end{aligned}$$</div>
+        <p class="ip-small">Rápido, pero las órdenes crecen con el error: satura, oscila y hay que <b>reducir κ₁</b> al aumentar N (0,25 → 0,2 → 0,1).</p>
+      </div>
+      <div class="ip-card law" style="--c:var(--s3)">
+        <span class="ip-pill">RF+C · ec. 12</span>
+        <h3 style="margin-top:8px">Formación + restricción</h3>
+        <div class="ip-eq">$$\begin{aligned}u_i=&-\kappa_1\!\sum_{j\in\mathcal N_i}\! e_{ij}(p_i-p_j)\\&-\kappa_2\,(p_i-p_i^*)\end{aligned}$$</div>
+        <p class="ip-small">El término de superficie es un muelle hacia \(p_i^*\), lineal en la distancia real. Más amortiguado y con menos saturación. Teorema 1: <b>localmente exponencialmente estable</b>.</p>
+      </div>
+      <div class="ip-card law" style="--c:var(--s1)">
+        <span class="ip-pill accent">PRF · ec. 19</span>
+        <h3 style="margin-top:8px">Formación proyectada</h3>
+        <div class="ip-eq">$$\begin{aligned}u_i=&-\kappa_1P_i\!\sum_{j\in\mathcal N_i}\!(\delta_{ij}-d_{ij}^{*2})(p_i^*-p_j^*)\\&-\kappa_2(p_i-p_i^*)\end{aligned}$$</div>
+        <p class="ip-small">La formación se mide entre los puntos proyectados \(p^*\) (\(\delta_{ij}=\|p_i^*-p_j^*\|^2\)) y su corrección se proyecta en el plano tangente. Teorema 2. Necesita conocer los \(p_j^*\) de los vecinos.</p>
+      </div>
+    </div>
+    <div class="ip-grid side ip-reveal" style="margin-top:18px">
+      <div class="ip-card">
+        <div class="ip-stage" style="height:560px"><canvas id="projCanvas"></canvas><span class="ip-stage-hint">Verde: P·u (tangente) · discontinua: componente normal eliminada</span></div>
+      </div>
+      <div class="ip-card">
+        <h3>El proyector P<sub>i</sub> (Proposición 1)</h3>
+        <div class="ip-eq">$$P_i=I-\frac{\nabla g(p_i^*)\nabla g(p_i^*)^\top}{\|\nabla g(p_i^*)\|^2},\qquad \dot p_i^*\approx P_i\,\dot p_i$$</div>
+        <p class="ip-small">Si la curvatura es pequeña, \(p_i^*\) se mueve como la proyección del movimiento del dron sobre el plano tangente. Los autovalores de \(P_i\) son \(\{1,1,0\}\): conserva lo tangente y anula lo normal.</p>
+        <div id="projControls"></div>
+        <div class="ip-readouts" id="projReadouts" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ip-section" id="comparativa">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">4</span>Simulador comparativo</p>
+      <h2>Mismo enjambre, tres controladores</h2>
+      <p>Semiesfera de R = 1 m, distancias objetivo de una triangulación de Delaunay (Algoritmo 1 de RAS 2024) y despegue desde un plano bajo. Cada dron sigue la orden de velocidad con su control interno y la capa de coordinación se ejecuta a 10 Hz con saturación de velocidad, como en Robotic Park.</p>
+    </div>
+    <div class="ip-card ip-reveal">
+      <div class="ip-toolbar">
+        <div id="cmpN"></div>
+        <button class="ip-btn accent" id="cmpRun" type="button">▶ Lanzar</button>
+        <button class="ip-btn ghost small" id="cmpPause" type="button">Pausar</button>
+        <span class="ip-pill muted" id="cmpTime">t = 0 s</span>
+      </div>
+      <div class="trio">
+        <div><div class="lab"><b style="color:var(--s5)">Baseline</b><span class="ip-pill muted" id="lb0"></span></div><div class="ip-stage"><canvas id="cmp0"></canvas></div></div>
+        <div><div class="lab"><b style="color:var(--s3)">RF+C</b><span class="ip-pill muted" id="lb1"></span></div><div class="ip-stage"><canvas id="cmp1"></canvas></div></div>
+        <div><div class="lab"><b style="color:var(--s1)">PRF</b><span class="ip-pill muted" id="lb2"></span></div><div class="ip-stage"><canvas id="cmp2"></canvas></div></div>
+      </div>
+      <p class="ip-small ip-muted" style="margin-top:6px">Arrastra cualquiera de las vistas: las tres cámaras se mueven juntas. Enlaces naranjas: error de distancia &gt; 12 %.</p>
+    </div>
+    <div class="ip-grid side-left ip-reveal" style="margin-top:18px">
+      <div class="ip-card">
+        <div id="cmpControls"></div>
+        <p class="ip-small ip-muted" style="margin-top:10px">Ganancias propias de esta simulación (el artículo usa κ₁ = 0,25 en su escala de tiempo). La Baseline reduce κ₁ como en el artículo: ×0,8 con 8 drones y ×0,4 con más.</p>
+      </div>
+      <div>
+        <div class="ip-grid cols-2">
+          <div class="ip-card"><div class="ip-plot-title"><span>Máx. ‖u_i‖ antes de saturar (m/s)</span></div><div id="pU"></div></div>
+          <div class="ip-card"><div class="ip-plot-title"><span>Error global de formación ε_d (m²)</span></div><div id="pD"></div></div>
+        </div>
+        <div class="ip-card" style="margin-top:18px"><div class="ip-plot-title"><span>Error de superficie ε_S</span></div><div id="pS"></div></div>
+      </div>
+    </div>
+    <div class="ip-card ip-reveal" style="margin-top:18px">
+      <h3>Métricas de esta simulación</h3>
+      <div class="ip-table-wrap"><table class="ip-table" id="cmpTable"></table></div>
+      <p class="ip-small ip-muted" id="cmpPaper" style="margin-top:10px"></p>
+    </div>
+  </div>
+</section>
+
+<section class="ip-section" id="resultados">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">5</span>Resultados del artículo</p>
+      <h2>Tabla I: escalabilidad de 5 a 20 drones</h2>
+      <p>Simulaciones en Robotic Park con Crazyflie 2.1 (media ± desviación típica). Elige la métrica:</p>
+    </div>
+    <div class="ip-card ip-reveal">
+      <div class="ip-toolbar"><div id="t1Seg"></div></div>
+      <div class="bars" id="t1Bars"></div>
+    </div>
+    <div class="kpi ip-reveal" style="margin-top:18px" id="kpis"></div>
+  </div>
+</section>
+
+<section class="ip-section" id="quiz">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">6</span>Autoevaluación</p>
+      <h2>¿Lo has entendido?</h2>
+    </div>
+    <div id="quizBox" class="ip-reveal"></div>
+  </div>
+</section>
+
+<section class="ip-section" id="citar">
+  <div class="ip-wrap">
+    <div class="ip-section-head ip-reveal">
+      <p class="ip-eyebrow"><span class="ip-num">7</span>Cómo citar</p>
+      <h2>Referencia</h2>
+    </div>
+    <div class="ip-grid cols-2 ip-reveal">
+      <div class="ip-card">
+        <p>Mañas-Álvarez, F. J., Guinaldo, M., Dormido, R., &amp; Dormido, S. (2026). Rigid formation control in multi-robot systems using Lagrange multipliers. In <em>2026 European Control Conference (ECC)</em> (pp. 1520–1525). IEEE.</p>
+        <p class="ip-small ip-muted">Financiado por los proyectos Collectively (PID2022-139187OB-I00) y GO-HYBRID (PID2024-156427OB-I00). Trabajo previo: <a href="../escudo-multi-uav/">escudo multi-UAV sobre superficies virtuales</a>.</p>
+        <div class="ip-btns">
+          <a class="ip-btn" href="https://ieeexplore.ieee.org/abstract/document/11625262/" target="_blank" rel="noopener">Artículo</a>
+          <a class="ip-btn ghost" href="../../publicaciones.html">Más publicaciones</a>
+        </div>
+      </div>
+      <div class="ip-code" id="bibtex">@inproceedings{ManasAlvarez2026Lagrange,
+  title     = {Rigid formation control in multi-robot systems
+               using Lagrange multipliers},
+  author    = {Ma{\~n}as-{\'A}lvarez, Francisco Jos{\'e} and Guinaldo, Mar{\'i}a
+               and Dormido, Raquel and Dormido, Sebasti{\'a}n},
+  booktitle = {2026 European Control Conference (ECC)},
+  pages     = {1520--1525},
+  year      = {2026},
+  publisher = {IEEE}
+}<button class="ip-btn small ghost" type="button" data-copy="#bibtex">Copiar</button></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ip-footer">
+  <div class="ip-wrap">
+    <span>Material docente interactivo · Proyecto de innovación docente · <a href="../../index.html">Robotic Park Lab</a> — UNED</span>
+    <span>Simulación didáctica; los valores de la Tabla I son los publicados en el artículo.</span>
+  </div>
+</footer>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../lib/ip.js"></script>
+<script defer src="../lib/scene3d.js"></script>
+<script defer src="../lib/formacion.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

@@ -20,9 +20,11 @@ assets/
   img/logo.png            Logotipo del laboratorio
   img/publications/       Portadas de las publicaciones (miniaturas, ≤ 420 px de ancho)
 interactivos/             Publicaciones interactivas (innovación docente), ver interactivos/README.md
-  lib/                      Librería común ip.css + ip.js
+  lib/                      Librería común: ip.css, ip.js, scene3d.js (3D) y formacion.js
   plantilla/                Plantilla para crear una página nueva
   relay-autotuning/         «Relay-based autotuning for quadrotor attitude and rate control»
+  escudo-multi-uav/         «Distributed multi-UAV shield formation based on virtual surface constraints»
+  formacion-lagrange/       «Rigid formation control in multi-robot systems using Lagrange multipliers»
 ```
 
 HTML/CSS plano, sin generador ni build: GitHub Pages sirve el repositorio tal cual desde la rama
