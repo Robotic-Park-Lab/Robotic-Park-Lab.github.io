@@ -169,7 +169,11 @@
     const t = cfg.task, m = $('#taskModes'); m.innerHTML = '';
     MODES.forEach(([k, es, en, des, den]) => {
       const b = el('button', { type: 'button', class: 'cfg-mode' + (t.mode === k ? ' is-on' : '') }, `${EN ? en : es}<small>${EN ? den : des}</small>`);
-      b.addEventListener('click', () => { t.mode = k; if (k === 'triangulated' && t.shape === 'line') t.shape = 'sphere'; renderTask(); structural(); });
+      b.addEventListener('click', () => {
+        t.mode = k; if (k === 'triangulated' && t.shape === 'line') t.shape = 'sphere';
+        if (k === 'herding') cfg.robots.forEach(r => { r.manual = false; });
+        renderTask(); structural();
+      });
       m.append(b);
     });
     const body = $('#taskBody'); body.innerHTML = '';

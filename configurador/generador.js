@@ -334,7 +334,11 @@
     const counts = { crazyflie: Math.max(0, f.crazyflie | 0), khepera: Math.max(0, f.khepera | 0) };
     const total = counts.crazyflie + counts.khepera;
     let starts;
-    if (f.layout === 'circle') starts = ringPts(total, f.radius, 0, 0, 0, total > 1 ? 0 : 0);
+    if (cfg.task && cfg.task.mode === 'herding' && counts.khepera > 0) {
+      // Pastoreo: drones en anillo y la «oveja» (primer Khepera) en el centro
+      starts = ringPts(counts.crazyflie, Math.max(f.radius, 0.6), 0, 0, 0)
+        .concat(Array.from({ length: counts.khepera }, (_, i) => i === 0 ? [0, 0, 0] : [-1.8, -1.2 + 0.4 * i, 0]));
+    } else if (f.layout === 'circle') starts = ringPts(total, f.radius, 0, 0, 0);
     else if (f.layout === 'line') starts = linePts(total, f.spacing, 0, 0, 0);
     else starts = gridPts(total, f.spacing, 0, 0, 0);
     let g = 0;
