@@ -20,6 +20,9 @@ assets/
   style.css               Hoja de estilos compartida (paleta verde/naranja del logo)
   img/logo.png            Logotipo del laboratorio
   img/publications/       Portadas de las publicaciones (miniaturas, ≤ 420 px de ancho)
+configurador/             «Crea tu experimento»: genera los ficheros de roboticpark_config (bilingüe)
+  generador.js            funciones puras cfg -> ficheros (experiencia, órdenes, .wbt, .rviz, scripts)
+  app.js, zip.js          interfaz, vista previa 3D y escritor .zip sin dependencias
 interactivos/             Publicaciones interactivas (innovación docente), ver interactivos/README.md
   lib/                      Librería común: ip.css, ip.js, scene3d.js (3D), formacion.js,
                             multiagente.js y altitud.js
@@ -64,6 +67,11 @@ carpeta con `python3 -m http.server`).
 - **Estilos**: todo el diseño vive en `assets/style.css`, con variables CSS en `:root`
   (colores, radios, sombras) y un bloque `@media (prefers-color-scheme: dark)` para modo oscuro
   automático.
+
+- **Configurador**: el esquema de los ficheros generados sigue a `roboticpark_config/launch/experience.launch.py`
+  y a los drivers de `uned_crazyflie_ros_pkg` / `uned_kheperaIV_ros_pkg` (rama `humble-dev`). Si cambian las
+  claves del YAML, los nombres de las órdenes o los tipos de controlador, actualiza `configurador/generador.js`
+  (catálogos `SHAPES`, `LAWS`, `ORDERS` y `robotBlock`). Las plantillas de partida están en `PRESETS`.
 
 ## Publicación
 

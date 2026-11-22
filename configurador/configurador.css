@@ -1,0 +1,105 @@
+/* Configurador de experimentos — Robotic Park Lab. Usa los tokens de ../interactivos/lib/ip.css */
+.cfg-hero { padding: 48px 0 40px; }
+.cfg-hero .ip-wrap { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 36px; align-items: center; }
+.cfg-flow { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.cfg-flow li { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid rgba(255,255,255,0.14); border-radius: 12px; background: rgba(255,255,255,0.04); color: var(--hero-text); font-weight: 600; }
+.cfg-flow b { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #1b1208; flex: none; }
+.cfg-flow code { font-family: var(--font-mono); color: #f0a35f; }
+@media (max-width: 860px) { .cfg-hero .ip-wrap { grid-template-columns: 1fr; } }
+
+.cfg-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 400px); gap: 24px; align-items: start; padding-top: 28px; padding-bottom: 40px; }
+.cfg-side { position: sticky; top: 72px; display: grid; gap: 16px; }
+@media (max-width: 1020px) { .cfg-layout { grid-template-columns: 1fr; } .cfg-side { position: static; order: -1; } }
+
+.cfg-sec { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 18px; scroll-margin-top: 72px; min-width: 0; }
+@media (min-width: 720px) { .cfg-sec { padding: 24px; } }
+.cfg-sec h2 { display: flex; align-items: center; gap: 12px; font-family: var(--font-head); font-size: 1.35rem; margin: 0 0 12px; }
+.cfg-num { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--primary); color: #fff; font: 700 0.95rem var(--font); flex: none; }
+.cfg-sec h3 { font-size: 1rem; margin: 18px 0 8px; color: var(--primary); }
+
+.cfg-row { display: flex; flex-wrap: wrap; gap: 12px 16px; margin: 10px 0; }
+.cfg-field { display: grid; gap: 5px; font-size: 0.82rem; font-weight: 600; color: var(--muted); min-width: 120px; flex: 1 1 150px; }
+.cfg-field.grow { flex: 1 1 100%; }
+.cfg-field.narrow { flex: 0 1 110px; min-width: 90px; }
+.cfg-field input, .cfg-field select, .cfg-table input, .cfg-table select {
+  font: 500 0.92rem var(--font); color: var(--text); background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 7px 9px; width: 100%; min-width: 0;
+}
+.cfg-field input:focus, .cfg-field select:focus, .cfg-table input:focus, .cfg-table select:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+.cfg-field .cfg-help { font-weight: 400; font-size: 0.76rem; color: var(--muted); }
+.cfg-checks { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 10px; }
+.cfg-checks label { display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+.cfg-checks input { width: 18px; height: 18px; accent-color: var(--primary); }
+
+.cfg-presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin: 12px 0 8px; }
+.cfg-preset { text-align: left; font: 600 0.88rem var(--font); color: var(--text); background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; cursor: pointer; transition: border-color .15s, background .15s; }
+.cfg-preset small { display: block; font-weight: 400; color: var(--muted); margin-top: 4px; font-size: 0.78rem; }
+.cfg-preset:hover { border-color: var(--primary); }
+.cfg-preset.is-on { border-color: var(--primary); background: var(--primary-soft); }
+
+.cfg-modes { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin-bottom: 8px; }
+.cfg-mode { text-align: left; font: 600 0.88rem var(--font); color: var(--text); background: var(--surface); border: 2px solid var(--border); border-radius: 12px; padding: 10px 12px; cursor: pointer; }
+.cfg-mode small { display: block; font-weight: 400; color: var(--muted); font-size: 0.76rem; margin-top: 3px; }
+.cfg-mode.is-on { border-color: var(--accent); background: var(--accent-soft); }
+
+.cfg-table { font-size: 0.84rem; }
+.cfg-table th { white-space: nowrap; }
+.cfg-table td { padding: 5px 6px; vertical-align: middle; }
+.cfg-table input[type=number] { width: 78px; }
+.cfg-table .cfg-name { font-family: var(--font-mono); font-weight: 600; white-space: nowrap; }
+.cfg-table .cfg-x { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 2px 6px; border-radius: 6px; }
+.cfg-table .cfg-x:hover { color: var(--danger); background: var(--danger-soft); }
+.cfg-table .cfg-xyz { display: flex; gap: 4px; }
+.cfg-table .cfg-xyz input { width: 64px; }
+.cfg-table .cfg-ord { display: flex; gap: 4px; }
+.cfg-tag { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+.cfg-tag.air { background: var(--primary-soft); color: var(--primary); }
+.cfg-tag.gnd { background: var(--accent-soft); color: var(--accent); }
+.cfg-soon { margin-top: 10px; }
+
+.cfg-timeline { position: relative; height: 64px; margin: 14px 4px 12px; }
+.cfg-timeline .axis { position: absolute; left: 0; right: 0; top: 30px; height: 4px; border-radius: 4px; background: var(--primary); }
+.cfg-timeline .tick { white-space: nowrap; position: absolute; top: 38px; font-size: 0.7rem; color: var(--muted); transform: translateX(-50%); }
+.cfg-timeline .ev { position: absolute; top: 20px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--border); cursor: default; }
+.cfg-timeline .ev.order { background: var(--accent); }
+.cfg-timeline .ev.goal { background: var(--info); }
+.cfg-timeline .ev.end { background: var(--muted); }
+.cfg-timeline .lab { position: absolute; top: 0; font-size: 0.7rem; font-weight: 700; color: var(--text); transform: translateX(-50%); white-space: nowrap; }
+
+.cfg-files { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 10px; }
+.cfg-files button { font: 600 0.78rem var(--font-mono); color: var(--muted); background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; cursor: pointer; }
+.cfg-files button.is-on { color: var(--primary); border-color: var(--primary); background: var(--primary-soft); }
+.cfg-code { max-height: 420px; overflow: auto; font-size: 0.78rem; }
+
+.cfg-stage { height: 340px; }
+.cfg-stage canvas { width: 100%; height: 100%; display: block; }
+.cfg-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.78rem; color: var(--muted); margin: 10px 0 6px; }
+.cfg-legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.cfg-legend .dot.air { background: var(--s1); }
+.cfg-legend .dot.gnd { background: var(--s2); }
+.cfg-legend .dot.real { background: transparent; border: 2px solid var(--text); width: 8px; height: 8px; }
+.cfg-legend .dot.tgt { background: transparent; border: 2px dashed var(--s3); width: 8px; height: 8px; }
+#playT { width: 100%; accent-color: var(--accent); }
+.cfg-play { margin-top: 4px; align-items: center; }
+
+.cfg-summary { font-size: 0.86rem; line-height: 1.55; }
+.cfg-summary b { color: var(--primary); }
+.cfg-msgs { list-style: none; margin: 12px 0; padding: 0; display: grid; gap: 6px; font-size: 0.82rem; }
+.cfg-msgs li { padding: 7px 10px; border-radius: 8px; }
+.cfg-msgs li.err { background: var(--danger-soft); color: var(--danger); font-weight: 600; }
+.cfg-msgs li.warn { background: var(--accent-soft); color: var(--text); }
+.cfg-msgs li.ok { background: var(--primary-soft); color: var(--primary); font-weight: 600; }
+.cfg-dl2 { width: 100%; justify-content: center; }
+.ip-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.cfg-forms, .cfg-side, .cfg-preview, .cfg-status { min-width: 0; }
+.cfg-hero .ip-wrap > * { min-width: 0; }
+.cfg-sec .ip-table-wrap { max-width: 100%; }
+/* tablas: anchos mínimos legibles; la caja .ip-table-wrap desplaza en horizontal si no caben */
+.cfg-table input, .cfg-table select { width: auto; }
+.cfg-table select { min-width: 92px; }
+.cfg-table input[type=number] { width: 76px; }
+.cfg-table .cfg-xyz input[type=number] { width: 70px; }
+.cfg-table .cfg-ord input[type=number] { width: 64px; }
+#robotTable { min-width: 660px; }
+#cmdTable { min-width: 820px; }
+#cmdTable td:nth-child(5) select { min-width: 170px; }

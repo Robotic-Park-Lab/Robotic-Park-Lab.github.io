@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Build your experiment">Crea tu experimento</title>
+<meta name="description" content="Configurador de experimentos de Robotic Park Lab: elige robots reales o virtuales, leyes de control, formación, entorno y órdenes, y descarga los ficheros ROS 2 listos para ejecutar.">
+<script>try{var l=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ip-lang');if(l)document.documentElement.setAttribute('data-lang',l)}catch(e){}</script>
+<link rel="icon" href="../assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../interactivos/lib/ip.css">
+<link rel="stylesheet" href="configurador.css">
+</head>
+<body>
+
+<header class="ip-topbar">
+  <div class="ip-wrap">
+    <a class="ip-brand" href="../index.html" data-href-en="../index_en.html"><img src="../assets/img/logo.png" alt=""><span><span lang="es">← Robotic Park Lab</span><span lang="en">← Robotic Park Lab</span></span></a>
+    <nav class="ip-topnav" aria-label="Secciones">
+      <a href="#plantillas"><span lang="es">Plantilla</span><span lang="en">Template</span></a>
+      <a href="#robots"><span lang="es">Robots</span><span lang="en">Robots</span></a>
+      <a href="#control"><span lang="es">Control</span><span lang="en">Control</span></a>
+      <a href="#tarea"><span lang="es">Formación</span><span lang="en">Formation</span></a>
+      <a href="#entorno"><span lang="es">Entorno</span><span lang="en">Environment</span></a>
+      <a href="#ordenes"><span lang="es">Órdenes</span><span lang="en">Commands</span></a>
+      <a href="#descarga"><span lang="es">Descarga</span><span lang="en">Download</span></a>
+    </nav>
+  </div>
+  <div class="ip-progress"></div>
+</header>
+
+<section class="ip-hero cfg-hero" id="inicio">
+  <div class="ip-wrap">
+    <div>
+      <p class="ip-kicker"><span lang="es">Robotic Park · ROS 2 Humble · Webots</span><span lang="en">Robotic Park · ROS 2 Humble · Webots</span></p>
+      <h1><span lang="es">Crea tu experimento</span><span lang="en">Build your experiment</span></h1>
+      <p class="ip-lead"><span lang="es">Elige cuántos robots quieres y de qué tipo, si son reales o virtuales, cómo se controlan, qué formación deben mantener, en qué entorno se simulan y qué órdenes reciben en cada instante. Al final descargas los ficheros listos para ejecutar en un ordenador con ROS 2, como el del laboratorio.</span><span lang="en">Choose how many robots you want and of which kind, whether they are real or virtual, how they are controlled, which formation they must keep, where they are simulated and which commands they receive at each instant. Then download the files ready to run on a ROS 2 computer, such as the lab's.</span></p>
+      <div class="ip-btns">
+        <a class="ip-btn" href="#plantillas"><span lang="es">Empezar</span><span lang="en">Start</span></a>
+        <label class="ip-btn ghost" for="importFile"><span lang="es">Abrir experimento.json</span><span lang="en">Open experimento.json</span></label>
+        <input type="file" id="importFile" accept=".json,application/json" hidden>
+      </div>
+    </div>
+    <ol class="cfg-flow" aria-label="Pasos">
+      <li><b>1</b><span lang="es">Configura en esta página</span><span lang="en">Configure on this page</span></li>
+      <li><b>2</b><span lang="es">Descarga el .zip</span><span lang="en">Download the .zip</span></li>
+      <li><b>3</b><code>./install.sh</code></li>
+      <li><b>4</b><code>./run.sh</code></li>
+    </ol>
+  </div>
+</section>
+
+<main class="ip-wrap cfg-layout">
+  <div class="cfg-forms">
+
+    <section class="cfg-sec" id="plantillas">
+      <h2><span class="cfg-num">1</span><span lang="es">Punto de partida</span><span lang="en">Starting point</span></h2>
+      <p class="ip-muted ip-small"><span lang="es">Elige una plantilla basada en experimentos publicados por el laboratorio y modifícala, o empieza desde la configuración básica.</span><span lang="en">Pick a template based on the lab's published experiments and modify it, or start from the basic configuration.</span></p>
+      <div class="cfg-presets" id="presets"></div>
+      <div class="cfg-row">
+        <label class="cfg-field grow"><span><span lang="es">Nombre del experimento</span><span lang="en">Experiment name</span></span><input id="expName" type="text" maxlength="60" spellcheck="false"></label>
+      </div>
+      <label class="cfg-field"><span><span lang="es">Descripción (opcional)</span><span lang="en">Description (optional)</span></span><input id="expDesc" type="text" maxlength="160"></label>
+    </section>
+
+    <section class="cfg-sec" id="robots">
+      <h2><span class="cfg-num">2</span><span lang="es">Robots</span><span lang="en">Robots</span></h2>
+      <div class="cfg-row" id="fleetCtl"></div>
+      <div class="cfg-row" id="fleetCtl2"></div>
+      <p class="ip-muted ip-small"><span lang="es"><b>Virtual</b>: solo en Webots. <b>Real</b>: robot físico (Crazyflie por radio, Khepera por wifi). <b>Gemelo digital</b>: el robot real y su réplica en Webots a la vez. Puedes editar cada posición inicial en la tabla.</span><span lang="en"><b>Virtual</b>: Webots only. <b>Real</b>: physical robot (Crazyflie over radio, Khepera over wifi). <b>Digital twin</b>: the real robot and its Webots replica at once. You can edit every start position in the table.</span></p>
+      <div class="ip-table-wrap"><table class="ip-table cfg-table" id="robotTable"></table></div>
+      <p class="ip-muted ip-small cfg-soon"><span lang="es">Próximamente: DJI Tello y AgileX LIMO (sus paquetes ROS 2 ya existen, pero el lanzador común de Robotic Park aún no los incluye).</span><span lang="en">Coming soon: DJI Tello and AgileX LIMO (their ROS 2 packages exist, but Robotic Park's common launcher does not include them yet).</span></p>
+    </section>
+
+    <section class="cfg-sec" id="control">
+      <h2><span class="cfg-num">3</span><span lang="es">Control de bajo nivel y comunicación</span><span lang="en">Low-level control and communication</span></h2>
+      <div class="cfg-row" id="llCtl"></div>
+      <div class="cfg-row" id="llCtl2"></div>
+    </section>
+
+    <section class="cfg-sec" id="tarea">
+      <h2><span class="cfg-num">4</span><span lang="es">Tarea: formación</span><span lang="en">Task: formation</span></h2>
+      <div class="cfg-modes" id="taskModes"></div>
+      <div id="taskBody"></div>
+    </section>
+
+    <section class="cfg-sec" id="entorno">
+      <h2><span class="cfg-num">5</span><span lang="es">Entorno, interfaz y registro</span><span lang="en">Environment, interface and logging</span></h2>
+      <div class="cfg-row" id="envCtl"></div>
+      <div class="cfg-checks" id="envChecks"></div>
+    </section>
+
+    <section class="cfg-sec" id="ordenes">
+      <h2><span class="cfg-num">6</span><span lang="es">Órdenes en el tiempo</span><span lang="en">Commands over time</span></h2>
+      <p class="ip-muted ip-small"><span lang="es">El supervisor (<code>mars_supervisor_pkg</code>) envía cada orden cuando ha pasado su retardo desde la anterior, o cuando <code>dron01</code> avisa de que el enjambre está listo. Las órdenes a «swarm» llegan a todos los robots. Al final se añade <code>end</code> automáticamente.</span><span lang="en">The supervisor (<code>mars_supervisor_pkg</code>) sends each command once its delay since the previous one has elapsed, or when <code>dron01</code> reports that the swarm is ready. Commands to "swarm" reach every robot. <code>end</code> is appended automatically.</span></p>
+      <div class="cfg-timeline" id="timeline"></div>
+      <div class="ip-table-wrap"><table class="ip-table cfg-table" id="cmdTable"></table></div>
+      <div class="ip-btns">
+        <button class="ip-btn small" id="addCmd" type="button">+ <span lang="es">Añadir orden</span><span lang="en">Add command</span></button>
+        <button class="ip-btn small ghost" id="resetCmd" type="button"><span lang="es">Secuencia automática</span><span lang="en">Automatic sequence</span></button>
+        <span class="ip-pill" id="cmdMode"></span>
+      </div>
+    </section>
+
+    <section class="cfg-sec" id="descarga">
+      <h2><span class="cfg-num">7</span><span lang="es">Revisa y descarga</span><span lang="en">Review and download</span></h2>
+      <div class="cfg-row">
+        <label class="cfg-field grow"><span><span lang="es">Espacio de trabajo ROS 2</span><span lang="en">ROS 2 workspace</span></span><input id="wsPath" type="text" spellcheck="false"></label>
+      </div>
+      <div class="cfg-files" id="fileTabs" role="tablist"></div>
+      <div class="ip-code cfg-code" id="fileView"></div>
+      <div class="ip-btns">
+        <button class="ip-btn" id="dlZip" type="button">⬇ <span lang="es">Descargar .zip</span><span lang="en">Download .zip</span></button>
+        <button class="ip-btn ghost" id="copyFile" type="button"><span lang="es">Copiar este fichero</span><span lang="en">Copy this file</span></button>
+        <button class="ip-btn ghost" id="dlJson" type="button"><span lang="es">Guardar configuración (.json)</span><span lang="en">Save configuration (.json)</span></button>
+      </div>
+      <div class="ip-note ip-small"><span lang="es">Requisitos en el ordenador: Ubuntu 22.04, ROS 2 Humble, Webots R2025a y Robotic Park instalado (rama <code>humble-dev</code>). <code>install.sh</code> copia los ficheros en <code>roboticpark_config</code> y recompila ese paquete; <code>run.sh</code> lanza el experimento. Prueba siempre primero con robots virtuales.</span><span lang="en">Requirements on the computer: Ubuntu 22.04, ROS 2 Humble, Webots R2025a and Robotic Park installed (<code>humble-dev</code> branch). <code>install.sh</code> copies the files into <code>roboticpark_config</code> and rebuilds that package; <code>run.sh</code> launches the experiment. Always try with virtual robots first.</span></div>
+    </section>
+  </div>
+
+  <aside class="cfg-side">
+    <div class="ip-card cfg-preview">
+      <div class="ip-toolbar">
+        <strong><span lang="es">Vista previa</span><span lang="en">Preview</span></strong>
+        <span id="viewSeg"></span>
+      </div>
+      <div class="ip-stage cfg-stage"><canvas id="cv"></canvas><span class="ip-stage-hint"><span lang="es">Arrastra para girar</span><span lang="en">Drag to rotate</span></span></div>
+      <div class="cfg-legend">
+        <span><i class="dot air"></i><span lang="es">Crazyflie</span><span lang="en">Crazyflie</span></span>
+        <span><i class="dot gnd"></i>Khepera IV</span>
+        <span><i class="dot real"></i><span lang="es">real</span><span lang="en">real</span></span>
+        <span><i class="dot tgt"></i><span lang="es">objetivo</span><span lang="en">target</span></span>
+      </div>
+      <input type="range" id="playT" min="0" max="1" step="0.001" value="1" aria-label="t">
+      <div class="ip-btns cfg-play">
+        <button class="ip-btn small accent" id="play" type="button">▶ <span lang="es">Animar</span><span lang="en">Animate</span></button>
+        <span class="ip-muted ip-small"><span lang="es">Esquema del movimiento, no es una simulación.</span><span lang="en">Motion sketch, not a simulation.</span></span>
+      </div>
+    </div>
+    <div class="ip-card cfg-status">
+      <div class="cfg-summary" id="summary"></div>
+      <ul class="cfg-msgs" id="msgs"></ul>
+      <button class="ip-btn cfg-dl2" id="dlZip2" type="button">⬇ <span lang="es">Descargar .zip</span><span lang="en">Download .zip</span></button>
+    </div>
+  </aside>
+</main>
+
+<footer class="ip-footer">
+  <div class="ip-wrap">
+    <span lang="es">Robotic Park Lab · Dpto. de Informática y Automática, UNED. Ficheros compatibles con <a href="https://github.com/Robotic-Park-Lab/RoboticPark/tree/humble-dev">RoboticPark (humble-dev)</a>, <a href="https://github.com/Robotic-Park-Lab/uned_crazyflie_ros_pkg">uned_crazyflie_ros_pkg</a> y <a href="https://github.com/Robotic-Park-Lab/uned_kheperaIV_ros_pkg">uned_kheperaIV_ros_pkg</a>.</span>
+    <span lang="en">Robotic Park Lab · Dept. of Computer Science and Automatic Control, UNED. Files compatible with <a href="https://github.com/Robotic-Park-Lab/RoboticPark/tree/humble-dev">RoboticPark (humble-dev)</a>, <a href="https://github.com/Robotic-Park-Lab/uned_crazyflie_ros_pkg">uned_crazyflie_ros_pkg</a> and <a href="https://github.com/Robotic-Park-Lab/uned_kheperaIV_ros_pkg">uned_kheperaIV_ros_pkg</a>.</span>
+  </div>
+</footer>
+
+<script src="../interactivos/lib/ip.js"></script>
+<script src="../interactivos/lib/scene3d.js"></script>
+<script src="generador.js"></script>
+<script src="zip.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
