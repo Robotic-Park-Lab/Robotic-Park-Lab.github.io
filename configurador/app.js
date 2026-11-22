@@ -96,7 +96,7 @@
     a.lastChild.append(el('span', {}, '&nbsp;'), allBtn);
     const b = $('#fleetCtl2'); b.innerHTML = '';
     b.append(
-      sel(T('Posiciones iniciales', 'Start positions'), [['circle', 'En círculo', 'Circle'], ['grid', 'En rejilla', 'Grid'], ['line', 'En línea', 'Line']],
+      sel(T('Posiciones iniciales', 'Start positions'), [['circle', 'En círculo', 'Circle'], ['grid', 'En rejilla', 'Grid'], ['line', 'En línea', 'Line'], ['below', 'Bajo su objetivo', 'Below its target']],
         () => cfg.fleet.layout, v => { cfg.fleet.layout = v; cfg.robots.forEach(r => { r.manual = false; }); }, { structural: true }),
       num(T('Radio del círculo', 'Circle radius'), () => cfg.fleet.radius, v => { cfg.fleet.radius = v; cfg.robots.forEach(r => { r.manual = false; }); }, { unit: 'm', step: 0.1, min: 0.2, structural: true }),
       num(T('Separación', 'Spacing'), () => cfg.fleet.spacing, v => { cfg.fleet.spacing = v; cfg.robots.forEach(r => { r.manual = false; }); }, { unit: 'm', step: 0.05, min: 0.2, structural: true })

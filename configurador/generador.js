@@ -190,7 +190,7 @@
       label: ['Formación triangulada con líderes (escudo)', 'Leader-based triangulated formation (shield)'],
       apply(c) {
         // Malla de referencia de AdaptiveFormation_N12 (roboticpark_config/scripts/generate_experience_yaml.py)
-        c.name = 'Escudo_N12'; c.fleet = { crazyflie: 12, khepera: 0, layout: 'grid', spacing: 0.5, radius: 1.0, type: 'virtual' };
+        c.name = 'Escudo_N12'; c.fleet = { crazyflie: 12, khepera: 0, layout: 'below', spacing: 0.5, radius: 1.0, type: 'virtual' };
         Object.assign(c.task, {
           mode: 'triangulated', shape: 'custom', leaders: [1, 2], meshGain: 4.0,
           targets: [[0.9, 0, 1.1], [1.299, 0.75, 0.35], [0.45, 0.7794, 1.1], [-0.45, 0.7794, 1.1], [-0.9, 0, 1.1], [-0.45, -0.7794, 1.1],
@@ -358,6 +358,11 @@
       }
     });
     cfg.robots = out;
+    if (f.layout === 'below' && cfg.task && cfg.task.mode !== 'none' && cfg.task.mode !== 'herding') {
+      // Cada robot empieza justo debajo de su punto de la formación (sin cruces al despegar)
+      const T = targets(cfg);
+      out.forEach((r, i) => { if (!r.manual && T[i]) { r.x = +T[i][0].toFixed(3); r.y = +T[i][1].toFixed(3); } });
+    }
     return cfg;
   }
 
@@ -386,8 +391,42 @@
       else if (t.groundShape === 'grid') G = gridPts(nG, t.spacing, t.cx, t.cy, 0);
       else G = ringPts(nG, t.groundR, t.cx, t.cy, 0, Math.PI / Math.max(1, nG));
     }
+    // Cada robot va al hueco que minimiza la suma de distancias al cuadrado desde su posición
+    // inicial: las trayectorias rectas no se cruzan (en el orden fijo i -> i dos drones podían
+    // chocar de camino a la formación).
+    A = assignNearest(air, A); G = assignNearest(gnd, G);
     let ia = 0, ig = 0;
     return R.map(r => KINDS[r.kind].air ? A[ia++] : G[ig++]);
+  }
+
+  /** Reordena los puntos P para que el robot k vaya a P'[k] con coste mínimo (algoritmo húngaro). */
+  function assignNearest(robots, P) {
+    const n = Math.min(robots.length, P.length);
+    if (n < 2) return P;
+    const cost = (i, j) => (robots[i].x - P[j][0]) ** 2 + (robots[i].y - P[j][1]) ** 2;
+    const u = new Array(n + 1).fill(0), v = new Array(n + 1).fill(0);
+    const p = new Array(n + 1).fill(0), way = new Array(n + 1).fill(0);
+    for (let i = 1; i <= n; i++) {
+      p[0] = i; let j0 = 0;
+      const minv = new Array(n + 1).fill(Infinity), used = new Array(n + 1).fill(false);
+      do {
+        used[j0] = true; const i0 = p[j0]; let delta = Infinity, j1 = 0;
+        for (let j = 1; j <= n; j++) {
+          if (used[j]) continue;
+          const cur = cost(i0 - 1, j - 1) - u[i0] - v[j];
+          if (cur < minv[j]) { minv[j] = cur; way[j] = j0; }
+          if (minv[j] < delta) { delta = minv[j]; j1 = j; }
+        }
+        for (let j = 0; j <= n; j++) {
+          if (used[j]) { u[p[j]] += delta; v[j] -= delta; } else minv[j] -= delta;
+        }
+        j0 = j1;
+      } while (p[j0] !== 0);
+      do { const j1 = way[j0]; p[j0] = p[j1]; j0 = j1; } while (j0);
+    }
+    const out = P.slice();
+    for (let j = 1; j <= n; j++) out[p[j] - 1] = P[j - 1];
+    return out;
   }
 
   /** Aristas de la formación entre robots (índices en cfg.robots). */
