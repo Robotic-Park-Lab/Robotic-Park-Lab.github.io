@@ -636,6 +636,10 @@
   // ------------------------------------------------------------------
   //  Mundo de Webots (portado de generate_formation_assets.py)
   // ------------------------------------------------------------------
+  const LED_RING = ['LED {', '  translation 0 0 0.001', '  children [', '    Shape {', '      appearance PBRAppearance {',
+    '        baseColor 0.15 0.15 0.15', '        roughness 0.6', '        metalness 0', '      }', '      geometry Cylinder {',
+    '        height 0.001', '        radius 0.017', '      }', '    }', '  ]', '  name "led_ring"', '  color [', '    0 1 0,',
+    '    1 0 0,', '    0 0 1', '  ]', '}'].map(l => '    ' + l + '\n').join('');
   function buildWorld(cfg) {
     const R = cfg.robots.filter(r => r.type !== 'physical');
     const needK = R.some(r => r.kind === 'khepera');
@@ -652,8 +656,9 @@
     R.forEach(r => {
       if (r.kind === 'crazyflie') {
         const supLine = sup ? '' : '  supervisor TRUE\n'; sup = true;
-        // LED "led_ring": webots_driver.py llama a led_ring.set() al iniciar y el PROTO estándar no lo trae
-        s += `\nCrazyflie {\n\ttranslation ${fx(r.x)} ${fx(r.y)} 0.015\n\tname "${r.name}"\n\tcontroller "<extern>"\n${supLine}  extensionSlot [\n    InertialUnit {\n    }\n    LED {\n      name "led_ring"\n    }\n  ]\n}\n`;
+        // LED "led_ring": webots_driver.py lo usa al iniciar y el PROTO estándar no lo trae.
+        // Disco fino bajo la placa (como el LED-ring deck real), sin boundingObject: no colisiona.
+        s += `\nCrazyflie {\n\ttranslation ${fx(r.x)} ${fx(r.y)} 0.015\n\tname "${r.name}"\n\tcontroller "<extern>"\n${supLine}  extensionSlot [\n    InertialUnit {\n    }\n${LED_RING}  ]\n}\n`;
       } else {
         s += `\nKhepera4 {\n\ttranslation ${fx(r.x)} ${fx(r.y)} 0.015\n\tname "${r.name}"\n\tcontroller "<extern>"\n  turretSlot [\n    GPS {\n    }\n    InertialUnit {\n    }\n  ]\n}\n`;
       }
