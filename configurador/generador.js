@@ -19,7 +19,7 @@
      roboticpark_config/launch/experience.launch.py
      roboticpark_config/scripts/generate_{experience_yaml,formation_assets}.py
      uned_crazyflie_driver/{driver_config,multi_agent_config,webots_driver}.py
-     uned_kheperaiv_webots/khepera_driver.py
+     uned_kheperaiv_driver/{driver_config,multi_agent_config,webots_driver}.py
      mars_supervisor_pkg/supervisor_node.py
    Sin dependencias: funciona en el navegador (window.RPGen) y en Node.
    ============================================================ */
@@ -476,7 +476,13 @@
       });
     }
     if (t.mode !== 'none') {
-      cmds.push({ delay: 4, trigger: 'time', target: 'swarm', kind: 'order', value: 'formation_run' });
+      // Los Khepera IV van a ~2 cm/s con el IPC de Webots: esperar a que lleguen a su hueco
+      // antes de formation_run (con 4 s la ley por distancias podía quedarse en un mínimo local)
+      let wait = 4;
+      if (t.mode !== 'herding') R.forEach((r, i) => {
+        if (!KINDS[r.kind].air && T[i]) wait = Math.max(wait, Math.ceil(Math.hypot(T[i][0] - r.x, T[i][1] - r.y) / 0.02) + 5);
+      });
+      cmds.push({ delay: Math.min(wait, 120), trigger: 'time', target: 'swarm', kind: 'order', value: 'formation_run' });
       cmds.push({ delay: 30, trigger: 'time', target: 'swarm', kind: 'order', value: 'formation_stop' });
     } else if (hasAir) {
       cmds.push({ delay: 15, trigger: 'time', target: 'swarm', kind: 'order', value: 'land' });
