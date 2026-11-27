@@ -26,6 +26,8 @@
     const out = Object.assign(base, o);
     ['fleet', 'lowlevel', 'task', 'env'].forEach(k => { out[k] = Object.assign(G.defaultConfig()[k], o[k] || {}); });
     out.robots = Array.isArray(o.robots) ? o.robots : [];
+    out.obstacles = Array.isArray(o.obstacles) ? o.obstacles : [];
+    out.nav = Object.assign(G.defaultConfig().nav, o.nav || {});
     out.commands = Array.isArray(o.commands) && o.commands.length ? o.commands : null;
     return out;
   }
@@ -66,11 +68,12 @@
       herding: [T('5 drones pastores guían a un Khepera hacia un objetivo.', '5 herder drones steer a Khepera to a goal.')],
       shield: [T('12 drones, malla triangulada guiada por dos líderes.', '12 drones, triangulated mesh driven by two leaders.')],
       teleop: [T('Un dron recorre puntos de paso; ideal para empezar.', 'One drone flies through waypoints; good to start.')],
+      obstacles: [T('4 drones cruzan entre tres columnas; navegación híbrida A* + evitación.', '4 drones cross between three columns; hybrid A* + avoidance navigation.')],
     };
     Object.entries(G.PRESETS).forEach(([k, p]) => {
       const b = el('button', { type: 'button', class: 'cfg-preset' + (k === activePreset ? ' is-on' : '') }, `${p.label[Li]}<small>${desc[k] || ''}</small>`);
       b.addEventListener('click', () => {
-        const c = G.defaultConfig(); p.apply(c); c.robots = []; cfg = c; activePreset = k;
+        const c = G.defaultConfig(); p.apply(c); cfg = c; activePreset = k;
         G.syncRobots(cfg); renderAll();
       });
       box.append(b);
@@ -181,11 +184,11 @@
     const row = () => { const r = el('div', { class: 'cfg-row' }); body.append(r); return r; };
 
     if (t.mode === 'none') {
-      body.append(el('p', { class: 'ip-muted ip-small' }, T('Los robots no ejecutan ninguna ley de formación: se mueven con las órdenes de la sección 6 (despegar, ir a una posición, aterrizar…).', 'Robots run no formation law: they move with the commands in section 6 (take off, go to a position, land…).')));
+      body.append(el('p', { class: 'ip-muted ip-small' }, T('Los robots no ejecutan ninguna ley de formación: se mueven con las órdenes de la sección 7 (despegar, ir a una posición, aterrizar…).', 'Robots run no formation law: they move with the commands in section 7 (take off, go to a position, land…).')));
       return;
     }
     if (t.mode === 'herding') {
-      body.append(el('p', { class: 'ip-muted ip-small' }, T('Usa <code>multi_agent_pkg/affine_formation_node</code>: los drones (pastores) forman un anillo alrededor del primer Khepera (oveja, reactivo) y lo empujan hacia la posición que le envíes en la sección 6.', 'Uses <code>multi_agent_pkg/affine_formation_node</code>: the drones (herders) form a ring around the first Khepera (sheep, reactive) and push it towards the position you send in section 6.')));
+      body.append(el('p', { class: 'ip-muted ip-small' }, T('Usa <code>multi_agent_pkg/affine_formation_node</code>: los drones (pastores) forman un anillo alrededor del primer Khepera (oveja, reactivo) y lo empujan hacia la posición que le envíes en la sección 7.', 'Uses <code>multi_agent_pkg/affine_formation_node</code>: the drones (herders) form a ring around the first Khepera (sheep, reactive) and push it towards the position you send in section 7.')));
       const r = row();
       r.append(num(T('Radio del anillo', 'Ring radius'), () => t.R, v => { t.R = v; }, { unit: 'm', step: 0.05, min: 0.3 }),
         num(T('Altura de vuelo', 'Flight height'), () => t.height, v => { t.height = v; }, { unit: 'm', step: 0.05, min: 0.6, max: 3 }));
@@ -233,7 +236,7 @@
     }
 
     if (t.mode === 'triangulated') {
-      body.append(el('p', { class: 'ip-muted ip-small' }, T('Usa <code>multi_agent_pkg/triangulated_formation_node</code>. La malla se obtiene por triangulación de Delaunay de las posiciones objetivo; los dos líderes fijan traslación, giro y escala, y reciben su posición en la sección 6.', 'Uses <code>multi_agent_pkg/triangulated_formation_node</code>. The mesh comes from a Delaunay triangulation of the target positions; the two leaders fix translation, rotation and scale, and get their position in section 6.')));
+      body.append(el('p', { class: 'ip-muted ip-small' }, T('Usa <code>multi_agent_pkg/triangulated_formation_node</code>. La malla se obtiene por triangulación de Delaunay de las posiciones objetivo; los dos líderes fijan traslación, giro y escala, y reciben su posición en la sección 7.', 'Uses <code>multi_agent_pkg/triangulated_formation_node</code>. The mesh comes from a Delaunay triangulation of the target positions; the two leaders fix translation, rotation and scale, and get their position in section 7.')));
       const drones = cfg.robots.filter(r => G.KINDS[r.kind].air).map((r, i) => [String(i + 1), r.name, r.name]);
       const r4 = row();
       [0, 1].forEach(k => r4.append(sel(T('Líder ', 'Leader ') + (k + 1), drones, () => String((t.leaders || [1, 2])[k]), v => { t.leaders = (t.leaders || [1, 2]).slice(); t.leaders[k] = +v; }, { structural: true })));
@@ -269,7 +272,115 @@
     if (t.protocol === 'EventBased') r8.append(num(T('Umbral c₀', 'Threshold c₀'), () => t.co, v => { t.co = v; }, { step: 0.005, min: 0 }), num(T('Umbral relativo a', 'Relative threshold a'), () => t.ai, v => { t.ai = v; }, { step: 0.01, min: 0 }));
   }
 
-  // ------------------------------------------------------------------ 5. entorno
+  // ------------------------------------------------------------------ 5. obstáculos y navegación
+  const NAV = G.NAV;
+  function newObstacle(shape, at) {
+    const k = cfg.obstacles.length, o = { shape, x: +(0.9 * Math.cos(0.6 + k * 2.4)).toFixed(2), y: +(0.9 * Math.sin(0.6 + k * 2.4)).toFixed(2), z: 1.0, ground: true, yaw: 0 };
+    if (at) { o.x = at.x; o.y = at.y; }
+    if (shape === 'box') Object.assign(o, { sx: 0.4, sy: 0.4, sz: 1.5 });
+    if (shape === 'cylinder') Object.assign(o, { r: 0.15, h: 2.0 });
+    if (shape === 'sphere') Object.assign(o, { r: 0.25, ground: false, z: 1.1 });
+    return o;
+  }
+  const numIn = (v, on, o = {}) => {
+    const i = el('input', { type: 'number', step: o.step ?? 0.05, min: o.min ?? '', value: v, title: o.title || '' });
+    i.addEventListener('input', () => { const x = parseFloat(i.value); if (isFinite(x)) on(x); });
+    return i;
+  };
+  function renderObstacles() {
+    const t = $('#obsTable'), obs = cfg.obstacles;
+    t.innerHTML = '';
+    if (!obs.length) { t.innerHTML = `<tbody><tr><td class="ip-muted">${T('Sin obstáculos: espacio despejado.', 'No obstacles: free space.')}</td></tr></tbody>`; return; }
+    t.innerHTML = `<thead><tr><th>#</th><th>${T('Forma', 'Shape')}</th><th>x (m)</th><th>y (m)</th><th>${T('z del centro (m)', 'centre z (m)')}</th><th>${T('Tamaño (m)', 'Size (m)')}</th><th>${T('Giro (°)', 'Yaw (°)')}</th><th></th></tr></thead>`;
+    const tb = el('tbody');
+    const cell = (tr, ...nodes) => { const td = el('td'); td.append(...nodes); tr.append(td); return td; };
+    obs.forEach((o, i) => {
+      const tr = el('tr');
+      tr.append(el('td', { class: 'cfg-name' }, String(i + 1)));
+      const sh = el('select'); Object.entries(NAV.SHAPES).forEach(([k, v]) => sh.append(el('option', { value: k }, v.label[Li]))); sh.value = o.shape;
+      sh.addEventListener('change', () => { obs[i] = newObstacle(sh.value, o); renderObstacles(); changed(); });
+      cell(tr, sh);
+      cell(tr, numIn(o.x, v => { o.x = v; changed(); }));
+      cell(tr, numIn(o.y, v => { o.y = v; changed(); }));
+      const zin = numIn(o.ground ? +NAV.centerZ(o).toFixed(3) : o.z, v => { o.z = v; changed(); });
+      zin.disabled = !!o.ground;
+      const gl = el('label', { title: T('Apoyado en el suelo', 'Resting on the floor') }), gc = el('input', { type: 'checkbox' }); gc.checked = !!o.ground;
+      gc.addEventListener('change', () => { o.ground = gc.checked; if (!o.ground) o.z = +NAV.centerZ(Object.assign({}, o, { ground: true })).toFixed(3); renderObstacles(); changed(); });
+      gl.append(gc, document.createTextNode(T(' en el suelo', ' on floor')));
+      const zb = el('div', { class: 'cfg-z' }); zb.append(zin, gl); cell(tr, zb);
+      const dims = el('div', { class: 'cfg-dims' });
+      const dim = (lab, k, title) => { dims.append(el('i', {}, lab), numIn(o[k], v => { o[k] = v; if (o.ground) zin.value = (+NAV.centerZ(o)).toFixed(3); changed(); }, { min: 0.01, title })); };
+      if (o.shape === 'box') { dim(T('largo', 'len'), 'sx', T('Lado en x', 'Side along x')); dim(T('ancho', 'wid'), 'sy', T('Lado en y', 'Side along y')); dim(T('alto', 'hgt'), 'sz', T('Altura', 'Height')); }
+      else if (o.shape === 'cylinder') { dim('r', 'r', T('Radio', 'Radius')); dim('h', 'h', T('Altura', 'Height')); }
+      else dim('r', 'r', T('Radio', 'Radius'));
+      cell(tr, dims);
+      if (o.shape === 'box') cell(tr, numIn(o.yaw || 0, v => { o.yaw = v; changed(); }, { step: 5 }));
+      else tr.append(el('td', { class: 'ip-muted' }, '—'));
+      const x = el('button', { type: 'button', class: 'cfg-x', title: T('Quitar', 'Remove'), 'aria-label': T('Quitar', 'Remove') }, '✕');
+      x.addEventListener('click', () => { obs.splice(i, 1); renderObstacles(); changed(); });
+      cell(tr, x);
+      tb.append(tr);
+    });
+    t.append(tb);
+  }
+  function renderNav() {
+    renderObstacles();
+    const box = $('#navModes'); box.innerHTML = '';
+    const used = new Set(cfg.robots.map(r => r.nav || 'direct'));
+    const cur = used.size === 1 ? [...used][0] : (cfg.fleet.nav || 'direct');
+    Object.entries(NAV.STRATEGIES).forEach(([k, st]) => {
+      const b = el('button', { type: 'button', class: 'cfg-mode' + (used.has(k) ? ' is-on' : '') }, `${st.label[Li]}<small>${st.short[Li]}</small>`);
+      b.title = T('Aplicar a todos los robots', 'Apply to every robot');
+      b.addEventListener('click', () => { cfg.fleet.nav = k; cfg.robots.forEach(r => { r.nav = k; }); renderNav(); changed(); });
+      box.append(b);
+    });
+    const help = $('#navHelp'); help.innerHTML = '';
+    (used.size > 1 ? [...used] : [cur]).forEach(k => help.append(el('p', {}, `<b>${NAV.STRATEGIES[k].label[Li]}.</b> ${NAV.STRATEGIES[k].help[Li]}`)));
+    if (cfg.task.mode === 'herding') help.append(el('p', {}, T('En el pastoreo el nodo centralizado mueve a todos los robots: la navegación no se aplica (todos van en «directa»).', 'In herding the centralized node moves every robot: navigation does not apply (all use "direct").')));
+    const nv = cfg.nav, pr = $('#navParams'); pr.innerHTML = '';
+    const any = (ks) => cfg.robots.some(r => ks.includes(r.nav));
+    if (cfg.obstacles.length || any(['astar', 'rrt', 'apf', 'hybrid'])) pr.append(num(T('Margen de seguridad', 'Safety margin'), () => nv.margin, v => { nv.margin = IP.clamp(v, 0, 1); }, { unit: 'm', step: 0.01, min: 0, help: T('Distancia libre extra alrededor de cada obstáculo (además del radio del robot).', 'Extra clearance around each obstacle (on top of the robot radius).') }));
+    if (any(['apf', 'hybrid'])) pr.append(
+      num(T('Alcance d₀', 'Range d₀'), () => nv.d0, v => { nv.d0 = IP.clamp(v, 0.1, 3); }, { unit: 'm', step: 0.05, min: 0.1, help: T('A partir de esta distancia no hay repulsión.', 'Beyond this distance there is no repulsion.') }),
+      num(T('η obstáculos', 'η obstacles'), () => nv.eta, v => { nv.eta = IP.clamp(v, 0, 5); }, { step: 0.05, min: 0, help: T('Intensidad de la repulsión de los obstáculos.', 'Strength of the obstacle repulsion.') }),
+      num(T('η robots', 'η robots'), () => nv.etaRobot, v => { nv.etaRobot = IP.clamp(v, 0, 5); }, { step: 0.05, min: 0, help: T('Intensidad de la repulsión entre robots.', 'Strength of the robot-to-robot repulsion.') }));
+    renderNavTable();
+  }
+  function renderNavTable() {
+    const t = $('#navTable'); t.innerHTML = '';
+    if (!cfg.robots.length) return;
+    t.innerHTML = `<thead><tr><th>Robot</th><th>${T('Estrategia', 'Strategy')}</th><th>${T('Objetivos', 'Targets')}</th><th>${T('Ruta', 'Route')}</th><th>${T('Tiempo est.', 'Est. time')}</th><th>${T('Vista previa', 'Preview')}</th></tr></thead>`;
+    const tb = el('tbody'), herd = cfg.task.mode === 'herding';
+    const { agents, sim } = G.navPreview(cfg);
+    cfg.robots.forEach((r, i) => {
+      const tr = el('tr'), a = agents[i], s = sim[i];
+      tr.append(el('td', { class: 'cfg-name' }, r.name));
+      const sel2 = el('select'); Object.entries(NAV.STRATEGIES).forEach(([k, st]) => sel2.append(el('option', { value: k }, st.label[Li])));
+      sel2.value = herd ? 'direct' : (r.nav || 'direct'); sel2.disabled = herd;
+      sel2.addEventListener('change', () => { r.nav = sel2.value; renderNav(); changed(); });
+      const td = el('td'); td.append(sel2); tr.append(td);
+      let len = 0; for (let l = 0; l < a.navLegs; l++) len += Math.max(s.paths[l] && s.paths[l].length > 1 ? NAV.pathLength(s.paths[l]) : 0, s.legLen[l] || 0);
+      const v = G.KINDS[r.kind].air ? G.SPEED.air : G.SPEED.ground;
+      tr.append(el('td', {}, String(a.navLegs)), el('td', {}, a.navLegs ? len.toFixed(2) + ' m' : '—'), el('td', {}, a.navLegs ? '≈' + Math.ceil(len / v * (a.strategy === 'apf' ? 2 : 1) + 2 * a.navLegs) + ' s' : '—'));
+      let st = ['ok', '✓ ' + T('llega', 'arrives')];
+      if (!a.navLegs) st = ['', T('sin objetivos', 'no targets')];
+      else if (s.fail.some(l => l < a.navLegs)) st = ['err', '✕ ' + T('sin camino', 'no path')];
+      else if (s.legsDone < a.navLegs) st = ['warn', '⚠ ' + T('no llega', 'does not arrive')];
+      else if (a.strategy === 'direct' && cfg.obstacles.length) {
+        let p = a.start, hit = -1; for (let l = 0; l < a.navLegs && hit < 0; l++) { hit = NAV.hits(cfg.obstacles, a.air, p, a.legs[l]); p = a.legs[l]; }
+        if (hit >= 0) st = ['err', '✕ ' + T('choca con el obstáculo ', 'hits obstacle ') + (hit + 1)];
+      }
+      if (st[0] === 'ok' && (sim.close || []).some(c => c.i === i || c.j === i)) st = ['warn', '⚠ ' + T('se cruza con otro robot', 'crosses another robot')];
+      if (st[0] === 'ok' && s.stuck) st = ['ok', '✓ ' + T('llega (escapa de un mínimo local)', 'arrives (escapes a local minimum)')];
+      tr.append(el('td', { class: st[0] }, st[1]));
+      tb.append(tr);
+    });
+    t.append(tb);
+  }
+  document.querySelectorAll('[data-obs]').forEach(b => b.addEventListener('click', () => { cfg.obstacles.push(newObstacle(b.dataset.obs)); renderObstacles(); changed(); }));
+  $('#obsClear').addEventListener('click', () => { cfg.obstacles.length = 0; renderObstacles(); changed(); });
+
+  // ------------------------------------------------------------------ 6. entorno
   function renderEnv() {
     const e = cfg.env, a = $('#envCtl'); a.innerHTML = '';
     a.append(
@@ -287,7 +398,7 @@
     if (e.log) c.append(chk(T('Grabar todos los topics (-a)', 'Record all topics (-a)'), () => e.logAll, v => { e.logAll = v; }));
   }
 
-  // ------------------------------------------------------------------ 6. órdenes
+  // ------------------------------------------------------------------ 7. órdenes
   const ORDER_KEYS = Object.keys(G.ORDERS);
   function parseOrder(v) {
     v = String(v);
@@ -402,7 +513,7 @@
     });
   }
 
-  // ------------------------------------------------------------------ 7. ficheros
+  // ------------------------------------------------------------------ 8. ficheros
   let built = null, curFile = 0;
   function renderFiles() {
     built = G.build(cfg, IP.lang);
@@ -427,7 +538,7 @@
     const modeTxt = { virtual: T('virtual', 'virtual'), physical: T('real', 'real'), hybrid: T('híbrido', 'hybrid') }[G.experimentMode(cfg)];
     const taskTxt = { distance: T('formación por distancias', 'distance formation'), herding: T('pastoreo', 'herding'), triangulated: T('formación triangulada', 'triangulated formation'), none: T('sin formación', 'no formation') }[t.mode];
     const T0 = G.targets(cfg), E = G.formationEdges(cfg, T0);
-    $('#summary').innerHTML = `<b>${G.safeName(cfg.name)}</b><br>${n('crazyflie')} Crazyflie · ${n('khepera')} Khepera IV · ${T('modo', 'mode')} <b>${modeTxt}</b><br>${taskTxt}${t.mode === 'distance' ? ` · ${G.SHAPES[t.shape].label[Li].toLowerCase()} · ${E.length} ${T('enlaces', 'links')} · ${t.law}${t.law === 'ML3' ? '' : '_' + t.output}` : ''}<br>${G.commandsOf(cfg).length + 1} ${T('órdenes', 'commands')} · ${cfg.env.tool}`;
+    $('#summary').innerHTML = `<b>${G.safeName(cfg.name)}</b><br>${n('crazyflie')} Crazyflie · ${n('khepera')} Khepera IV · ${T('modo', 'mode')} <b>${modeTxt}</b><br>${taskTxt}${t.mode === 'distance' ? ` · ${G.SHAPES[t.shape].label[Li].toLowerCase()} · ${E.length} ${T('enlaces', 'links')} · ${t.law}${t.law === 'ML3' ? '' : '_' + t.output}` : ''}<br>${cfg.obstacles.length} ${T('obstáculos', 'obstacles')} · ${T('navegación', 'navigation')}: ${[...new Set(cfg.robots.map(r => NAV.STRATEGIES[G.strategyOf(cfg, r)].label[Li].split(/[:(]/)[0].trim().toLowerCase()))].join(', ') || '—'}<br>${G.commandsOf(cfg).length + 1} ${T('órdenes', 'commands')} · ${cfg.env.tool}`;
     const m = $('#msgs'); m.innerHTML = '';
     built.errors.forEach(x => m.append(el('li', { class: 'err' }, '✕ ' + x)));
     built.warnings.forEach(x => m.append(el('li', { class: 'warn' }, '⚠ ' + x)));
@@ -448,6 +559,11 @@
     const Tg = G.targets(cfg).map(p => p || [0, 0, 0]);
     const tgt = cfg.task.mode === 'none' ? cfg.robots.map(r => [r.x, r.y, G.KINDS[r.kind].air ? 1.1 : 0]) : Tg;
     cache = { tgt, E: G.formationEdges(cfg, tgt) };
+    if (cfg.task.mode !== 'herding') {
+      const { agents, sim } = G.navPreview(cfg);
+      cache.nav = { agents, sim, n: Math.max(2, ...sim.map(s => s.traj.length)) };
+      if (cfg.task.mode === 'none') cache.tgt = sim.map(s => s.traj[s.traj.length - 1]);
+    }
     return cache;
   }
   function surfaceWire(t) {
@@ -461,9 +577,32 @@
     if (t.shape === 'cone') add((s, v) => { const th = s * 2 * Math.PI, h = v; return [t.cx + t.a * (1 - h) * Math.cos(th), t.cy + t.a * (1 - h) * Math.sin(th), t.cz + t.c * h]; });
     return segs.map(r => r.filter(p => p[2] > -0.01));
   }
+  function drawObstacle(o) {
+    const z = NAV.centerZ(o), x = +o.x, y = +o.y, C = '--accent';
+    const ring = (r, zz, n = 24) => Array.from({ length: n }, (_, k) => { const a = k / n * 2 * Math.PI; return [x + r * Math.cos(a), y + r * Math.sin(a), zz]; });
+    if (o.shape === 'box') {
+      const c = Math.cos((+o.yaw || 0) * Math.PI / 180), s = Math.sin((+o.yaw || 0) * Math.PI / 180), hx = o.sx / 2, hy = o.sy / 2;
+      const P = (u, v, w) => [x + c * u * hx - s * v * hy, y + s * u * hx + c * v * hy, z + w * o.sz / 2];
+      const bot = [P(-1, -1, -1), P(1, -1, -1), P(1, 1, -1), P(-1, 1, -1)], top = [P(-1, -1, 1), P(1, -1, 1), P(1, 1, 1), P(-1, 1, 1)];
+      sc.poly(top, { fill: C, alpha: 0.28, stroke: C, width: 1.2 });
+      for (let k = 0; k < 4; k++) sc.poly([bot[k], bot[(k + 1) % 4], top[(k + 1) % 4], top[k]], { fill: C, alpha: 0.12, stroke: C, width: 1 });
+    } else if (o.shape === 'cylinder') {
+      const b = ring(+o.r, z - o.h / 2), t = ring(+o.r, z + o.h / 2);
+      sc.poly(t, { fill: C, alpha: 0.28, stroke: C, width: 1.2 }); sc.polyline(b, { color: C, width: 1, closed: true, alpha: 0.6 });
+      for (let k = 0; k < 24; k += 3) sc.line(b[k], t[k], { color: C, width: 1, alpha: 0.45 });
+    } else {
+      const r = +o.r;
+      for (const f of [-0.6, 0, 0.6]) sc.polyline(ring(r * Math.sqrt(1 - f * f), z + r * f), { color: C, width: 1, closed: true, alpha: 0.6 });
+      const mer = (ang) => Array.from({ length: 25 }, (_, k) => { const t = k / 24 * 2 * Math.PI; return [x + r * Math.cos(t) * Math.cos(ang), y + r * Math.cos(t) * Math.sin(ang), z + r * Math.sin(t)]; });
+      sc.polyline(mer(0), { color: C, width: 1, alpha: 0.5 }); sc.polyline(mer(Math.PI / 2), { color: C, width: 1, alpha: 0.5 });
+      sc.poly(ring(r, z), { fill: C, alpha: 0.2 });
+    }
+  }
+  const lerp3 = (A, B, f) => [A[0] + (B[0] - A[0]) * f, A[1] + (B[1] - A[1]) * f, A[2] + (B[2] - A[2]) * f];
+  function trajAt(tr, f) { const k = f * (tr.length - 1), i = Math.min(tr.length - 1, Math.floor(k)); return i >= tr.length - 1 ? tr[tr.length - 1] : lerp3(tr[i], tr[i + 1], k - i); }
   IP.animate($('#cv').parentElement, (dt) => {
     if (playing) { u = Math.min(1, u + dt / 5); slider.value = u; if (u >= 1) playing = false; }
-    const { tgt, E } = sceneData(), R = cfg.robots;
+    const { tgt, E, nav } = sceneData(), R = cfg.robots;
     sc.begin();
     for (let k = -2; k <= 2; k += 0.5) {
       sc.line([k, -2, 0], [k, 2, 0], { color: '--border', width: 1, scaleWidth: false });
@@ -473,11 +612,26 @@
     if (cfg.task.mode === 'distance' || cfg.task.mode === 'triangulated') {
       surfaceWire(cfg.task).forEach(r => sc.polyline(r, { color: '--s3', width: 1, alpha: 0.22, scaleWidth: false }));
     }
+    cfg.obstacles.forEach(drawObstacle);
     const showStart = view !== 'target', showTgt = view !== 'start';
+    if (nav && showTgt) nav.sim.forEach((s, i) => {
+      const a = nav.agents[i];
+      if (a.strategy === 'direct' || !a.navLegs) return;
+      if (a.strategy === 'apf') sc.polyline(s.traj, { color: '--info', width: 1.4, dash: [5, 4], alpha: 0.75, scaleWidth: false });
+      else s.paths.slice(0, a.navLegs).forEach(P => sc.polyline(P, { color: '--info', width: 1.6, dash: [5, 4], alpha: 0.8, scaleWidth: false }));
+    });
     // posiciones animadas: despegue (0-0.3) y desplazamiento al objetivo (0.3-1)
     const cur = R.map((r, i) => {
       const air = G.KINDS[r.kind].air, s0 = [r.x, r.y, air ? 0.03 : 0], to = tgt[i] || s0;
       if (view === 'start') return s0;
+      if (nav) {
+        // despegue (0-0,25) y recorrido simulado con la estrategia de cada robot (0,25-1)
+        const tr = nav.sim[i].traj;
+        if (view === 'target') return tr[tr.length - 1];
+        if (u < 0.25) { const a = ease(u / 0.25); return air ? [r.x, r.y, 0.03 + (tr[0][2] - 0.03) * a] : s0; }
+        const g = (u - 0.25) / 0.75 * (nav.n - 1) / Math.max(1, tr.length - 1);
+        return trajAt(tr, Math.min(1, g));
+      }
       if (view === 'target') return to;
       const a = ease(IP.clamp(u / 0.3, 0, 1)), b = ease(IP.clamp((u - 0.3) / 0.7, 0, 1));
       const up = air ? [r.x, r.y, 0.03 + (1.1 - 0.03) * a] : s0;
@@ -487,7 +641,7 @@
       E.forEach(([i, j]) => sc.line(tgt[i], tgt[j], { color: '--s3', width: 1.2, dash: [4, 4], alpha: 0.7 }));
       tgt.forEach(p => sc.point(p, { r: 3, color: '--s3', alpha: 0.6 }));
     }
-    if (view === 'both' && u > 0.3) E.forEach(([i, j]) => sc.line(cur[i], cur[j], { color: '--accent', width: 1.6, alpha: Math.min(1, (u - 0.3) * 3) }));
+    if (view === 'both' && u > (nav ? 0.25 : 0.3) && (!nav || u >= 0.999)) E.forEach(([i, j]) => sc.line(cur[i], cur[j], { color: '--accent', width: 1.6, alpha: Math.min(1, (u - 0.3) * 3) }));
     if (showStart || view === 'both') {
       R.forEach((r, i) => {
         const p = cur[i], air = G.KINDS[r.kind].air, real = r.type !== 'virtual';
@@ -507,7 +661,7 @@
     activePreset = null;
     cache = null;
     clearTimeout(tFiles);
-    tFiles = setTimeout(() => { renderFiles(); renderStatus(); if (!cfg.commands) renderCommands(); else renderTimeline(G.commandsOf(cfg)); }, 120);
+    tFiles = setTimeout(() => { renderFiles(); renderStatus(); renderNavTable(); if (!cfg.commands) renderCommands(); else renderTimeline(G.commandsOf(cfg)); }, 120);
     clearTimeout(tSave);
     tSave = setTimeout(() => { try { localStorage.setItem(STORE, JSON.stringify(cfg)); } catch (e) { /* sin almacenamiento */ } }, 400);
   }
@@ -515,12 +669,14 @@
     G.syncRobots(cfg);
     renderRobots();
     if (!$('#taskBody').contains(document.activeElement)) renderTask();
+    if (!$('#navegacion').contains(document.activeElement)) renderNav();
     renderCommands();
     changed();
   }
   function renderAll() {
     cache = null;
-    renderPresets(); renderFleet(); renderRobots(); renderLowLevel(); renderTask(); renderEnv(); renderCommands();
+    if (!Array.isArray(cfg.obstacles)) cfg.obstacles = [];
+    renderPresets(); renderFleet(); renderRobots(); renderLowLevel(); renderTask(); renderNav(); renderEnv(); renderCommands();
     renderFiles(); renderStatus();
     try { localStorage.setItem(STORE, JSON.stringify(cfg)); } catch (e) { /* */ }
   }
@@ -564,4 +720,6 @@
 
   IP.page();
   renderAll();
+  // código del nodo de navegación que va en el .zip
+  fetch('navegacion.py').then(r => (r.ok ? r.text() : null)).then(t => { if (t) { G.setNavSource(t); renderFiles(); } }).catch(() => { /* sin red: el zip lleva un aviso */ });
 })();

@@ -103,3 +103,24 @@
 #robotTable { min-width: 660px; }
 #cmdTable { min-width: 820px; }
 #cmdTable td:nth-child(5) select { min-width: 170px; }
+
+/* obstáculos y navegación */
+#obsTable { min-width: 860px; }
+#obsTable td:nth-child(3) input, #obsTable td:nth-child(4) input { width: 72px; }
+#obsTable .cfg-z input[type=number] { width: 72px; }
+#obsTable .cfg-dims { display: flex; gap: 4px; align-items: center; }
+#obsTable .cfg-dims i { font-style: normal; font-size: 0.72rem; color: var(--muted); }
+#obsTable .cfg-dims input[type=number] { width: 74px; }
+#obsTable .cfg-z { display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+#obsTable .cfg-z input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--primary); }
+#obsTable input:disabled { opacity: 0.55; }
+#navTable { min-width: 600px; }
+#navTable select { min-width: 0; max-width: 200px; }
+#navTable td:last-child, #navTable th:last-child { white-space: normal; min-width: 150px; text-align: left; }
+#navTable td.ok { color: var(--ok); font-weight: 600; }
+#navTable td.warn { color: var(--accent); font-weight: 600; }
+#navTable td.err { color: var(--danger); font-weight: 600; }
+.cfg-navmodes { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+.cfg-navhelp { margin: 8px 0 4px; }
+.cfg-legend .dot.obs { background: var(--accent); border-radius: 2px; opacity: 0.7; }
+.cfg-legend .dot.path { background: transparent; border-top: 2px dashed var(--info); border-radius: 0; height: 0; width: 14px; vertical-align: 3px; }

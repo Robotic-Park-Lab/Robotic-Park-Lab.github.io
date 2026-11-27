@@ -23,6 +23,7 @@
       <a href="#robots"><span lang="es">Robots</span><span lang="en">Robots</span></a>
       <a href="#control"><span lang="es">Control</span><span lang="en">Control</span></a>
       <a href="#tarea"><span lang="es">Formación</span><span lang="en">Formation</span></a>
+      <a href="#navegacion"><span lang="es">Obstáculos</span><span lang="en">Obstacles</span></a>
       <a href="#entorno"><span lang="es">Entorno</span><span lang="en">Environment</span></a>
       <a href="#ordenes"><span lang="es">Órdenes</span><span lang="en">Commands</span></a>
       <a href="#descarga"><span lang="es">Descarga</span><span lang="en">Download</span></a>
@@ -36,7 +37,7 @@
     <div>
       <p class="ip-kicker"><span lang="es">Robotic Park · ROS 2 Humble · Webots</span><span lang="en">Robotic Park · ROS 2 Humble · Webots</span></p>
       <h1><span lang="es">Crea tu experimento</span><span lang="en">Build your experiment</span></h1>
-      <p class="ip-lead"><span lang="es">Elige cuántos robots quieres y de qué tipo, si son reales o virtuales, cómo se controlan, qué formación deben mantener, en qué entorno se simulan y qué órdenes reciben en cada instante. Al final descargas los ficheros listos para ejecutar en un ordenador con ROS 2, como el del laboratorio.</span><span lang="en">Choose how many robots you want and of which kind, whether they are real or virtual, how they are controlled, which formation they must keep, where they are simulated and which commands they receive at each instant. Then download the files ready to run on a ROS 2 computer, such as the lab's.</span></p>
+      <p class="ip-lead"><span lang="es">Elige cuántos robots quieres y de qué tipo, si son reales o virtuales, cómo se controlan, qué formación deben mantener, qué obstáculos hay y cómo los esquivan, en qué entorno se simulan y qué órdenes reciben en cada instante. Al final descargas los ficheros listos para ejecutar en un ordenador con ROS 2, como el del laboratorio.</span><span lang="en">Choose how many robots you want and of which kind, whether they are real or virtual, how they are controlled, which formation they must keep, which obstacles there are and how they avoid them, where they are simulated and which commands they receive at each instant. Then download the files ready to run on a ROS 2 computer, such as the lab's.</span></p>
       <div class="ip-btns">
         <a class="ip-btn" href="#plantillas"><span lang="es">Empezar</span><span lang="en">Start</span></a>
         <label class="ip-btn ghost" for="importFile"><span lang="es">Abrir experimento.json</span><span lang="en">Open experimento.json</span></label>
@@ -86,14 +87,34 @@
       <div id="taskBody"></div>
     </section>
 
+    <section class="cfg-sec" id="navegacion">
+      <h2><span class="cfg-num">5</span><span lang="es">Obstáculos y navegación</span><span lang="en">Obstacles and navigation</span></h2>
+      <p class="ip-muted ip-small"><span lang="es">Añade obstáculos al mundo virtual (aparecen en Webots y en RViz, y los robots chocan con ellos) y elige cómo se mueve cada robot hasta los objetivos que recibe en la sección 7. Con una estrategia distinta de «directa», el experimento incluye un nodo de navegación que recibe el objetivo, calcula la ruta y guía al robot; los drivers del laboratorio no cambian.</span><span lang="en">Add obstacles to the virtual world (they appear in Webots and RViz, and robots collide with them) and choose how each robot moves to the targets it receives in section 7. With any strategy other than "direct", the experiment includes a navigation node that receives the target, computes the route and guides the robot; the lab drivers are unchanged.</span></p>
+      <h3><span lang="es">Obstáculos</span><span lang="en">Obstacles</span></h3>
+      <div class="ip-table-wrap"><table class="ip-table cfg-table" id="obsTable"></table></div>
+      <div class="ip-btns">
+        <button class="ip-btn small" type="button" data-obs="box">+ <span lang="es">Caja</span><span lang="en">Box</span></button>
+        <button class="ip-btn small" type="button" data-obs="cylinder">+ <span lang="es">Cilindro</span><span lang="en">Cylinder</span></button>
+        <button class="ip-btn small" type="button" data-obs="sphere">+ <span lang="es">Esfera</span><span lang="en">Sphere</span></button>
+        <button class="ip-btn small ghost" type="button" id="obsClear"><span lang="es">Quitar todos</span><span lang="en">Remove all</span></button>
+      </div>
+      <p class="ip-muted ip-small"><span lang="es">(x, y, z) es el centro del obstáculo. Con «en el suelo», z se calcula para que se apoye en el suelo. Los drones vuelan entre 0,6 y 3 m: un obstáculo más bajo que su altura de vuelo no les estorba.</span><span lang="en">(x, y, z) is the obstacle centre. With "on the floor", z is computed so that it rests on the floor. Drones fly between 0.6 and 3 m: an obstacle lower than their flight height does not get in their way.</span></p>
+      <h3><span lang="es">Estrategia de navegación</span><span lang="en">Navigation strategy</span></h3>
+      <div class="cfg-modes cfg-navmodes" id="navModes"></div>
+      <div class="ip-note ip-small cfg-navhelp" id="navHelp"></div>
+      <div class="cfg-row" id="navParams"></div>
+      <div class="ip-table-wrap"><table class="ip-table cfg-table" id="navTable"></table></div>
+      <p class="ip-muted ip-small"><span lang="es">Las leyes de formación (sección 4) no ven los obstáculos: la navegación actúa al ir a cada objetivo y se detiene con <code>formation_run</code>, <code>land</code> o <code>end</code>. Las rutas y tiempos son una estimación con un modelo cinemático (dron ≈0,35 m/s, Khepera IV ≈2 cm/s).</span><span lang="en">Formation laws (section 4) do not see obstacles: navigation acts while going to each target and stops on <code>formation_run</code>, <code>land</code> or <code>end</code>. Routes and times are estimates with a kinematic model (drone ≈0.35 m/s, Khepera IV ≈2 cm/s).</span></p>
+    </section>
+
     <section class="cfg-sec" id="entorno">
-      <h2><span class="cfg-num">5</span><span lang="es">Entorno, interfaz y registro</span><span lang="en">Environment, interface and logging</span></h2>
+      <h2><span class="cfg-num">6</span><span lang="es">Entorno, interfaz y registro</span><span lang="en">Environment, interface and logging</span></h2>
       <div class="cfg-row" id="envCtl"></div>
       <div class="cfg-checks" id="envChecks"></div>
     </section>
 
     <section class="cfg-sec" id="ordenes">
-      <h2><span class="cfg-num">6</span><span lang="es">Órdenes en el tiempo</span><span lang="en">Commands over time</span></h2>
+      <h2><span class="cfg-num">7</span><span lang="es">Órdenes en el tiempo</span><span lang="en">Commands over time</span></h2>
       <p class="ip-muted ip-small"><span lang="es">El supervisor (<code>mars_supervisor_pkg</code>) envía cada orden cuando ha pasado su retardo desde la anterior, o cuando <code>dron01</code> avisa de que el enjambre está listo. Las órdenes a «swarm» llegan a todos los robots. Al final se añade <code>end</code> automáticamente.</span><span lang="en">The supervisor (<code>mars_supervisor_pkg</code>) sends each command once its delay since the previous one has elapsed, or when <code>dron01</code> reports that the swarm is ready. Commands to "swarm" reach every robot. <code>end</code> is appended automatically.</span></p>
       <div class="cfg-timeline" id="timeline"></div>
       <div class="ip-table-wrap"><table class="ip-table cfg-table" id="cmdTable"></table></div>
@@ -105,7 +126,7 @@
     </section>
 
     <section class="cfg-sec" id="descarga">
-      <h2><span class="cfg-num">7</span><span lang="es">Revisa y descarga</span><span lang="en">Review and download</span></h2>
+      <h2><span class="cfg-num">8</span><span lang="es">Revisa y descarga</span><span lang="en">Review and download</span></h2>
       <div class="cfg-row">
         <label class="cfg-field grow"><span><span lang="es">Espacio de trabajo ROS 2</span><span lang="en">ROS 2 workspace</span></span><input id="wsPath" type="text" spellcheck="false"></label>
       </div>
@@ -132,11 +153,13 @@
         <span><i class="dot gnd"></i>Khepera IV</span>
         <span><i class="dot real"></i><span lang="es">real</span><span lang="en">real</span></span>
         <span><i class="dot tgt"></i><span lang="es">objetivo</span><span lang="en">target</span></span>
+        <span><i class="dot obs"></i><span lang="es">obstáculo</span><span lang="en">obstacle</span></span>
+        <span><i class="dot path"></i><span lang="es">ruta planificada</span><span lang="en">planned route</span></span>
       </div>
       <input type="range" id="playT" min="0" max="1" step="0.001" value="1" aria-label="t">
       <div class="ip-btns cfg-play">
         <button class="ip-btn small accent" id="play" type="button">▶ <span lang="es">Animar</span><span lang="en">Animate</span></button>
-        <span class="ip-muted ip-small"><span lang="es">Esquema del movimiento, no es una simulación.</span><span lang="en">Motion sketch, not a simulation.</span></span>
+        <span class="ip-muted ip-small"><span lang="es">Simulación cinemática simplificada (no es Webots).</span><span lang="en">Simplified kinematic simulation (not Webots).</span></span>
       </div>
     </div>
     <div class="ip-card cfg-status">
@@ -156,6 +179,7 @@
 
 <script src="../interactivos/lib/ip.js"></script>
 <script src="../interactivos/lib/scene3d.js"></script>
+<script src="navegacion.js"></script>
 <script src="generador.js"></script>
 <script src="zip.js"></script>
 <script src="app.js"></script>

@@ -11,7 +11,10 @@
                                   Robots, Supervisor, Other)
      resources/<exp>_topics.yaml  guion de órdenes del supervisor
                                   (mars_supervisor_pkg/supervisor_node)
-     worlds/<exp>.wbt             mundo de Webots (robots virtuales)
+     worlds/<exp>.wbt             mundo de Webots (robots virtuales y obstáculos)
+     navegacion/navegacion.{py,json}  nodo de navegación con obstáculos
+                                  (solo si hay obstáculos o estrategias
+                                  distintas de «directa»; ver navegacion.js)
      rviz/<exp>.rviz              configuración de RViz
      install.sh, run.sh, README.md, experimento.json
 
@@ -24,12 +27,12 @@
    Sin dependencias: funciona en el navegador (window.RPGen) y en Node.
    ============================================================ */
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory();
-  else root.RPGen = factory();
-})(typeof self !== 'undefined' ? self : this, function () {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./navegacion.js'));
+  else root.RPGen = factory(root.RPNav);
+})(typeof self !== 'undefined' ? self : this, function (NAV) {
   'use strict';
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
   const pad2 = (n) => String(n).padStart(2, '0');
   const fx = (v, d = 3) => {
     const s = Number(v).toFixed(d);
@@ -135,7 +138,9 @@
       name: 'MiExperimento',
       description: '',
       robots: [],
-      fleet: { crazyflie: 5, khepera: 0, layout: 'circle', spacing: 0.6, radius: 1.0, type: 'virtual' },
+      fleet: { crazyflie: 5, khepera: 0, layout: 'circle', spacing: 0.6, radius: 1.0, type: 'virtual', nav: 'direct' },
+      obstacles: [],             // ver navegacion.js
+      nav: { margin: 0.15, d0: 0.6, eta: 0.15, etaRobot: 0.2 },
       lowlevel: {
         cfController: 'pid', khController: 'ipc', protocol: 'Continuous', co: 0.01, ai: 0.0,
         comm: 'Continuous', commCo: 0.01, commAi: 0.0, poseT: 100, path: false, twist: false, motors: false,
@@ -196,6 +201,21 @@
           targets: [[0.9, 0, 1.1], [1.299, 0.75, 0.35], [0.45, 0.7794, 1.1], [-0.45, 0.7794, 1.1], [-0.9, 0, 1.1], [-0.45, -0.7794, 1.1],
             [0.45, -0.7794, 1.1], [0, 1.5, 0.35], [-1.299, 0.75, 0.35], [-1.299, -0.75, 0.35], [0, -1.5, 0.35], [1.299, -0.75, 0.35]],
         });
+      },
+    },
+    obstacles: {
+      label: ['Cruce entre columnas (navegación con obstáculos)', 'Crossing between columns (obstacle navigation)'],
+      apply(c) {
+        // 4 drones cruzan a la vez una fila de columnas e intercambian sus lados: A* esquiva las
+        // columnas y la repulsión entre robots evita que choquen en el cruce (estrategia híbrida)
+        c.name = 'CruceColumnas_N04'; c.fleet = { crazyflie: 4, khepera: 0, layout: 'line', spacing: 0.6, radius: 1.0, type: 'virtual', nav: 'hybrid' };
+        c.task.mode = 'none';
+        const xs = [-0.9, -0.3, 0.3, 0.9];
+        c.robots = xs.map((x, i) => ({ kind: 'crazyflie', idx: i + 1, name: 'dron' + pad2(i + 1), type: 'virtual', x, y: -1.2, yaw: 0, manual: true, nav: 'hybrid' }));
+        c.obstacles = [-0.9, 0, 0.9].map(x => ({ shape: 'cylinder', x, y: 0, z: 1.0, ground: true, r: 0.1, h: 2.0 }));
+        c.commands = [{ delay: 8, trigger: 'time', target: 'swarm', kind: 'order', value: 'take_off' }]
+          .concat(xs.map((x, i) => ({ delay: i ? 0 : 4, trigger: 'time', target: 'dron' + pad2(i + 1), kind: 'goal', value: [-x, 1.2, 1.1] })))
+          .concat([{ delay: 20, trigger: 'time', target: 'swarm', kind: 'order', value: 'land' }]);
       },
     },
     teleop: {
@@ -349,6 +369,7 @@
         const base = {
           kind, idx: i + 1, name: KINDS[kind].prefix + pad2(i + 1),
           type: p ? p.type : (prev[i] ? prev[i].type : f.type),
+          nav: prev[i] && prev[i].nav ? prev[i].nav : (f.nav || 'direct'),
           x: p ? p.x : +starts[g][0].toFixed(3), y: p ? p.y : +starts[g][1].toFixed(3),
           yaw: 0, manual: !!p,
           uri: prev[i] && prev[i].uri ? prev[i].uri : 'radio://0/80/2M/E7E7E7E7' + pad2(i + 1),
@@ -482,6 +503,14 @@
       if (t.mode !== 'herding') R.forEach((r, i) => {
         if (!KINDS[r.kind].air && T[i]) wait = Math.max(wait, Math.ceil(Math.hypot(T[i][0] - r.x, T[i][1] - r.y) / 0.02) + 5);
       });
+      // con obstáculos o navegación, la ruta puede ser más larga que la recta: esperar a que lleguen
+      if (t.mode !== 'herding' && nodeNeeded(cfg)) R.forEach((r, i) => {
+        if (!T[i] || (t.mode === 'triangulated' && !(t.leaders || []).includes(i + 1))) return;
+        const air = KINDS[r.kind].air, st = strategyOf(cfg, r);
+        const P = NAV.planLeg(st === 'apf' ? 'astar' : st, cfg.obstacles || [], air, startPose(r), clampGoal(r, T[i]), Object.assign({ seed: 1 + i * 7919 }, navOpts(cfg)));
+        const len = P ? NAV.pathLength(P) * (st === 'apf' ? 1.2 : 1) : Math.hypot(T[i][0] - r.x, T[i][1] - r.y);
+        wait = Math.max(wait, Math.ceil(len / (air ? SPEED.air : SPEED.ground) * (st === 'apf' ? 2 : 1)) + (air ? 4 : 5));
+      });
       cmds.push({ delay: Math.min(wait, 120), trigger: 'time', target: 'swarm', kind: 'order', value: 'formation_run' });
       cmds.push({ delay: 30, trigger: 'time', target: 'swarm', kind: 'order', value: 'formation_stop' });
     } else if (hasAir) {
@@ -492,6 +521,72 @@
     return cmds;
   }
   const commandsOf = (cfg) => (cfg.commands && cfg.commands.length ? cfg.commands : defaultCommands(cfg));
+
+  // ------------------------------------------------------------------
+  //  Obstáculos y navegación (algoritmos en navegacion.js / navegacion.py)
+  // ------------------------------------------------------------------
+  // Velocidades efectivas para estimar tiempos: el driver del Crazyflie limita la
+  // referencia horizontal a 0,5 m/s; el Khepera IV con el IPC de Webots va a ≈2 cm/s.
+  const SPEED = { air: 0.35, ground: 0.02 };
+  function strategyOf(cfg, r) {
+    if (cfg.task && cfg.task.mode === 'herding') return 'direct';   // el nodo de pastoreo manda
+    return NAV.STRATEGIES[r.nav] ? r.nav : 'direct';
+  }
+  const navOpts = (cfg) => Object.assign({}, NAV.DEFAULTS, cfg.nav || {});
+  const navNeeded = (cfg) => cfg.robots.some(r => strategyOf(cfg, r) !== 'direct');
+  const nodeNeeded = (cfg) => navNeeded(cfg) || (cfg.obstacles || []).length > 0;
+  const startPose = (r) => [r.x, r.y, KINDS[r.kind].air ? 1.1 : 0];
+  const clampGoal = (r, v) => (KINDS[r.kind].air ? [v[0], v[1], Math.min(3, Math.max(0.6, v[2]))] : [v[0], v[1], 0]);
+  /** Objetivos que recibe cada robot por órdenes «ir a posición», en orden. */
+  function legsOf(cfg) {
+    const cmds = commandsOf(cfg);
+    return cfg.robots.map(r => cmds.filter(c => c.kind === 'goal' && c.target === r.name && Array.isArray(c.value) && c.value.length === 3 && c.value.every(v => isFinite(v)))
+      .map(c => clampGoal(r, c.value.map(Number))));
+  }
+  let navCache = { key: null, val: null };
+  /** Simulación cinemática de todos los robots con su estrategia (vista previa y avisos). */
+  function navPreview(cfg) {
+    const key = JSON.stringify([cfg.robots, cfg.obstacles, cfg.nav, cfg.commands, cfg.task]);
+    if (navCache.key === key) return navCache.val;
+    const L = legsOf(cfg);
+    const T = cfg.task.mode === 'none' || cfg.task.mode === 'herding' ? null : targets(cfg);
+    const agents = cfg.robots.map((r, i) => {
+      const legs = L[i].slice(), legStrat = legs.map(() => strategyOf(cfg, r));
+      // tras formation_run la ley de formación lleva a cada robot a su hueco (sin esquivar obstáculos)
+      if (T && T[i]) {
+        const last = legs.length ? legs[legs.length - 1] : startPose(r), t = clampGoal(r, T[i]);
+        if (Math.hypot(last[0] - t[0], last[1] - t[1], last[2] - t[2]) > 0.02) { legs.push(t); legStrat.push('direct'); }
+      }
+      return { air: KINDS[r.kind].air, strategy: strategyOf(cfg, r), start: startPose(r), legs, legStrat, navLegs: L[i].length };
+    });
+    const sim = NAV.simulate(agents, cfg.obstacles || [], navOpts(cfg));
+    navCache = { key, val: { agents, sim } };
+    return navCache.val;
+  }
+  /** Instante (s) de cada orden según los retardos (las de «ready» cuentan 5 s, como en la línea temporal). */
+  function commandTimes(cmds) { let t = 0; return cmds.map(c => (t += c.trigger === 'ready' ? 5 : (Number(c.delay) || 0))); }
+  /** Obstáculo con z de centro explícita (para el mundo, el nodo y RViz). */
+  function obstacleOut(o, k) {
+    const out = { name: 'obstaculo' + pad2(k + 1), shape: o.shape, x: +o.x, y: +o.y, z: +NAV.centerZ(o).toFixed(3), ground: false };
+    if (o.shape === 'box') Object.assign(out, { sx: +o.sx, sy: +o.sy, sz: +o.sz, yaw: +o.yaw || 0 });
+    else if (o.shape === 'cylinder') Object.assign(out, { r: +o.r, h: +o.h });
+    else out.r = +o.r;
+    return out;
+  }
+  function buildNavJson(cfg) {
+    const nv = navOpts(cfg);
+    return JSON.stringify({
+      generator: 'robotic-park-configurador', generatorVersion: VERSION,
+      '#': 'Parámetros del nodo navegacion.py. Distancias en m. Estrategias: ' + Object.keys(NAV.STRATEGIES).join(', '),
+      params: { margin: nv.margin, d0: nv.d0, eta: nv.eta, etaRobot: nv.etaRobot, res: nv.res, bound: nv.bound, rate: 10,
+        lookahead_air: 0.35, lookahead_ground: 0.12, tol_air: 0.08, tol_ground: 0.05 },
+      obstacles: (cfg.obstacles || []).map(obstacleOut),
+      robots: cfg.robots.map((r, i) => ({ name: r.name, air: KINDS[r.kind].air, strategy: strategyOf(cfg, r), index: i })),
+    }, null, 2);
+  }
+  let NAV_SRC = null;
+  /** El código del nodo (navegacion.py) lo carga la página; en Node se lee del disco. */
+  function setNavSource(src) { NAV_SRC = src; }
 
   // ------------------------------------------------------------------
   //  Validación
@@ -545,7 +640,77 @@
       if (c.kind === 'goal' && (!Array.isArray(c.value) || c.value.length !== 3 || c.value.some(v => !isFinite(v)))) E.push(tt(`Orden ${i + 1}: la posición debe tener x, y, z numéricos.`, `Command ${i + 1}: the position needs numeric x, y, z.`));
       if (c.kind === 'order' && /\s/.test(String(c.value))) E.push(tt(`Orden ${i + 1}: la orden no puede contener espacios.`, `Command ${i + 1}: the order cannot contain spaces.`));
     });
-    return { errors: E, warnings: [...new Set(W)] };
+    validateNav(cfg, E, W, tt);
+    return { errors: [...new Set(E)], warnings: [...new Set(W)] };
+  }
+
+  function validateNav(cfg, E, W, tt) {
+    const R = cfg.robots, obs = cfg.obstacles || [], nv = navOpts(cfg);
+    const SH = { box: tt('caja', 'box'), cylinder: tt('cilindro', 'cylinder'), sphere: tt('esfera', 'sphere') };
+    const on = (k) => `${tt('obstáculo', 'obstacle')} ${k + 1} (${SH[obs[k].shape]})`;
+    const pt = (p) => `(${p.map(v => (+v).toFixed(2)).join(', ')})`;
+    obs.forEach((o, k) => {
+      if (!SH[o.shape]) { E.push(tt(`Obstáculo ${k + 1}: forma desconocida.`, `Obstacle ${k + 1}: unknown shape.`)); return; }
+      const dims = o.shape === 'box' ? [o.sx, o.sy, o.sz] : o.shape === 'cylinder' ? [o.r, o.h] : [o.r];
+      if (dims.some(v => !(Number(v) > 0))) E.push(tt(`Obstáculo ${k + 1}: las dimensiones deben ser positivas.`, `Obstacle ${k + 1}: dimensions must be positive.`));
+      if (![o.x, o.y].concat(o.ground ? [] : [o.z]).every(v => isFinite(v))) E.push(tt(`Obstáculo ${k + 1}: posición no válida.`, `Obstacle ${k + 1}: invalid position.`));
+      if (Math.abs(o.x) > 3.5 || Math.abs(o.y) > 3) W.push(tt(`El obstáculo ${k + 1} queda fuera del suelo del laboratorio (x ∈ [−3,5, 3,5], y ∈ [−3, 3] m).`, `Obstacle ${k + 1} lies outside the lab floor (x ∈ [−3.5, 3.5], y ∈ [−3, 3] m).`));
+      if (!o.ground && NAV.zRange(o)[0] < -0.001) W.push(tt(`El obstáculo ${k + 1} se mete bajo el suelo: marca «apoyado en el suelo» o sube z.`, `Obstacle ${k + 1} goes below the floor: tick "on the floor" or raise z.`));
+    });
+    if (E.length) return;
+    const L = legsOf(cfg);
+    if (obs.length) {
+      R.forEach((r, i) => {
+        const air = KINDS[r.kind].air;
+        const k = air ? NAV.hits(obs, true, [r.x, r.y, 0.02], [r.x, r.y, 1.1]) : NAV.inside(obs, false, [r.x, r.y, 0]);
+        if (k >= 0) E.push(tt(`${r.name} empieza dentro o debajo del ${on(k)}${air ? ' (despega en vertical hasta 1,1 m)' : ''}.`, `${r.name} starts inside or under ${on(k)}${air ? ' (it takes off vertically to 1.1 m)' : ''}.`));
+        L[i].forEach(g => {
+          const kk = NAV.inside(obs, air, g);
+          if (kk >= 0) E.push(tt(`${r.name}: el objetivo ${pt(g)} está dentro del ${on(kk)}.`, `${r.name}: target ${pt(g)} is inside ${on(kk)}.`));
+          else if (NAV.inside(obs, air, g, nv.margin) >= 0) W.push(tt(`${r.name}: el objetivo ${pt(g)} está a menos de ${nv.margin} m de un obstáculo (margen de seguridad).`, `${r.name}: target ${pt(g)} is closer than ${nv.margin} m to an obstacle (safety margin).`));
+        });
+      });
+      if (cfg.task.mode === 'distance' || cfg.task.mode === 'triangulated') {
+        targets(cfg).forEach((p, i) => { if (!p) return; const k = NAV.inside(obs, KINDS[R[i].kind].air, clampGoal(R[i], p)); if (k >= 0) E.push(tt(`${R[i].name}: su hueco en la formación ${pt(p)} está dentro del ${on(k)}. Mueve la formación o el obstáculo.`, `${R[i].name}: its formation slot ${pt(p)} is inside ${on(k)}. Move the formation or the obstacle.`)); });
+      }
+    }
+    if (!nodeNeeded(cfg) || E.length) return;
+    const { agents, sim } = navPreview(cfg);
+    const cmds = commandsOf(cfg), times = commandTimes(cmds), tEnd = (times[times.length - 1] || 0) + 10;
+    (sim.close || []).forEach(({ i, j, d }) => {
+      const sa = agents[i].strategy, sb = agents[j].strategy, blind = (x) => x === 'direct' || x === 'astar' || x === 'rrt';
+      W.push(tt(`${R[i].name} y ${R[j].name} se cruzan a ${Math.round(d * 100)} cm en la vista previa${blind(sa) || blind(sb) ? ' (las estrategias directa, A* y RRT no ven a los otros robots: usa la híbrida o la reactiva, o escalona las órdenes)' : ''}.`,
+        `${R[i].name} and ${R[j].name} pass within ${Math.round(d * 100)} cm in the preview${blind(sa) || blind(sb) ? ' (direct, A* and RRT do not see other robots: use hybrid or reactive, or stagger the commands)' : ''}.`));
+    });
+    sim.forEach((s, i) => {
+      const r = R[i], a = agents[i], lab = NAV.STRATEGIES[a.strategy].label[tt(0, 1)];
+      s.fail.forEach(l => { if (l < a.navLegs) E.push(tt(`${r.name} (${lab}) no encuentra un camino libre hasta su objetivo ${l + 1}.`, `${r.name} (${lab}) finds no free path to its target ${l + 1}.`)); });
+      if (a.strategy === 'direct' && obs.length) {
+        let p = a.start;
+        for (let l = 0; l < a.navLegs; l++) { const k = NAV.hits(obs, a.air, p, a.legs[l]); if (k >= 0) { W.push(tt(`${r.name} va en línea recta y atraviesa el ${on(k)}: elige una estrategia de navegación que lo esquive.`, `${r.name} flies straight and crosses ${on(k)}: choose a navigation strategy that avoids it.`)); break; } p = a.legs[l]; }
+      }
+      if (a.strategy !== 'direct' && !s.fail.length && s.legsDone < a.navLegs) W.push(a.strategy === 'apf'
+        ? tt(`${r.name}: con campos de potencial no llega a su objetivo en la vista previa (mínimo local). Prueba A* o la híbrida.`, `${r.name}: with potential fields it does not reach its target in the preview (local minimum). Try A* or hybrid.`)
+        : tt(`${r.name} no llega a su objetivo ${s.legsDone + 1} en la vista previa (otros robots le cierran el paso). Separa los objetivos o escalona las órdenes.`, `${r.name} does not reach its target ${s.legsDone + 1} in the preview (other robots block it). Spread the targets or stagger the commands.`));
+      if (obs.length && a.legs.length > a.navLegs) {
+        const k = NAV.hits(obs, a.air, a.navLegs ? a.legs[a.navLegs - 1] : a.start, a.legs[a.legs.length - 1]);
+        if (k >= 0) W.push(tt(`${r.name}: tras formation_run la ley de formación lo lleva en línea recta hacia su hueco y cruza el ${on(k)} (las leyes de formación no ven los obstáculos).`, `${r.name}: after formation_run the formation law drives it straight to its slot across ${on(k)} (formation laws do not see obstacles).`));
+      }
+      // ¿le da tiempo a llegar antes de la siguiente orden que le afecta?
+      let leg = 0;
+      for (let c = 0; c < cmds.length && leg < a.navLegs; c++) {
+        const cm = cmds[c];
+        if (!(cm.kind === 'goal' && cm.target === r.name)) continue;
+        // longitud recorrida en la simulación (en campos de potencial puede ser mucho mayor que la ruta)
+        const P = s.paths[leg] || [], len = Math.max(P.length > 1 ? NAV.pathLength(P) : 0, s.legLen[leg] || 0);
+        // campos de potencial: con varios robots oscilan al cruzarse; en Webots tardan ≈2 veces lo estimado
+        const need = len / (a.air ? SPEED.air : SPEED.ground) * (a.strategy === 'apf' ? 2 : 1) + 2;
+        let tn = tEnd;
+        for (let j = c + 1; j < cmds.length; j++) { const q = cmds[j]; if (q.target === r.name || (q.target === 'swarm' && q.kind === 'order')) { tn = times[j]; break; } }
+        if (times[c] + need > tn + 0.5) { W.push(tt(`${r.name}: necesita ≈${Math.ceil(need)} s para llegar a ${pt(a.legs[leg])} (${len.toFixed(1)} m), pero la siguiente orden que le afecta llega ${(tn - times[c]).toFixed(0)} s después. Aumenta los retardos.`, `${r.name}: needs ≈${Math.ceil(need)} s to reach ${pt(a.legs[leg])} (${len.toFixed(1)} m), but the next command affecting it arrives ${(tn - times[c]).toFixed(0)} s later. Increase the delays.`)); break; }
+        leg++;
+      }
+    });
   }
 
   // ------------------------------------------------------------------
@@ -617,12 +782,14 @@
     R.forEach((r, i) => {
       const n = '/' + r.name;
       out.push(n + '/local_pose', n + '/local_pose_gt', n + '/target_pose', n + '/goal_pose');
+      if (strategyOf(cfg, r) !== 'direct') out.push(n + '/nav_goal', n + '/nav_path');
       if (cfg.task.mode !== 'none') {
         out.push(n + '/global_error');
         Ed.filter(([a, b]) => a === i || b === i).forEach(([a, b]) => { const j = a === i ? b : a; out.push(`${n}/${R[j].name}/error`); });
       }
     });
     if (cfg.task.mode === 'triangulated') out.push('/formation_error', '/formation_scale');
+    if ((cfg.obstacles || []).length) out.push('/obstacles');
     return [...new Set(out)].join(' ');
   }
 
@@ -664,7 +831,9 @@
     const cmds = commandsOf(cfg).slice();
     const last = cmds[cmds.length - 1];
     if (!last || !(last.target === 'swarm' && last.value === 'end')) cmds.push({ delay: 10, trigger: 'time', target: 'swarm', kind: 'order', value: 'end' });
-    const topicOf = (c) => c.kind === 'goal' ? (c.target === 'swarm' ? 'swarm/goal_pose' : c.target + '/target_pose') : (c.target === 'swarm' ? 'swarm/order' : c.target + '/order');
+    // los objetivos de los robots con navegación van al nodo navegacion.py (<robot>/nav_goal)
+    const navd = new Set(cfg.robots.filter(r => strategyOf(cfg, r) !== 'direct').map(r => r.name));
+    const topicOf = (c) => c.kind === 'goal' ? (c.target === 'swarm' ? 'swarm/goal_pose' : c.target + (navd.has(c.target) ? '/nav_goal' : '/target_pose')) : (c.target === 'swarm' ? 'swarm/order' : c.target + '/order');
     const pubs = [];
     cmds.forEach(c => { const tp = topicOf(c), ty = c.kind === 'goal' ? 'PoseStamped' : 'String'; if (!pubs.some(p => p.name === tp)) pubs.push({ name: tp, type: ty }); });
     const doc = { config: { publisher: {}, subscription: { topic00: { name: 'swarm/status', type: 'String' } } } };
@@ -701,6 +870,14 @@
     if (cfg.env.world === 'lab') {
       s += `Solid {\n\trotation 0 0 1 3.14159\n\tchildren [\n\t\tCadShape {\n\t\t\turl [\n\t\t\t\t"meshes/RoboticPark.dae"\n\t\t\t]\n\t\t}\n\t]\n\tcontactMaterial ""\n\tboundingObject Mesh {\n\t\turl [\n\t\t\t"meshes/RoboticPark_new.dae"\n\t\t]\n\t}\n\tradarCrossSection 1\n}\n`;
     }
+    (cfg.obstacles || []).forEach((o, k) => {
+      const q = obstacleOut(o, k), D = 'OBS' + pad2(k + 1);
+      const geo = q.shape === 'box' ? `Box {\n\t\t\t\tsize ${fx(q.sx)} ${fx(q.sy)} ${fx(q.sz)}\n\t\t\t}`
+        : q.shape === 'cylinder' ? `Cylinder {\n\t\t\t\theight ${fx(q.h)}\n\t\t\t\tradius ${fx(q.r)}\n\t\t\t}`
+          : `Sphere {\n\t\t\t\tradius ${fx(q.r)}\n\t\t\t\tsubdivision 3\n\t\t\t}`;
+      // Solid sin Physics: obstáculo fijo; boundingObject para que los robots choquen con él
+      s += `\nSolid {\n\ttranslation ${fx(q.x)} ${fx(q.y)} ${fx(q.z)}\n\trotation 0 0 1 ${fx((q.yaw || 0) * deg, 5)}\n\tchildren [\n\t\tShape {\n\t\t\tappearance PBRAppearance {\n\t\t\t\tbaseColor 0.85 0.45 0.15\n\t\t\t\troughness 0.7\n\t\t\t\tmetalness 0\n\t\t\t}\n\t\t\tgeometry DEF ${D} ${geo}\n\t\t}\n\t]\n\tname "${q.name}"\n\tboundingObject USE ${D}\n}\n`;
+    });
     let sup = false;
     R.forEach(r => {
       if (r.kind === 'crazyflie') {
@@ -727,8 +904,10 @@
     let d = `    - Alpha: 0.5\n      Cell Size: 1\n      Class: rviz_default_plugins/Grid\n      Color: 160; 160; 164\n      Enabled: true\n      Line Style:\n        Line Width: 0.03\n        Value: Lines\n      Name: Grid\n      Normal Cell Count: 0\n      Offset:\n        X: 0\n        Y: 0\n        Z: 0\n      Plane: XY\n      Plane Cell Count: 10\n      Reference Frame: <Fixed Frame>\n      Value: true\n`;
     d += model('RobotModel', 'src/uned_crazyflie_ros_pkg/uned_crazyflie_config/model/urdf/RoboticPark_simple.urdf', 'RoboticPark');
     const T = targets(cfg), Ed = formationEdges(cfg, T);
+    if ((cfg.obstacles || []).length) d += `    - Class: rviz_default_plugins/MarkerArray\n      Enabled: true\n      Name: obstacles\n      Namespaces:\n        {}\n` + qos('/obstacles') + `      Value: true\n`;
     cfg.robots.forEach((r, i) => {
       const air = KINDS[r.kind].air;
+      if (strategyOf(cfg, r) !== 'direct') d += path(r.name + '-nav_path', '/' + r.name + '/nav_path');
       d += model(r.name, air ? 'src/uned_crazyflie_ros_pkg/uned_crazyflie_config/model/urdf/crazyflie_simple.urdf' : 'src/uned_kheperaIV_ros_pkg/uned_kheperaiv_config/urdf/khepera_simple.urdf', r.name);
       d += pose(r.name + '-local_pose', '/' + r.name + '/local_pose', '25; 255; 0');
       d += pose(r.name + '-target_pose', '/' + r.name + '/target_pose', '255; 25; 0');
@@ -799,6 +978,10 @@ sleep 2
       s += `\n# Khepera IV reales: experience.launch.py no lanza su driver (bloque comentado en el launch).\n`;
       realK.forEach(r => { s += `ros2 run uned_kheperaiv_driver kheperaIV_client_driver --ros-args -r __node:=${r.name}_driver -p config:="$CONFIG" -p id:=${r.name} & PIDS+=($!)   # ${r.ip}\n`; });
     }
+    if (nodeNeeded(cfg)) {
+      const n = cfg.robots.filter(r => strategyOf(cfg, r) !== 'direct').length;
+      s += `\n# Navegación con obstáculos (${(cfg.obstacles || []).length} obstáculos, ${n} robots con estrategia propia).\n# Recibe <robot>/nav_goal del supervisor y publica <robot>/target_pose; también /obstacles para RViz.\nHERE="$(cd "$(dirname "\${BASH_SOURCE[0]}")" && pwd)"\npython3 "$HERE/navegacion/navegacion.py" "$HERE/navegacion/navegacion.json" & PIDS+=($!)\n`;
+    }
     if (real) s += `\n# Antes de lanzar: enciende los robots reales y comprueba la radio Crazyradio / la red de los Khepera.\n`;
     s += `\nros2 launch roboticpark_config experience.launch.py config_file:=${name}.yaml\n`;
     return s;
@@ -815,6 +998,11 @@ sleep 2
     if (t.mode === 'herding') lines.push(`- ${tt('Tarea', 'Task')}: ${tt('pastoreo centralizado (multi_agent_pkg/affine_formation_node)', 'centralized herding (multi_agent_pkg/affine_formation_node)')}`);
     if (t.mode === 'triangulated') lines.push(`- ${tt('Tarea', 'Task')}: ${tt('formación triangulada con líderes', 'leader-based triangulated formation')} (${tt('líderes', 'leaders')}: ${(t.leaders || []).map(i => 'dron' + pad2(i)).join(', ')})`);
     if (t.mode === 'none') lines.push(`- ${tt('Tarea', 'Task')}: ${tt('sin formación (solo órdenes y puntos de paso)', 'no formation (orders and waypoints only)')}`);
+    const obs = cfg.obstacles || [];
+    if (obs.length || navNeeded(cfg)) {
+      const cnt = {}; R.forEach(r => { const k = strategyOf(cfg, r); cnt[k] = (cnt[k] || 0) + 1; });
+      lines.push(`- ${tt('Obstáculos', 'Obstacles')}: ${obs.length} · ${tt('navegación', 'navigation')}: ${Object.entries(cnt).map(([k, n]) => `${NAV.STRATEGIES[k].label[L === 'en' ? 1 : 0]} ×${n}`).join(', ')}`);
+    }
     lines.push(`- ${tt('Control de bajo nivel', 'Low-level control')}: Crazyflie ${cfg.lowlevel.cfController}, Khepera ${cfg.lowlevel.khController}, ${cfg.lowlevel.protocol}; ${tt('comunicación', 'communication')} ${cfg.lowlevel.comm}`);
     return lines.join('\n');
   }
@@ -863,9 +1051,9 @@ ${tt('Equivale a', 'Equivalent to')} \`ros2 launch roboticpark_config experience
 | \`roboticpark_config/resources/${name}_topics.yaml\` | ${tt('guion de órdenes del supervisor (mars_supervisor_pkg)', 'supervisor command script (mars_supervisor_pkg)')} |
 | \`roboticpark_config/worlds/${name}.wbt\` | ${tt('mundo de Webots con los robots virtuales', 'Webots world with the virtual robots')} |
 | \`roboticpark_config/rviz/${name}.rviz\` | ${tt('vista de RViz', 'RViz view')} |
-| \`experimento.json\` | ${tt('configuración para reabrirla en el configurador web', 'configuration to reopen it in the web configurator')} |
+${nodeNeeded(cfg) ? `| \`navegacion/navegacion.py\`, \`navegacion.json\` | ${tt('nodo de navegación con obstáculos y sus parámetros', 'obstacle-aware navigation node and its parameters')} |\n` : ''}| \`experimento.json\` | ${tt('configuración para reabrirla en el configurador web', 'configuration to reopen it in the web configurator')} |
 
-## ${tt('Secuencia de órdenes', 'Command sequence')}
+${nodeNeeded(cfg) ? readmeNav(cfg, L) : ''}## ${tt('Secuencia de órdenes', 'Command sequence')}
 
 | # | ${tt('Cuándo', 'When')} | ${tt('Destino', 'Target')} | ${tt('Tipo', 'Type')} | ${tt('Valor', 'Value')} |
 |---|---|---|---|---|
@@ -880,6 +1068,19 @@ ${tt('Generado el', 'Generated on')} ${new Date().toISOString().slice(0, 10)} �
 `;
   }
 
+  function readmeNav(cfg, L) {
+    const tt = (es, en) => (L === 'en' ? en : es), Li = L === 'en' ? 1 : 0;
+    const obs = (cfg.obstacles || []).map(obstacleOut);
+    const SH = { box: tt('caja', 'box'), cylinder: tt('cilindro', 'cylinder'), sphere: tt('esfera', 'sphere') };
+    const dim = (o) => o.shape === 'box' ? `${o.sx} × ${o.sy} × ${o.sz} m, ${tt('giro', 'yaw')} ${o.yaw}°` : o.shape === 'cylinder' ? `r = ${o.r} m, h = ${o.h} m` : `r = ${o.r} m`;
+    let s = `## ${tt('Obstáculos y navegación', 'Obstacles and navigation')}\n\n`;
+    if (obs.length) s += `| ${tt('Obstáculo', 'Obstacle')} | ${tt('Forma', 'Shape')} | ${tt('Centro', 'Centre')} (m) | ${tt('Tamaño', 'Size')} |\n|---|---|---|---|\n` + obs.map(o => `| ${o.name} | ${SH[o.shape]} | (${o.x}, ${o.y}, ${o.z}) | ${dim(o)} |`).join('\n') + '\n\n';
+    s += `| Robot | ${tt('Estrategia', 'Strategy')} |\n|---|---|\n` + cfg.robots.map(r => `| ${r.name} | ${NAV.STRATEGIES[strategyOf(cfg, r)].label[Li]} |`).join('\n') + '\n\n';
+    s += tt(`\`run.sh\` lanza \`navegacion/navegacion.py\` (nodo ROS 2 sin dependencias extra). El supervisor envía los objetivos de los robots con estrategia propia a \`<robot>/nav_goal\`; el nodo calcula la ruta y publica en \`<robot>/target_pose\` un punto intermedio por delante del robot hasta que llega. Con \`formation_run\`, \`land\` o \`end\` deja de intervenir: las leyes de formación no esquivan obstáculos. Los parámetros (margen de seguridad, alcance y ganancias de repulsión) están en \`navegacion/navegacion.json\`. En RViz se ven los obstáculos (\`/obstacles\`) y las rutas (\`<robot>/nav_path\`).\n\n`,
+      `\`run.sh\` starts \`navegacion/navegacion.py\` (a ROS 2 node with no extra dependencies). The supervisor sends the targets of robots with their own strategy to \`<robot>/nav_goal\`; the node computes the route and publishes on \`<robot>/target_pose\` an intermediate point ahead of the robot until it arrives. On \`formation_run\`, \`land\` or \`end\` it stops intervening: formation laws do not avoid obstacles. Parameters (safety margin, repulsion range and gains) are in \`navegacion/navegacion.json\`. RViz shows the obstacles (\`/obstacles\`) and routes (\`<robot>/nav_path\`).\n\n`);
+    return s;
+  }
+
   function build(cfg, L = 'es') {
     const name = safeName(cfg.name);
     const v = validate(cfg, L);
@@ -892,6 +1093,10 @@ ${tt('Generado el', 'Generated on')} ${new Date().toISOString().slice(0, 10)} �
       { path: `roboticpark_config/rviz/${name}.rviz`, content: buildRviz(cfg), lang: 'yaml' },
       { path: 'install.sh', content: buildInstall(cfg), lang: 'sh', exec: true },
       { path: 'run.sh', content: buildRun(cfg), lang: 'sh', exec: true },
+      ...(nodeNeeded(cfg) ? [
+        { path: 'navegacion/navegacion.json', content: buildNavJson(cfg), lang: 'json' },
+        { path: 'navegacion/navegacion.py', content: NAV_SRC || '# No se pudo cargar navegacion.py: descárgalo de https://robotic-park-lab.github.io/configurador/navegacion.py\n', lang: 'py', exec: true },
+      ] : []),
       { path: 'README.md', content: buildReadme(cfg, L), lang: 'md' },
       { path: 'experimento.json', content: JSON.stringify(Object.assign({ generator: 'robotic-park-configurador', generatorVersion: VERSION }, plain), null, 2), lang: 'json' },
     ];
@@ -899,7 +1104,8 @@ ${tt('Generado el', 'Generated on')} ${new Date().toISOString().slice(0, 10)} �
   }
 
   return {
-    VERSION, KINDS, SHAPES, LAWS, ORDERS, PRESETS,
+    VERSION, KINDS, SHAPES, LAWS, ORDERS, PRESETS, NAV, SPEED,
+    strategyOf, navNeeded, nodeNeeded, legsOf, navPreview, obstacleOut, buildNavJson, setNavSource, startPose,
     defaultConfig, syncRobots, targets, formationEdges, delaunay, surfaceToken,
     defaultCommands, commandsOf, validate, experimentMode, safeName,
     buildExperience, buildTopics, buildWorld, buildRviz, buildInstall, buildRun, buildReadme, build, toYAML,
