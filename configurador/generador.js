@@ -32,7 +32,7 @@
 })(typeof self !== 'undefined' ? self : this, function (NAV) {
   'use strict';
 
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
   const pad2 = (n) => String(n).padStart(2, '0');
   const fx = (v, d = 3) => {
     const s = Number(v).toFixed(d);
@@ -153,12 +153,78 @@
         topology: 'delaunay', k: 3, constraint: true,
         law: 'gradient', output: 'v', gain: 0.25, upper: 0.3, period: 0.2,
         protocol: 'Continuous', co: 0.01, ai: 0.0,
-        targets: [], leaders: [1, 2], meshGain: 4.0, uncertainty: false,
+        targets: [], leaders: [1, 2], meshGain: 10.0, uncertainty: false,
+        tri: defaultTri(),
       },
       env: { tool: 'Webots', world: 'lab', rviz: true, rqt: false, cpu: true, log: false, logAll: false, vicon: 'auto' },
       commands: null,            // null => secuencia automática
       ws: '~/roboticpark_ws',
     };
+  }
+
+  /** Parámetros del experimento de formación triangulada (artículo «Distributed control of
+   *  triangulated 3D multirobot formations with scale flexibility»). Una transformación de la
+   *  referencia es v = [a, b, c, d, e, f] de la ec. (1): giro θ y escala s en el plano xy
+   *  (a = s cos θ, b = s sin θ), escala c en z y traslación h = (d, e, f).
+   *   init      configuración de partida p_i(0) = C_i v0 + ruido (todos los drones, antes de
+   *             formation_run); sin líderes la formación final es ≈ C C⁺ p(0)
+   *   vstar     transformación que fijan los líderes (posición del líder i = C_i v*)
+   *   maneuvers cambios de v* para los líderes después de formation_run (at: s desde el
+   *             final de la anterior; steps: subpasos interpolados, separados every s, para
+   *             que la maniobra sea gradual y con 3 líderes sigan siendo coherentes)
+   *   duration  s de formation_run antes de formation_stop (tras la última maniobra) */
+  function defaultTri() {
+    return {
+      init: { s: 1.0, theta: 0, c: 1.0, d: 0, e: 0, f: 0, noise: 0.2, seed: 1 },
+      vstar: { s: 1.0, theta: 0, c: 1.0, d: 0, e: 0, f: 0 },
+      maneuvers: [],
+      duration: 60,
+    };
+  }
+  function triOf(t) {
+    const d = defaultTri(), o = (t && t.tri) || {};
+    return {
+      init: Object.assign(d.init, o.init || {}), vstar: Object.assign(d.vstar, o.vstar || {}),
+      maneuvers: Array.isArray(o.maneuvers) ? o.maneuvers.map(m => Object.assign({ at: 30, steps: 1, every: 5 }, d.vstar, m)) : [],
+      duration: isFinite(o.duration) ? +o.duration : d.duration,
+    };
+  }
+  /** v = [a, b, c, d, e, f] a partir de {s, theta (grados), c, d, e, f}. */
+  const vOf = (q) => [q.s * Math.cos(q.theta * deg), q.s * Math.sin(q.theta * deg), q.c, q.d, q.e, q.f];
+  /** p_i = C_i v (ec. 2). */
+  const applyV = (r, v) => [v[0] * r[0] - v[1] * r[1] + v[3], v[1] * r[0] + v[0] * r[1] + v[4], v[2] * r[2] + v[5]];
+  /** Generador pseudoaleatorio reproducible (mulberry32). */
+  function rng(seed) {
+    let a = (seed >>> 0) || 1;
+    return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  const leadersOf = (t) => (Array.isArray(t.leaders) ? t.leaders : []).map(Number).filter(i => i >= 1);
+  /** Posiciones de partida de la fase de formación (índice de cfg.robots): líderes en C_i v*,
+   *  resto en C_i v0 + ruido uniforme en [-noise, noise] por eje (z ≥ 0,65 m). */
+  function triStarts(cfg, T) {
+    const t = cfg.task, q = triOf(t), L = leadersOf(t);
+    const v0 = vOf(q.init), vs = vOf(q.vstar), u = rng(q.init.seed | 0), n = +q.init.noise || 0;
+    return T.map((r, i) => {
+      const w = [u(), u(), u()].map(x => (2 * x - 1) * n);          // se consume siempre: reproducible
+      if (L.includes(i + 1)) return applyV(r, vs);
+      const p = applyV(r, v0);
+      return [p[0] + w[0], p[1] + w[1], Math.max(0.65, p[2] + w[2])];
+    });
+  }
+  /** Lista de órdenes de los líderes para las maniobras: [{delay, v}] (delay en s). */
+  function triManeuverSteps(t) {
+    const q = triOf(t), out = [];
+    let prev = q.vstar;
+    q.maneuvers.forEach(m => {
+      const k = Math.max(1, Math.round(m.steps) || 1), dt = Math.max(0, +m.at || 0);
+      for (let j = 1; j <= k; j++) {
+        const a = j / k, mix = {};
+        ['s', 'theta', 'c', 'd', 'e', 'f'].forEach(key => { mix[key] = prev[key] + (m[key] - prev[key]) * a; });
+        out.push({ delay: j === 1 ? dt : Math.max(0.5, +m.every || 5), v: vOf(mix) });
+      }
+      prev = m;
+    });
+    return out;
   }
 
   const PRESETS = {
@@ -200,6 +266,18 @@
           mode: 'triangulated', shape: 'custom', leaders: [1, 2], meshGain: 4.0,
           targets: [[0.9, 0, 1.1], [1.299, 0.75, 0.35], [0.45, 0.7794, 1.1], [-0.45, 0.7794, 1.1], [-0.9, 0, 1.1], [-0.45, -0.7794, 1.1],
             [0.45, -0.7794, 1.1], [0, 1.5, 0.35], [-1.299, 0.75, 0.35], [-1.299, -0.75, 0.35], [0, -1.5, 0.35], [1.299, -0.75, 0.35]],
+        });
+      },
+    },
+    semiellipsoid: {
+      label: ['Semielipsoide triangulada sin líderes (escala libre)', 'Triangulated half-ellipsoid without leaders (free scale)'],
+      apply(c) {
+        // Formación de referencia no degenerada (todas las alturas distintas, espiral de Fibonacci);
+        // sin líderes converge a la referencia escalada/girada/trasladada que fija p(0)
+        c.name = 'Semielipsoide_N12_SinLider'; c.fleet = { crazyflie: 12, khepera: 0, layout: 'below', spacing: 0.5, radius: 1.0, type: 'virtual' };
+        Object.assign(c.task, {
+          mode: 'triangulated', shape: 'ellipsoid', ea: 1.4, eb: 1.0, ec: 0.8, cx: 0, cy: 0, cz: 0.55, leaders: [], meshGain: 10.0,
+          tri: { init: { s: 0.85, theta: 25, c: 1.15, d: 0.2, e: -0.15, f: 0, noise: 0.2, seed: 7 }, vstar: defaultTri().vstar, maneuvers: [], duration: 60 },
         });
       },
     },
@@ -487,6 +565,7 @@
     const hasAir = R.some(r => KINDS[r.kind].air);
     const cmds = [];
     if (hasAir) cmds.push({ delay: 10, trigger: 'time', target: 'swarm', kind: 'order', value: 'take_off' });
+    if (t.mode === 'triangulated') return triCommands(cfg, T, cmds);
     if (t.mode === 'herding') {
       const sheep = R.find(r => !KINDS[r.kind].air);
       if (sheep) cmds.push({ delay: 1, trigger: 'time', target: sheep.name, kind: 'goal', value: [-1.0, 0.0, 0.0] });
@@ -518,6 +597,29 @@
       return cmds;
     }
     if (hasAir) cmds.push({ delay: 5, trigger: 'time', target: 'swarm', kind: 'order', value: 'land' });
+    return cmds;
+  }
+  /** Guion de la formación triangulada: despegue → cada dron a su posición de partida (líderes
+   *  en C_i v*, resto en C_i v0 + ruido) → formation_run → maniobras de los líderes →
+   *  formation_stop → aterrizaje. */
+  function triCommands(cfg, T, cmds) {
+    const R = cfg.robots, t = cfg.task, q = triOf(t), L = leadersOf(t);
+    const S = triStarts(cfg, T), r2 = (v) => v.map(x => +x.toFixed(2));
+    let wait = 4;
+    R.forEach((r, i) => {
+      cmds.push({ delay: i === 0 ? 5 : 0, trigger: 'time', target: r.name, kind: 'goal', value: r2(S[i]) });
+      const st = startPose(r);
+      wait = Math.max(wait, Math.ceil(Math.hypot(S[i][0] - st[0], S[i][1] - st[1]) / SPEED.air + Math.abs(S[i][2] - st[2]) / 0.3) + 5);
+    });
+    cmds.push({ delay: Math.min(wait, 60), trigger: 'time', target: 'swarm', kind: 'order', value: 'formation_run' });
+    if (L.length) triManeuverSteps(t).forEach(st => {
+      L.forEach((li, k) => {
+        if (!T[li - 1]) return;
+        cmds.push({ delay: k === 0 ? st.delay : 0, trigger: 'time', target: R[li - 1].name, kind: 'goal', value: r2(applyV(T[li - 1], st.v)) });
+      });
+    });
+    cmds.push({ delay: Math.max(5, q.duration), trigger: 'time', target: 'swarm', kind: 'order', value: 'formation_stop' });
+    cmds.push({ delay: 3, trigger: 'time', target: 'swarm', kind: 'order', value: 'land' });
     return cmds;
   }
   const commandsOf = (cfg) => (cfg.commands && cfg.commands.length ? cfg.commands : defaultCommands(cfg));
@@ -606,8 +708,38 @@
     if (t.mode === 'triangulated') {
       if (nG) E.push(tt('La formación triangulada con líderes es solo para drones: quita los Khepera.', 'The leader-based triangulated formation is drones-only: remove the Kheperas.'));
       if (nA < 4) E.push(tt('La formación triangulada necesita al menos 4 drones.', 'The triangulated formation needs at least 4 drones.'));
-      const ld = (t.leaders || []).filter(i => i >= 1 && i <= nA);
-      if (new Set(ld).size !== 2) E.push(tt('Elige exactamente dos líderes distintos.', 'Choose exactly two different leaders.'));
+      const ld = leadersOf(t).filter(i => i <= nA);
+      if (new Set(ld).size !== ld.length || ld.length !== leadersOf(t).length) E.push(tt('Los líderes deben ser drones distintos de la flota.', 'Leaders must be different drones of the fleet.'));
+      if (ld.length === 1) E.push(tt('Con un solo líder no se fija la formación (v tiene 6 grados de libertad): usa 0, 2 o 3 líderes.', 'A single leader does not fix the formation (v has 6 degrees of freedom): use 0, 2 or 3 leaders.'));
+      if (ld.length > 3) W.push(tt('Más de 3 líderes: deben moverse de forma coherente con la formación o el error ‖Ap‖ no llegará a cero.', 'More than 3 leaders: they must move consistently with the formation or ‖Ap‖ will not reach zero.'));
+      if (nA - ld.length < 2) E.push(tt('Hacen falta al menos 2 seguidores.', 'At least 2 followers are needed.'));
+      if (nA >= 4 && !nG) {
+        const T = targets(cfg), tris = delaunay(T);
+        // Supuesto 1: en cada arista compartida por dos triángulos, det[C_i; C_j] ∝ |xy_i − xy_j|² (z_i − z_j) ≠ 0
+        const cnt = new Map();
+        tris.forEach(([a, b, c]) => [[a, b], [b, c], [a, c]].forEach(([i, j]) => { const k = i + ',' + j; cnt.set(k, (cnt.get(k) || 0) + 1); }));
+        const bad = [...cnt].filter(([, c]) => c > 1).map(([k]) => k.split(',').map(Number))
+          .filter(([i, j]) => Math.abs(T[i][2] - T[j][2]) < 0.02 || Math.hypot(T[i][0] - T[j][0], T[i][1] - T[j][1]) < 0.02);
+        // (es suficiente, no necesario: el escudo de 12 drones lo incumple y aun así rank A = 3N − 6)
+        if (bad.length) W.push(tt(`Supuesto 1 del artículo: ${bad.length} arista(s) interior(es) de la malla unen drones a la misma altura (p. ej. ${R[bad[0][0]].name}–${R[bad[0][1]].name}); la convergencia ya no está garantizada (hace falta rank A = 3N − 6). Usa una forma no degenerada (semielipsoide o posiciones a mano con alturas distintas).`, `Paper Assumption 1: ${bad.length} interior mesh edge(s) join drones at the same height (e.g. ${R[bad[0][0]].name}–${R[bad[0][1]].name}); convergence is no longer guaranteed (rank A = 3N − 6 is needed). Use a non-degenerate shape (half-ellipsoid or manual positions with different heights).`));
+        // Supuesto 2: C_L de rango 6 ⇔ algún par de líderes con alturas y proyecciones xy distintas
+        if (ld.length >= 2) {
+          let ok = false;
+          for (let a = 0; a < ld.length; a++) for (let b = a + 1; b < ld.length; b++) {
+            const p = T[ld[a] - 1], q2 = T[ld[b] - 1];
+            if (Math.abs(p[2] - q2[2]) > 0.02 && Math.hypot(p[0] - q2[0], p[1] - q2[1]) > 0.02) ok = true;
+          }
+          if (!ok) E.push(tt('Supuesto 2 del artículo: C_L es singular; dos de los líderes deben tener alturas y proyecciones xy distintas.', 'Paper Assumption 2: C_L is singular; two of the leaders must have different heights and xy projections.'));
+        }
+        const S = triStarts(cfg, T), q = triOf(t);
+        const low = (P) => P.some(p => p[2] < 0.6 || p[2] > 3.0);
+        if (low(S)) W.push(tt('Alguna posición de partida queda fuera de z ∈ [0,6, 3,0] m (el driver la recorta).', 'Some start position is outside z ∈ [0.6, 3.0] m (the driver clamps it).'));
+        if (ld.length && triManeuverSteps(t).some(st => low(ld.map(i => applyV(T[i - 1], st.v))))) W.push(tt('Alguna maniobra lleva a un líder fuera de z ∈ [0,6, 3,0] m.', 'Some manoeuvre takes a leader outside z ∈ [0.6, 3.0] m.'));
+        if (ld.length && low(T.map(r => applyV(r, vOf(q.vstar))))) W.push(tt('Con la transformación de los líderes algún dron queda fuera de z ∈ [0,6, 3,0] m.', 'With the leaders\' transformation some drone ends outside z ∈ [0.6, 3.0] m.'));
+        let dm = Infinity;
+        for (let i = 0; i < S.length; i++) for (let j = i + 1; j < S.length; j++) dm = Math.min(dm, dist(S[i], S[j]));
+        if (dm < 0.3) W.push(tt(`Dos drones parten a ${(dm * 100).toFixed(0)} cm: reduce el ruido o cambia la semilla.`, `Two drones start ${(dm * 100).toFixed(0)} cm apart: reduce the noise or change the seed.`));
+      }
     }
     if (t.mode === 'distance') {
       const law = LAWS[t.law];
@@ -740,7 +872,7 @@
           : { enable: false, T: 100, Onboard: false, controller: { type: 'gradient', protocol: 'Continuous', period: F(0.2), upperLimit: F(0.1), lowerLimit: F(-0.1), gain: F(0.1), threshold: thr(0.01, 0) }, role: 'consensus', type: 'distance', relationship: '' };
       }
     } else if (t.mode === 'triangulated') {
-      task = { enable: true, T: 100, Onboard: false, controller: { type: 'affine_p', protocol: 'Continuous', period: F(0.2), upperLimit: F(0.3), lowerLimit: F(-0.3), gain: F(0.1), threshold: thr(0.01, 0) }, role: (t.leaders || []).includes(i + 1) ? 'leader' : 'follower', type: 'triangulated_formation', relationship: '' };
+      task = { enable: true, T: 100, Onboard: false, controller: { type: 'affine_p', protocol: 'Continuous', period: F(0.2), upperLimit: F(0.3), lowerLimit: F(-0.3), gain: F(0.1), threshold: thr(0.01, 0) }, role: leadersOf(t).includes(i + 1) ? 'leader' : 'follower', type: 'triangulated_formation', relationship: '' };
     } else {
       const rel = neigh.map(j => `${cfg.robots[j].name}_${fx(dist(T[i], T[j]), 5)}`);
       const sf = air ? surfaceToken(cfg) : null;
@@ -788,7 +920,7 @@
         Ed.filter(([a, b]) => a === i || b === i).forEach(([a, b]) => { const j = a === i ? b : a; out.push(`${n}/${R[j].name}/error`); });
       }
     });
-    if (cfg.task.mode === 'triangulated') out.push('/formation_error', '/formation_scale');
+    if (cfg.task.mode === 'triangulated') out.push('/formation_error', '/formation_scale', '/formation/indices', '/formation/v_hat', '/formation/v_leaders', '/formation/v_pred');
     if ((cfg.obstacles || []).length) out.push('/obstacles');
     return [...new Set(out)].join(' ');
   }
@@ -819,7 +951,8 @@
     };
     if (t.mode === 'triangulated') {
       doc.Mesh = { triangles: delaunay(T).map(tr => tr.map(k => k + 1)) };
-      doc.Formation = { control_gain: F(t.meshGain, 1), uncertainty_enable: !!t.uncertainty };
+      // Leído por triangulated_formation_node (sección Formation del fichero de experiencia)
+      doc.Formation = { control_gain: F(t.meshGain, 1), control_period: F(0.1, 2), uncertainty_enable: !!t.uncertainty, leaders: leadersOf(t).length };
     }
     const head = `# Robotic Park — ${cfg.description ? cfg.description.replace(/\n/g, ' ') + '. ' : ''}Agentes: ${cfg.robots.length}\n` +
       `# Generado con el configurador web de Robotic Park Lab (v${VERSION}).\n` +
@@ -996,7 +1129,12 @@ sleep 2
     lines.push(`- ${tt('Modo', 'Mode')}: ${experimentMode(cfg)} · ${tt('Simulador', 'Simulator')}: ${cfg.env.tool} (${cfg.env.world === 'lab' ? tt('laboratorio Robotic Park', 'Robotic Park lab') : tt('suelo vacío', 'empty floor')})`);
     if (t.mode === 'distance') lines.push(`- ${tt('Formación', 'Formation')}: ${SHAPES[t.shape].label[L === 'en' ? 1 : 0]}, ${tt('topología', 'topology')} ${t.topology}${t.topology === 'knn' ? ' (k=' + t.k + ')' : ''}, ${tt('ley', 'law')} ${t.law}${t.law === 'ML3' ? '' : '_' + t.output}, ${tt('ganancia', 'gain')} ${t.gain}, ${t.protocol}`);
     if (t.mode === 'herding') lines.push(`- ${tt('Tarea', 'Task')}: ${tt('pastoreo centralizado (multi_agent_pkg/affine_formation_node)', 'centralized herding (multi_agent_pkg/affine_formation_node)')}`);
-    if (t.mode === 'triangulated') lines.push(`- ${tt('Tarea', 'Task')}: ${tt('formación triangulada con líderes', 'leader-based triangulated formation')} (${tt('líderes', 'leaders')}: ${(t.leaders || []).map(i => 'dron' + pad2(i)).join(', ')})`);
+    if (t.mode === 'triangulated') {
+      const ld = leadersOf(t), q = triOf(t), fv = (o) => `s=${o.s}, θ=${o.theta}°, c=${o.c}, h=(${o.d}, ${o.e}, ${o.f})`;
+      lines.push(`- ${tt('Tarea', 'Task')}: ${tt('formación triangulada 3D', 'triangulated 3D formation')} (multi_agent_pkg/triangulated_formation_node), ${ld.length ? tt('líderes', 'leaders') + ': ' + ld.map(i => R[i - 1] ? R[i - 1].name : '?').join(', ') : tt('sin líderes', 'no leaders')}, ${tt('ganancia', 'gain')} ${t.meshGain}`);
+      lines.push(`- ${tt('Partida', 'Start')}: v0 = ${fv(q.init)} + ${tt('ruido', 'noise')} ±${q.init.noise} m (${tt('semilla', 'seed')} ${q.init.seed})`);
+      if (ld.length) lines.push(`- ${tt('Líderes', 'Leaders')}: v* = ${fv(q.vstar)}${q.maneuvers.length ? '; ' + tt('maniobras', 'manoeuvres') + ': ' + q.maneuvers.map(m => `+${m.at} s → ${fv(m)}`).join('; ') : ''}`);
+    }
     if (t.mode === 'none') lines.push(`- ${tt('Tarea', 'Task')}: ${tt('sin formación (solo órdenes y puntos de paso)', 'no formation (orders and waypoints only)')}`);
     const obs = cfg.obstacles || [];
     if (obs.length || navNeeded(cfg)) {
@@ -1106,7 +1244,7 @@ ${tt('Generado el', 'Generated on')} ${new Date().toISOString().slice(0, 10)} �
   return {
     VERSION, KINDS, SHAPES, LAWS, ORDERS, PRESETS, NAV, SPEED,
     strategyOf, navNeeded, nodeNeeded, legsOf, navPreview, obstacleOut, buildNavJson, setNavSource, startPose,
-    defaultConfig, syncRobots, targets, formationEdges, delaunay, surfaceToken,
+    defaultConfig, defaultTri, triOf, vOf, applyV, triStarts, triManeuverSteps, leadersOf, syncRobots, targets, formationEdges, delaunay, surfaceToken,
     defaultCommands, commandsOf, validate, experimentMode, safeName,
     buildExperience, buildTopics, buildWorld, buildRviz, buildInstall, buildRun, buildReadme, build, toYAML,
   };

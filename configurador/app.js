@@ -67,6 +67,7 @@
       hybrid: [T('4 drones y 3 Khepera IV en una misma formación por distancias.', '4 drones and 3 Khepera IV in one distance-based formation.')],
       herding: [T('5 drones pastores guían a un Khepera hacia un objetivo.', '5 herder drones steer a Khepera to a goal.')],
       shield: [T('12 drones, malla triangulada guiada por dos líderes.', '12 drones, triangulated mesh driven by two leaders.')],
+      semiellipsoid: [T('12 drones en una semielipsoide; sin líderes la formación conserva la escala y el giro de partida.', '12 drones on a half-ellipsoid; without leaders the formation keeps the start scale and rotation.')],
       teleop: [T('Un dron recorre puntos de paso; ideal para empezar.', 'One drone flies through waypoints; good to start.')],
       obstacles: [T('4 drones cruzan entre tres columnas; navegación híbrida A* + evitación.', '4 drones cross between three columns; hybrid A* + avoidance navigation.')],
     };
@@ -165,7 +166,7 @@
   const MODES = [
     ['distance', 'Formación por distancias', 'Distance-based formation', 'Distribuida: cada robot usa solo sus vecinos.', 'Distributed: each robot only uses its neighbours.'],
     ['herding', 'Pastoreo (herding)', 'Herding', 'Centralizada: drones guían a un Khepera.', 'Centralized: drones steer a Khepera.'],
-    ['triangulated', 'Triangulada con líderes', 'Leader-based triangulated', 'Centralizada: malla 3D y dos líderes.', 'Centralized: 3D mesh and two leaders.'],
+    ['triangulated', 'Triangulada 3D (con o sin líderes)', 'Triangulated 3D (with or without leaders)', 'Centralizada: malla 3D; 0, 2 o 3 líderes.', 'Centralized: 3D mesh; 0, 2 or 3 leaders.'],
     ['none', 'Sin formación', 'No formation', 'Solo órdenes y puntos de paso.', 'Orders and waypoints only.'],
   ];
   function renderTask() {
@@ -236,12 +237,54 @@
     }
 
     if (t.mode === 'triangulated') {
-      body.append(el('p', { class: 'ip-muted ip-small' }, T('Usa <code>multi_agent_pkg/triangulated_formation_node</code>. La malla se obtiene por triangulación de Delaunay de las posiciones objetivo; los dos líderes fijan traslación, giro y escala, y reciben su posición en la sección 7.', 'Uses <code>multi_agent_pkg/triangulated_formation_node</code>. The mesh comes from a Delaunay triangulation of the target positions; the two leaders fix translation, rotation and scale, and get their position in section 7.')));
+      body.append(el('p', { class: 'ip-muted ip-small' }, T('Usa <code>multi_agent_pkg/triangulated_formation_node</code> (artículo «Distributed control of triangulated 3D multirobot formations with scale flexibility»). La malla es la triangulación de Delaunay de las posiciones objetivo, que actúan como referencia <i>r<sub>i</sub></i>; la formación final es <i>p<sub>i</sub> = G r<sub>i</sub> + h</i> con giro θ y escala <i>s</i> en xy, escala <i>c</i> en z y traslación <i>h</i>. <b>Sin líderes</b>, <i>G</i> y <i>h</i> salen de la configuración de partida; <b>con 2 o 3 líderes</b>, los fijan ellos. Usa una forma no degenerada (todas las alturas distintas, p. ej. el elipsoide).', 'Uses <code>multi_agent_pkg/triangulated_formation_node</code> (paper "Distributed control of triangulated 3D multirobot formations with scale flexibility"). The mesh is the Delaunay triangulation of the target positions, which act as the reference <i>r<sub>i</sub></i>; the final formation is <i>p<sub>i</sub> = G r<sub>i</sub> + h</i> with rotation θ and scale <i>s</i> in xy, scale <i>c</i> in z and translation <i>h</i>. <b>Without leaders</b>, <i>G</i> and <i>h</i> come from the start configuration; <b>with 2 or 3 leaders</b>, they fix them. Use a non-degenerate shape (all heights different, e.g. the ellipsoid).')));
       const drones = cfg.robots.filter(r => G.KINDS[r.kind].air).map((r, i) => [String(i + 1), r.name, r.name]);
+      const q = G.triOf(t); t.tri = q;
       const r4 = row();
-      [0, 1].forEach(k => r4.append(sel(T('Líder ', 'Leader ') + (k + 1), drones, () => String((t.leaders || [1, 2])[k]), v => { t.leaders = (t.leaders || [1, 2]).slice(); t.leaders[k] = +v; }, { structural: true })));
-      r4.append(num(T('Ganancia de la malla', 'Mesh gain'), () => t.meshGain, v => { t.meshGain = v; }, { step: 0.5, min: 0.1 }));
+      const nL = G.leadersOf(t).length;
+      r4.append(sel(T('Líderes', 'Leaders'), [['0', 'Ninguno (escala libre)', 'None (free scale)'], ['2', 'Dos', 'Two'], ['3', 'Tres', 'Three']], () => String(nL === 0 || nL === 3 ? nL : 2), v => {
+        const n = +v, cur = G.leadersOf(t);
+        t.leaders = n === 0 ? [] : Array.from({ length: n }, (_, k) => cur[k] || [1, Math.max(2, Math.ceil(drones.length / 2)), drones.length][k] || k + 1);
+      }, { rerender: renderTask, structural: true }));
+      G.leadersOf(t).forEach((li, k) => r4.append(sel(T('Líder ', 'Leader ') + (k + 1), drones, () => String(li), v => { t.leaders = G.leadersOf(t).slice(); t.leaders[k] = +v; }, { structural: true })));
+      r4.append(num(T('Ganancia de la malla', 'Mesh gain'), () => t.meshGain, v => { t.meshGain = v; }, { step: 0.5, min: 0.1, help: T('≈ 0,1·k s⁻¹ con el lazo de posición del Crazyflie', '≈ 0.1·k s⁻¹ with the Crazyflie position loop') }));
       const c = el('div', { class: 'cfg-checks' }); c.append(chk(T('Activar incertidumbre en la malla', 'Enable mesh uncertainty'), () => t.uncertainty, v => { t.uncertainty = v; })); body.append(c);
+      const V = (obj, key, lab, o = {}) => num(lab, () => obj[key], v => { obj[key] = v; }, Object.assign({ step: 0.05, structural: true }, o));
+      const vRow = (obj, title) => {
+        body.append(el('h3', {}, title));
+        const rr = row();
+        rr.append(V(obj, 's', T('Escala xy s', 'xy scale s'), { min: 0.1 }), V(obj, 'theta', T('Giro θ', 'Rotation θ'), { unit: '°', step: 5 }), V(obj, 'c', T('Escala z c', 'z scale c')),
+          V(obj, 'd', 'h<sub>x</sub>', { unit: 'm' }), V(obj, 'e', 'h<sub>y</sub>', { unit: 'm' }), V(obj, 'f', 'h<sub>z</sub>', { unit: 'm' }));
+        return rr;
+      };
+      const ri = vRow(q.init, T('Configuración de partida de los seguidores (C<sub>i</sub> v<sub>0</sub> + ruido)', 'Followers\' start configuration (C<sub>i</sub> v<sub>0</sub> + noise)'));
+      ri.append(V(q.init, 'noise', T('Ruido ±', 'Noise ±'), { unit: 'm', min: 0 }), V(q.init, 'seed', T('Semilla', 'Seed'), { step: 1, int: true, min: 1 }));
+      if (G.leadersOf(t).length) {
+        vRow(q.vstar, T('Transformación que fijan los líderes (v*)', 'Transformation fixed by the leaders (v*)'));
+        body.append(el('h3', {}, T('Maniobras de los líderes tras «formation_run»', 'Leader manoeuvres after "formation_run"')));
+        const tw = el('div', { class: 'ip-table-wrap' }), tb = el('table', { class: 'ip-table cfg-table' });
+        const cols = [['at', T('tras (s)', 'after (s)'), 5], ['steps', T('pasos', 'steps'), 1], ['every', T('cada (s)', 'every (s)'), 1], ['s', 's', 0.05], ['theta', 'θ (°)', 5], ['c', 'c', 0.05], ['d', 'h<sub>x</sub>', 0.05], ['e', 'h<sub>y</sub>', 0.05], ['f', 'h<sub>z</sub>', 0.05]];
+        tb.innerHTML = '<thead><tr>' + cols.map(([, l]) => `<th>${l}</th>`).join('') + '<th></th></tr></thead>';
+        const tbody = el('tbody');
+        q.maneuvers.forEach((m, mi) => {
+          const tr = el('tr');
+          cols.forEach(([k, , st]) => {
+            const inp = el('input', { type: 'number', step: st, value: m[k] });
+            inp.addEventListener('input', () => { const v = parseFloat(inp.value); if (isFinite(v)) { m[k] = v; structural(); } });
+            const td = el('td'); td.append(inp); tr.append(td);
+          });
+          const del = el('button', { type: 'button', class: 'ip-btn small ghost' }, '✕');
+          del.addEventListener('click', () => { q.maneuvers.splice(mi, 1); renderTask(); structural(); });
+          const td = el('td'); td.append(del); tr.append(td); tbody.append(tr);
+        });
+        tb.append(tbody); tw.append(tb); body.append(tw);
+        const add = el('button', { type: 'button', class: 'ip-btn small ghost' }, T('+ Añadir maniobra', '+ Add manoeuvre'));
+        add.addEventListener('click', () => { const last = q.maneuvers.length ? q.maneuvers[q.maneuvers.length - 1] : q.vstar; q.maneuvers.push(Object.assign({}, last, { at: 60, steps: 1, every: 5 })); renderTask(); structural(); });
+        body.append(add);
+      }
+      const rd = row();
+      rd.append(V(q, 'duration', T('Duración de la formación tras la última orden', 'Formation time after the last command'), { unit: 's', step: 5, min: 5 }));
+      body.append(el('p', { class: 'ip-muted ip-small' }, T('Índices registrados por el nodo (<code>/formation/indices</code>): ‖Ap‖ (ec. 21), V = pᵀAp/2, e<sub>sh</sub> = ‖(I − CC⁺)p‖/√N, e<sub>F</sub> = ‖p<sub>F</sub> − p<sub>F</sub>*‖/√N<sub>F</sub> (ec. 53) y la distancia mínima entre drones; además <code>/formation/v_hat</code> = C⁺p, <code>/formation/v_leaders</code> = C<sub>L</sub>⁺p<sub>L</sub> y <code>/formation/v_pred</code> = C⁺p(t<sub>0</sub>).', 'Indices logged by the node (<code>/formation/indices</code>): ‖Ap‖ (eq. 21), V = pᵀAp/2, e<sub>sh</sub> = ‖(I − CC⁺)p‖/√N, e<sub>F</sub> = ‖p<sub>F</sub> − p<sub>F</sub>*‖/√N<sub>F</sub> (eq. 53) and the minimum inter-drone distance; also <code>/formation/v_hat</code> = C⁺p, <code>/formation/v_leaders</code> = C<sub>L</sub>⁺p<sub>L</sub> and <code>/formation/v_pred</code> = C⁺p(t<sub>0</sub>).')));
       return;
     }
 
